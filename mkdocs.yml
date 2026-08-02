@@ -24,6 +24,7 @@ nav:
   - GIS features: gis-features.md
   - Evaluation: evaluation.md
   - Confidence: confidence.md
+  - Ranking explanations: explanations.md
   - CLI: cli.md
   - Offline inference: offline-inference.md
   - Known limits: known-limits.md

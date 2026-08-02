@@ -105,6 +105,8 @@ class RankedMission(BaseModel):
     confidence: Confidence
     feature_breakdown: dict[str, float]
     preference_adjustments: dict[str, float] = Field(default_factory=dict)
+    #: Deterministic ranking “why” (RFC-0009) — distinct from confidence.reasons.
+    explanations: list[ReasonCode] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     evidence: dict[str, Any] = Field(default_factory=dict)
 
