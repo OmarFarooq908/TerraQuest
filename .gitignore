@@ -20,6 +20,7 @@ build/
 # Local geospatial artifacts (large, regenerated)
 data/packs/
 data/cache/
+**/query.duckdb
 
 # OS / editor noise that is not always a leading-dot path
 *.swp

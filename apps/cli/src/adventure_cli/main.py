@@ -123,6 +123,90 @@ def pack_info(
     console.print(manifest.model_dump_json(indent=2))
 
 
+@pack_app.command("materialize")
+def pack_materialize(
+    pack: str = typer.Option(
+        "fixtures/karakoram_mini",
+        "--pack",
+        help="Pack id or fixtures/... path",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Rebuild query.duckdb even when content_hash already matches",
+    ),
+) -> None:
+    """Build derived DuckDB query layer from pack GeoJSON (RFC-0004).
+
+    GeoJSON remains the source of truth. query.duckdb is gitignored and rebuilt
+    when pack layer hashes change.
+    """
+    from adventure_gis import PackQueryError, materialize_pack_db, query_db_path
+    from adventure_gis.pack_query import pack_fingerprint_for_db, read_pack_db_meta
+
+    _print_pack_banner(pack)
+    try:
+        path = materialize_pack_db(pack, force=force)
+        _, pack_dir = load_pack_manifest(pack)
+        meta = read_pack_db_meta(path)
+    except PackQueryError as exc:
+        console.print(f"[bold red]Materialize error[/bold red]: {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Materialized[/green] {path}")
+    console.print(
+        f"[dim]pack_id={meta.get('pack_id')} content_hash={meta.get('content_hash')} "
+        f"schema={meta.get('duckdb_schema_version')} "
+        f"(fingerprint={pack_fingerprint_for_db(pack_dir)})[/dim]"
+    )
+    console.print(f"[dim]expected path={query_db_path(pack_dir)}[/dim]")
+
+
+@pack_app.command("query")
+def pack_query(
+    pack: str = typer.Option(
+        "fixtures/karakoram_mini",
+        "--pack",
+        help="Pack id or fixtures/... path",
+    ),
+    sql: str = typer.Option(
+        ...,
+        "--sql",
+        "-q",
+        help="Read-only SQL against query.duckdb (auto-materializes if stale)",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force re-materialize before querying",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Print rows as JSON"),
+) -> None:
+    """Run read-only SQL over the pack's derived DuckDB database."""
+    from adventure_gis import PackQueryError, execute_pack_sql
+
+    try:
+        cols, rows = execute_pack_sql(pack, sql, force_materialize=force)
+    except PackQueryError as exc:
+        console.print(f"[bold red]Query error[/bold red]: {exc}")
+        raise typer.Exit(code=2) from exc
+
+    if json_out:
+        payload = [dict(zip(cols, row, strict=True)) for row in rows]
+        console.print_json(data=payload)
+        return
+
+    if not cols:
+        console.print("[dim](no columns)[/dim]")
+        return
+    table = Table(title="pack query")
+    for c in cols:
+        table.add_column(str(c))
+    for row in rows:
+        table.add_row(*[("" if v is None else str(v)) for v in row])
+    console.print(table)
+    console.print(f"[dim]{len(rows)} row(s)[/dim]")
+
+
 @mission_app.command("run")
 def mission_run(
     pack: str = typer.Option(
