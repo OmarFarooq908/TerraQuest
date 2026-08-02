@@ -20,6 +20,7 @@ nav:
   - Pack builder: pack-builder.md
   - MissionIntent: mission-intent.md
   - Generators: generators.md
+  - GIS features: gis-features.md
   - Evaluation: evaluation.md
   - Confidence: confidence.md
   - CLI: cli.md

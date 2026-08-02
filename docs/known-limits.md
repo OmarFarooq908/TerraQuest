@@ -5,6 +5,7 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 | Limit | Status |
 |-------|--------|
 | Travel time | Haversine / 45 km/h heuristic — not a road router |
+| GIS features | Distance + settlement-density kernel + road-class `access_fit`; no DEM prominence / polygon edges yet — see [GIS features](gis-features.md) |
 | `party_size` | Parsed; camping capacity not scored |
 | Confidence | Heuristic noisy-OR with **pack-kind priors** (synthetic ceiling lower than real); not empirically calibrated — see [confidence](confidence.md) |
 | Overpass ingest | Degraded (no road_lines); opt-in only |

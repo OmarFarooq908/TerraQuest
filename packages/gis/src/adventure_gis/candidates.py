@@ -13,6 +13,31 @@ from adventure_gis.pack_data import NamedPoint, PackData
 # Remoteness when settlement layer is absent — neutral unknown, not "maximally remote".
 _UNKNOWN_REMOTENESS = 0.5
 
+# Settlement density kernel (deterministic, pack-reproducible).
+_SETTLEMENT_DENSITY_RADIUS_KM = 10.0
+# Weighted count at which density saturates near 1.0 (see docs/gis-features.md).
+_SETTLEMENT_DENSITY_REF = 4.0
+
+# OSM highway=* → access quality for light vehicles (higher = easier sedan access).
+_HIGHWAY_ACCESS: dict[str, float] = {
+    "motorway": 1.0,
+    "trunk": 0.95,
+    "primary": 0.9,
+    "secondary": 0.85,
+    "tertiary": 0.75,
+    "unclassified": 0.65,
+    "residential": 0.7,
+    "living_street": 0.65,
+    "service": 0.55,
+    "road": 0.6,
+    "track": 0.4,
+    "path": 0.25,
+    "footway": 0.2,
+    "bridleway": 0.25,
+    "cycleway": 0.35,
+    "pedestrian": 0.2,
+}
+
 
 def _min_dist_km(origin: Point, places: Iterable[NamedPoint]) -> float | None:
     """Nearest place distance in km, or None if the layer is empty."""
@@ -62,13 +87,57 @@ def _local_relief_m(origin: Point, samples: list[NamedPoint], radius_km: float =
     return max(nearby) - min(nearby)
 
 
+def _settlement_density_kernel(
+    origin: Point,
+    settlements: list[NamedPoint],
+    *,
+    radius_km: float = _SETTLEMENT_DENSITY_RADIUS_KM,
+) -> tuple[float | None, int | None]:
+    """Population-weighted, distance-decayed settlement density in ``radius_km``.
+
+    Returns ``(density in [0,1], count)`` or ``(None, None)`` when the layer is empty.
+    """
+    if not settlements:
+        return None, None
+    weighted = 0.0
+    count = 0
+    for s in settlements:
+        d = haversine_km(origin, s.point)
+        if d > radius_km:
+            continue
+        count += 1
+        pop = _prop_float(s.properties, "population", 0.0)
+        # log10 population bump: village ~1.1, town ~1.5, city ~2.0
+        pop_w = 1.0 + min(1.0, math.log10(1.0 + max(0.0, pop)) / 5.0)
+        decay = 1.0 - (d / radius_km)
+        weighted += pop_w * decay
+    return _clamp01(weighted / _SETTLEMENT_DENSITY_REF), count
+
+
+def _nearest_road(origin: Point, roads: list[NamedPoint]) -> tuple[float | None, str | None]:
+    """Nearest road-node distance and ``highway`` tag (lowercased), if any."""
+    if not roads:
+        return None, None
+    best_d: float | None = None
+    best_hwy: str | None = None
+    for r in roads:
+        d = haversine_km(origin, r.point)
+        if best_d is None or d < best_d:
+            best_d = d
+            raw = r.properties.get("highway")
+            hwy = str(raw).strip().lower() if raw not in (None, "") else None
+            best_hwy = hwy
+    return best_d, best_hwy
+
+
 def _access_fit(
     dist_road_km: float | None,
+    highway: str | None,
     vehicle: str | None,
     vehicle_class: str | None,
     days: float | None,
 ) -> float:
-    """Sedan/hatchback-friendly: prefer places near roads but not in town."""
+    """Sedan/hatchback-friendly: prefer places near *usable* roads, not just any node."""
     if dist_road_km is None:
         # Missing road layer — do not pretend far-road isolation.
         return 0.35
@@ -90,8 +159,27 @@ def _access_fit(
         "hatchback",
         "sedan",
     }
-    if light and dist_road_km > 12:
-        base *= 0.5
+    capable = vc in {"suv", "suv_4x4"} or any(
+        x in v for x in ("4x4", "jeep", "land cruiser", "prado")
+    )
+
+    class_score = _HIGHWAY_ACCESS.get(highway, 0.5) if highway else 0.5
+    rough = highway in {"track", "path", "footway", "bridleway", "pedestrian"}
+
+    if light:
+        # Distance-only base blended with road class — tracks hurt light cars.
+        base = base * (0.5 + 0.5 * class_score)
+        if rough and dist_road_km > 3:
+            base *= 0.55
+        if dist_road_km > 12:
+            base *= 0.5
+    elif capable:
+        base = base * (0.75 + 0.25 * max(class_score, 0.35))
+    else:
+        base = base * (0.6 + 0.4 * class_score)
+        if rough and dist_road_km > 8:
+            base *= 0.7
+
     if days is not None and days <= 3 and dist_road_km > 20:
         base *= 0.4
     return _clamp01(base)
@@ -130,8 +218,11 @@ def generate_candidates(
     for seed in pack.catalog:
         origin = seed.point
         dist_settlement = _min_dist_km(origin, pack.settlements)
-        dist_road = _min_dist_km(origin, pack.roads)
+        dist_road, nearest_highway = _nearest_road(origin, pack.roads)
         dist_water = _min_dist_km(origin, pack.water)
+        settlement_density, settlements_within = _settlement_density_kernel(
+            origin, pack.settlements
+        )
         relief = _prop_float(seed.properties, "relief_m", 0.0)
         if relief <= 0:
             relief = _local_relief_m(origin, pack.elevation_samples)
@@ -178,15 +269,22 @@ def generate_candidates(
 
         building_density = _prop_unit(seed.properties, "building_density", 0.1)
         crowd_prop = _prop_unit(seed.properties, "crowd", building_density)
-        novelty = _clamp01(remoteness * 0.7 + (1.0 - building_density) * 0.3)
-        crowd = crowd_prop
+        # Prefer GIS settlement density when the settlements layer exists; blend
+        # lightly with catalog props so hand-authored fixture cues still matter.
+        if settlement_density is not None:
+            crowd = _clamp01(0.7 * settlement_density + 0.3 * crowd_prop)
+            density_for_novelty = settlement_density
+        else:
+            crowd = crowd_prop
+            density_for_novelty = building_density
+        novelty = _clamp01(remoteness * 0.7 + (1.0 - density_for_novelty) * 0.3)
 
         forest_prop = _prop_unit(seed.properties, "forest", 0.0)
         if "forest" in tags:
             forest_prop = max(forest_prop, 0.75)
         forest = forest_prop
 
-        access = _access_fit(dist_road, vehicle, vehicle_class, days)
+        access = _access_fit(dist_road, nearest_highway, vehicle, vehicle_class, days)
         camping = _clamp01(
             (1.0 - _prop_unit(seed.properties, "slope", 0.3)) * 0.6 + water * 0.25 + access * 0.15
         )
@@ -212,6 +310,9 @@ def generate_candidates(
             dist_water_km=_round_km(dist_water),
             elevation_m=elev,
             relief_m=round(relief, 1),
+            settlement_density=settlement_density,
+            settlements_within_10km=settlements_within,
+            nearest_highway=nearest_highway,
         )
 
         provenance = seed.properties.get("provenance") or {}
@@ -245,6 +346,9 @@ def generate_candidates(
                     "relief_m": features.relief_m,
                     "forest": forest,
                     "crowd": crowd,
+                    "settlement_density": settlement_density,
+                    "settlements_within_10km": settlements_within,
+                    "nearest_highway": nearest_highway,
                     "osm_id": (provenance.get("osm_id") if isinstance(provenance, dict) else None)
                     or seed.properties.get("osm_id"),
                     "provenance": provenance,

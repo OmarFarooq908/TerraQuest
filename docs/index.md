@@ -7,6 +7,7 @@ Local-first exploration OS: **deterministic GIS discovers**, LLMs only interpret
 - [Pack builder](pack-builder.md)
 - [MissionIntent](mission-intent.md)
 - [Generators](generators.md)
+- [GIS features](gis-features.md)
 - [Evaluation](evaluation.md)
 - [CLI](cli.md)
 - [Offline inference](offline-inference.md)
