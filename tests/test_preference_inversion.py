@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import pytest
-import yaml
-from adventure_core.config import repo_root
 from adventure_core.intent import PreferenceVector
 from adventure_core.polarity import (
     detect_preference_inversions,
@@ -62,41 +60,6 @@ def test_hate_crowds_not_confused_with_love_rivers():
     assert intent.preferences.danger < -0.3
     findings = detect_preference_inversions("love rivers, hate crowds", intent.preferences)
     assert not any(f.cue_id == "love_crowds" for f in findings)
-
-
-def _check_pref_expectation(prefs: PreferenceVector, key: str, bound: float) -> None:
-    dim, op = key.rsplit("_", 1)
-    value = float(getattr(prefs, dim))
-    if op == "gt":
-        assert value > bound, f"{dim}={value} expected > {bound}"
-    elif op == "lt":
-        assert value < bound, f"{dim}={value} expected < {bound}"
-    else:
-        raise AssertionError(f"unknown op in {key}")
-
-
-def test_golden_prompts_rules_polarity():
-    path = repo_root() / "eval" / "golden_prompts.yaml"
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    prompts = data["prompts"]
-    assert len(prompts) >= 12
-
-    inversion_cases = [p for p in prompts if str(p["id"]).startswith("inv_")]
-    assert len(inversion_cases) >= 10
-
-    for case in prompts:
-        expect = case.get("expect") or {}
-        if expect.get("interpreter", "rules") != "rules":
-            continue
-        intent = interpret_mission(case["prompt"], interpreter="rules", repair_polarity=True)
-        if "days" in expect:
-            assert intent.constraints.days == expect["days"]
-        if "origin" in expect:
-            assert intent.constraints.origin == expect["origin"]
-        if "vehicle_contains" in expect:
-            assert expect["vehicle_contains"] in (intent.constraints.vehicle or "")
-        for key, bound in (expect.get("preferences") or {}).items():
-            _check_pref_expectation(intent.preferences, key, float(bound))
 
 
 def test_router_repairs_simulated_llm_inversion(monkeypatch: pytest.MonkeyPatch):

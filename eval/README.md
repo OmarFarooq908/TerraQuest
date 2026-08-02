@@ -1,7 +1,13 @@
 # Evaluation (intent goldens)
 
-Golden prompts and expected properties for the rules interpreter and ranking.
+Golden prompts and expected **preference signs** / hard constraints for the rules
+interpreter. Loaded by `tests/test_intent_regression.py` (CI).
 
-Used by `scripts/check_pack.py` and future eval jobs — see `eval/golden_prompts.yaml`.
+See `eval/golden_prompts.yaml` (≥20 cases). Add new cases there — document steps
+in `docs/evaluation.md`.
 
-For **discovery-quality place labels** (interesting vs popular), see `evaluation/` and RFC-0002.
+Optional Ollama: set `expect.interpreter: ollama` and run with
+`ADVENTURE_OLLAMA_GOLDENS=1`.
+
+For **discovery-quality place labels** (interesting vs popular), see `evaluation/`
+and RFC-0002.

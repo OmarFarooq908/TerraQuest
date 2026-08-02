@@ -4,18 +4,39 @@
 
 | Layer | Path | Question |
 |-------|------|----------|
-| Intent / ranking regression | `eval/golden_prompts.yaml`, `tests/test_golden_mission.py` | Is interpretation + scoring deterministic and sign-correct? |
+| Intent / ranking regression | `eval/golden_prompts.yaml`, `tests/test_intent_regression.py` | Is interpretation + scoring deterministic and sign-correct? |
 | **Discovery quality** | `evaluation/` + RFC-0002 | Did we surface places an explorer would actually care about? |
 
 North Star metric (for now): **`recall_at_k`** on labels with `interesting=true` (default k=5), with **`popularity_trap_at_k`** as a guardrail.
 
 ## Offline golden missions
 
-`tests/test_golden_mission.py` asserts:
+`tests/test_intent_regression.py` loads `eval/golden_prompts.yaml` (≥20 cases) and asserts:
 
-- Rules interpreter emits expected preference signs for rich prompts
-- Fearless & Far mode does not rank near-town controls first
-- Preference alignment prefers matching candidate dimensions
+- Preference **signs** via `dim_gt` / `dim_lt` (not exact floats)
+- Hard constraints when declared (`days`, `origin`, `vehicle_*`, `party_size`)
+- Near-neutral prompts stay near zero (`near_neutral: true`)
+- All `inv_*` polarity cases remain covered
+
+Default CI uses `--interpreter rules` only. Opt-in Ollama goldens (local or
+manual workflow):
+
+```bash
+ADVENTURE_OLLAMA_GOLDENS=1 uv run pytest -q tests/test_intent_regression.py -k ollama
+```
+
+On GitHub: Actions → CI → Run workflow → enable **run_ollama_goldens**
+(`intent-ollama` job; not a required check).
+
+### Adding a golden case
+
+1. Append an entry under `prompts:` in `eval/golden_prompts.yaml`.
+2. Prefer **sign** expectations (`water_gt: 0.5`) over brittle exact values.
+3. Set `expect.interpreter: rules` for CI; use `ollama` only for opt-in cases.
+4. Run `uv run pytest -q tests/test_intent_regression.py` and confirm the new id appears.
+5. Keep `inv_*` ids for polarity regressions; use descriptive ids for constraint/regional cases.
+
+`tests/test_golden_mission.py` still covers end-to-end ranking smoke (Fearless & Far vs river/forest prompts).
 
 ## Discovery-quality harness (RFC-0002)
 

@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - MissionIntent semantic validation + repair (`intent_repairs`) for LLM/rules paths
 - Strict catalog FeatureCollection validation (`adventure_core.catalog_validate`) at pack load and in `scripts/check_pack.py`
 - `adventure_gis.validate_pack` / `pack_content_hash` for CI and builder reuse
+- Intent regression suite: ≥20 golden prompts with sign/constraint checks (`tests/test_intent_regression.py`)
+- Opt-in Ollama intent goldens (`ADVENTURE_OLLAMA_GOLDENS=1` / CI workflow_dispatch `intent-ollama`)
 
 ### Changed
 

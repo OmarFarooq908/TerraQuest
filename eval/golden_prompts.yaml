@@ -8,6 +8,8 @@ prompts:
       interpreter: rules
       days: 3
       vehicle_contains: swift
+      vehicle_class: hatchback
+      party_size: 5
       preferences:
         remoteness_gt: 0.2
         novelty_gt: 0.2
@@ -20,6 +22,9 @@ prompts:
     expect:
       interpreter: rules
       origin: Lahore
+      days: 2.5
+      vehicle_contains: city
+      vehicle_class: sedan
       preferences:
         water_gt: 0.5
         forest_gt: 0.5
@@ -69,6 +74,7 @@ prompts:
     prompt: "Honda City only. Don't want dangerous roads."
     expect:
       interpreter: rules
+      vehicle_contains: city
       preferences:
         danger_lt: -0.3
         accessibility_gt: 0.2
@@ -120,3 +126,92 @@ prompts:
       preferences:
         hiking_lt: -0.3
         accessibility_gt: 0.2
+
+  # --- constraint / regional / near-neutral (≥6 new for suite depth) ---
+  - id: islamabad_lakes_corolla
+    prompt: >
+      Two days from Islamabad in a Toyota Corolla. Love lakes, avoid crowds.
+    expect:
+      interpreter: rules
+      days: 2
+      origin: Islamabad
+      vehicle_contains: corolla
+      vehicle_class: sedan
+      preferences:
+        water_gt: 0.5
+        human_activity_lt: -0.3
+
+  - id: skardu_fearless_4x4
+    prompt: >
+      From Skardu, five days, 4x4. Fearless & Far — remote and untouched.
+    expect:
+      interpreter: rules
+      days: 5
+      origin: Skardu
+      vehicle_contains: 4x4
+      vehicle_class: suv_4x4
+      preferences:
+        remoteness_gt: 0.5
+        novelty_gt: 0.3
+
+  - id: party_swift_lahore
+    prompt: "Party of 4, two days, Suzuki Swift from Lahore."
+    expect:
+      interpreter: rules
+      days: 2
+      origin: Lahore
+      party_size: 4
+      vehicle_contains: swift
+      vehicle_class: hatchback
+      near_neutral: true
+
+  - id: scenic_viewpoint_skardu
+    prompt: "Scenic viewpoint near Skardu."
+    expect:
+      interpreter: rules
+      origin: Skardu
+      preferences:
+        photography_gt: 0.5
+
+  - id: ambiguous_weekend
+    prompt: "Just looking around. Maybe something nice."
+    expect:
+      interpreter: rules
+      near_neutral: true
+
+  - id: friends_lakes_avoid_crowds
+    prompt: "Three friends and I want lakes. Avoid crowds."
+    expect:
+      interpreter: rules
+      party_size: 4
+      preferences:
+        water_gt: 0.5
+        human_activity_lt: -0.3
+
+  - id: safe_sedan_only
+    prompt: "We don't want dangerous roads. Sedan only."
+    expect:
+      interpreter: rules
+      vehicle_contains: sedan
+      vehicle_class: sedan
+      preferences:
+        danger_lt: -0.3
+        accessibility_gt: 0.2
+
+  - id: rivers_lakes_camping
+    prompt: "Love rivers and lakes and want camping nearby."
+    expect:
+      interpreter: rules
+      preferences:
+        water_gt: 0.5
+        camping_gt: 0.3
+
+  # --- opt-in Ollama (skipped unless ADVENTURE_OLLAMA_GOLDENS=1) ---
+  - id: ollama_hate_crowds_smoke
+    prompt: "I hate crowds. Find a quiet river."
+    expect:
+      interpreter: ollama
+      preferences:
+        human_activity_lt: -0.3
+        water_gt: 0.2
+        solitude_gt: 0.2

@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      run_ollama_goldens:
+        description: "Run opt-in Ollama intent goldens (requires Ollama on runner)"
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -56,6 +62,30 @@ jobs:
           --interpreter rules
           --k 5
           --json
+
+  intent-ollama:
+    # Opt-in only — never required for PR/main green (issue #12).
+    if: github.event_name == 'workflow_dispatch' && inputs.run_ollama_goldens
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --group dev
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:11434/api/tags >/dev/null && break
+            sleep 1
+          done
+          ollama pull llama3.2
+      - name: Ollama golden prompts
+        env:
+          ADVENTURE_OLLAMA_GOLDENS: "1"
+        run: uv run pytest -q tests/test_intent_regression.py -k ollama
 
   docs:
     runs-on: ubuntu-latest
