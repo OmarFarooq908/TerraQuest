@@ -20,3 +20,9 @@ Each feature stores:
 - `densify` — `cell_id` / `parent_id` reserved for Phase C
 
 Quotas and `min_spacing_km` are applied per generator, then soft global merge.
+
+## Testing
+
+Offline unit tests live in `tests/test_generators.py` (synthetic GeoJSON layers, no
+network / DEM). Prefer adding a focused case there when introducing a generator or
+changing quota / spacing behavior.

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Intent regression suite: ≥20 golden prompts with sign/constraint checks (`tests/test_intent_regression.py`)
 - Opt-in Ollama intent goldens (`ADVENTURE_OLLAMA_GOLDENS=1` / CI workflow_dispatch `intent-ollama`)
 - Segmented coverage gates (`configs/coverage_gates.yaml` + `scripts/check_coverage_gates.py`); global floor **70%**
+- Offline unit tests for individual discovery generators (`tests/test_generators.py`)
 
 ### Changed
 
