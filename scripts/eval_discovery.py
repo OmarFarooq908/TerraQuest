@@ -228,7 +228,7 @@ def write_markdown_report(runs: list[dict[str, Any]], path: Path) -> None:
             "",
             "## Notes",
             "",
-            "- North Star: maximize `recall_at_k` on `interesting=true` without inflating `popularity_trap_at_k`.",
+            "- North Star (RFC-0005): maximize `recall_at_k` on `interesting=true` without inflating `popularity_trap_at_k`.",
             "- `nDCG@k` uses label `human_rating` with exponential gain `(2^rel - 1) / log2(rank+1)`.",
             "- Precision@k denominator is matched labels only; unlabeled tops do not dilute it.",
             "- Re-run: `uv run python scripts/eval_discovery.py --ablations --write-report "

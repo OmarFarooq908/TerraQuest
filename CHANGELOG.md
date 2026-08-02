@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Measuring “adventure” (RFC-0005 / #29): operational North Star pin — primary `recall_at_k` (k=5) + `popularity_trap_at_k` guardrail; `configs/north_star.yaml`; threats-to-validity note
 - Pack-time VLM features (RFC-0007 / #22): optional `vlm_features` layer + evidence join; packbuilder attach from precomputed GeoJSON; never used as a ranker; `pack_vlm` pin in `configs/models.yaml`
 - Sentinel-2 indices (RFC-0006 / #21): optional `sentinel_indices` pack layer + featurize path; packbuilder attach via precomputed GeoJSON; ranking weights unchanged pending eval lift
 - Docs polish (#4): tighter README/docs quick-start (fixture vs real pack, default `--pack` gotcha), CLI flag table, fixed ROADMAP issue links, known-limits formatting

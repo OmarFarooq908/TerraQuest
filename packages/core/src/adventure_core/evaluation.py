@@ -1,4 +1,4 @@
-"""Evaluation place-label schema and discovery-quality metrics (RFC-0002)."""
+"""Evaluation place-label schema and discovery-quality metrics (RFC-0002 / RFC-0005)."""
 
 from __future__ import annotations
 
@@ -13,6 +13,68 @@ from pydantic import BaseModel, Field, field_validator
 from adventure_core.geo import Point, haversine_km
 
 PLACE_LABEL_SCHEMA_VERSION = "0.1.0"
+
+# North Star pin (RFC-0005) — must match configs/north_star.yaml.
+NORTH_STAR_PRIMARY_METRIC = "recall_at_k"
+NORTH_STAR_PRIMARY_LABEL_FILTER = "interesting"
+NORTH_STAR_K = 5
+NORTH_STAR_GUARDRAIL_METRIC = "popularity_trap_at_k"
+NORTH_STAR_POPULARITY_THRESHOLD = 7.0
+NORTH_STAR_MATCH_RADIUS_KM = 2.0
+
+
+class NorthStarConfig(BaseModel):
+    """Pinned primary metric + guardrail (RFC-0005)."""
+
+    primary_metric: str = NORTH_STAR_PRIMARY_METRIC
+    primary_label_filter: str = NORTH_STAR_PRIMARY_LABEL_FILTER
+    k: int = NORTH_STAR_K
+    guardrail_metric: str = NORTH_STAR_GUARDRAIL_METRIC
+    popularity_threshold: float = NORTH_STAR_POPULARITY_THRESHOLD
+    match_radius_km: float = NORTH_STAR_MATCH_RADIUS_KM
+    default_mode: str = "fearless_far"
+
+
+def load_north_star_config() -> NorthStarConfig:
+    """Load ``configs/north_star.yaml``; fall back to module constants."""
+    from adventure_core.config import configs_dir, load_yaml
+
+    path = configs_dir() / "north_star.yaml"
+    if not path.is_file():
+        return NorthStarConfig()
+    raw = load_yaml(path)
+    return NorthStarConfig(
+        primary_metric=str(raw.get("primary_metric") or NORTH_STAR_PRIMARY_METRIC),
+        primary_label_filter=str(
+            raw.get("primary_label_filter") or NORTH_STAR_PRIMARY_LABEL_FILTER
+        ),
+        k=int(raw.get("k") if raw.get("k") is not None else NORTH_STAR_K),
+        guardrail_metric=str(raw.get("guardrail_metric") or NORTH_STAR_GUARDRAIL_METRIC),
+        popularity_threshold=float(
+            raw.get("popularity_threshold")
+            if raw.get("popularity_threshold") is not None
+            else NORTH_STAR_POPULARITY_THRESHOLD
+        ),
+        match_radius_km=float(
+            raw.get("match_radius_km")
+            if raw.get("match_radius_km") is not None
+            else NORTH_STAR_MATCH_RADIUS_KM
+        ),
+        default_mode=str(raw.get("default_mode") or "fearless_far"),
+    )
+
+
+def north_star_constants_match_config(cfg: NorthStarConfig | None = None) -> bool:
+    """True when module constants agree with ``configs/north_star.yaml``."""
+    pin = cfg or load_north_star_config()
+    return (
+        pin.primary_metric == NORTH_STAR_PRIMARY_METRIC
+        and pin.primary_label_filter == NORTH_STAR_PRIMARY_LABEL_FILTER
+        and pin.k == NORTH_STAR_K
+        and pin.guardrail_metric == NORTH_STAR_GUARDRAIL_METRIC
+        and pin.popularity_threshold == NORTH_STAR_POPULARITY_THRESHOLD
+        and pin.match_radius_km == NORTH_STAR_MATCH_RADIUS_KM
+    )
 
 
 class GeoJSONPoint(BaseModel):

@@ -71,7 +71,7 @@ Computed offline by `scripts/eval_discovery.py` / `adventure_core.evaluation`:
 | `popularity_trap_at_k` | Among top-k matched labels, fraction with `google_maps_popularity >= 7` (configurable) |
 | `rating_spearman` | Spearman ρ between mission score and `human_rating` for matched pairs with ratings |
 
-Primary North Star metric for the next stretch: **`recall_at_k` on `interesting=true`** (k=5 default), with popularity-trap as a guardrail.
+Primary North Star metric for the next stretch: **`recall_at_k` on `interesting=true`** (k=5 default), with popularity-trap as a guardrail. Formal freeze, metric map, and threats to validity: **RFC-0005**.
 
 ### Harness inputs
 

@@ -8,11 +8,13 @@ Adventure AI / TerraQuest is in **`0.x`**: APIs and schemas may change with RFCs
 
 Working balance: ~**80%** better data + evaluation, ~**20%** new features. Architecture for `MissionIntent` → deterministic GIS scoring stays frozen unless an RFC proves a North Star need.
 
+**Primary metric (RFC-0005):** `recall_at_k` on `interesting=true` (k=5), guardrail `popularity_trap_at_k`. Pin: `configs/north_star.yaml`.
+
 Milestone: **North Star — discovery quality** (see issues). Start here:
 
 1. [#9 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/9)
 2. [#10 Formal ontology](https://github.com/OmarFarooq908/TerraQuest/issues/10)
-3. [#29 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/29)
+3. [#29 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/29) — RFC-0005
 4. P0 correctness issues (intent, inversion, schema, confidence)
 
 Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/TerraQuest/issues/8).

@@ -13,13 +13,27 @@ from adventure_core.evaluation import (
     PlaceLabel,
     RankedRef,
     compute_discovery_metrics,
+    load_north_star_config,
     load_place_labels,
     match_ranked_to_labels,
     ndcg_at_k,
+    north_star_constants_match_config,
+    NORTH_STAR_K,
+    NORTH_STAR_PRIMARY_METRIC,
 )
 from pydantic import ValidationError
 
 FIXTURE_LABELS = repo_root() / "evaluation" / "fixtures" / "karakoram_mini"
+
+
+def test_north_star_pin_matches_yaml():
+    """RFC-0005: module constants stay in sync with configs/north_star.yaml."""
+    cfg = load_north_star_config()
+    assert north_star_constants_match_config(cfg)
+    assert cfg.primary_metric == NORTH_STAR_PRIMARY_METRIC == "recall_at_k"
+    assert cfg.k == NORTH_STAR_K == 5
+    assert cfg.guardrail_metric == "popularity_trap_at_k"
+    assert cfg.primary_label_filter == "interesting"
 
 
 def test_load_fixture_labels():

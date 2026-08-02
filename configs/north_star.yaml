@@ -1,0 +1,13 @@
+# North Star measurement pin (RFC-0005 / issue #29)
+# Loaded by adventure_core.evaluation — keep in sync with NORTH_STAR_* constants.
+
+primary_metric: recall_at_k
+primary_label_filter: interesting
+k: 5
+guardrail_metric: popularity_trap_at_k
+popularity_threshold: 7.0
+match_radius_km: 2.0
+default_mode: fearless_far
+freeze_note: >
+  Primary metric frozen for ~1–2 months from RFC-0005 merge.
+  Fixture recall is smoke only; real claims need regional labels.
