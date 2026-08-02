@@ -12,6 +12,19 @@
 | `preferences` | `PreferenceVector` in `[-1, 1]` per dimension |
 | `goals` | Soft goal ids |
 | `interpreter_notes` | Provenance / fallback notes |
+| `intent_repairs` | Semantic repairs applied after interpret (clip, drop, contradiction) |
+| `raw_prompt` | Original user text when available |
+
+## Validation
+
+Every `interpret_mission` call runs `validate_and_repair_intent` (unless disabled):
+
+- Clip preferences to `[-1, 1]`; drop unknown preference/goal keys
+- Clear unknown `vehicle_class`; reject `days <= 0`
+- Resolve strong `solitude` + positive `human_activity` contradictions
+- Then polarity repair (prompt cues) may adjust signs further
+
+Unrecoverable intents raise `IntentValidationError` (fail closed).
 
 ## Preference dimensions
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Literal
 
 from adventure_core.intent import MissionIntent
+from adventure_core.intent_validate import IntentValidationError, validate_and_repair_intent
 from adventure_core.interpreters import interpret_rules
 from adventure_core.polarity import repair_preference_inversions
 
@@ -21,6 +22,7 @@ def interpret_mission(
     mode: str | None = None,
     allow_rules_fallback: bool = True,
     repair_polarity: bool = True,
+    validate_intent: bool = True,
 ) -> MissionIntent:
     notes: list[str] = []
     intent: MissionIntent
@@ -30,7 +32,10 @@ def interpret_mission(
     elif interpreter == "ollama":
         if not ollama_available():
             raise RuntimeError("Ollama not available at http://127.0.0.1:11434")
-        intent = interpret_ollama(prompt, model=model)
+        try:
+            intent = interpret_ollama(prompt, model=model)
+        except IntentValidationError:
+            raise
     else:
         # auto
         if ollama_available():
@@ -61,6 +66,8 @@ def interpret_mission(
             )
 
     intent = intent.model_copy(update={"raw_prompt": prompt})
+    if validate_intent:
+        intent = validate_and_repair_intent(intent)
     if repair_polarity:
         intent, _findings = repair_preference_inversions(intent, prompt=prompt)
     if mode:

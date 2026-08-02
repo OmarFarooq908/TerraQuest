@@ -8,11 +8,14 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 | `party_size` | Parsed; camping capacity not scored |
 | Confidence | Heuristic noisy-OR; not empirically calibrated |
 | Overpass ingest | Degraded (no road_lines); opt-in only |
-| LLM intent | Polarity repair mitigates sign flips; `--interpreter rules` for CI |
+| LLM intent | Validation + polarity repair in `interpret_mission`; `--interpreter rules` for CI |
 | Sentinel-2 | Not in v1 packs |
 | Mission-time densify | Schema hooks only (Phase C later) |
 | Missing GIS layers | Empty settlements/roads/water → `dist_*_km=null`, neutral remoteness 0.5, evidence `layer_flags` — never `-1` / `999` sentinels |
 
+## MissionIntent repairs
+
+Unsafe LLM JSON is sanitized (`drop` unknown prefs/goals, clip to [-1, 1]). Semantic repairs land on `MissionIntent.intent_repairs` (and mirrored `interpreter_notes`). Unrecoverable cases (e.g. `days <= 0`) raise `IntentValidationError` and fail closed.
 ## Feature ranges
 
 Unit-interval features on `CandidateFeatures` (`remoteness`, `crowd`, …) are always in **[0, 1]** (Pydantic-enforced). Distance fields are non-negative kilometers or **`null`** when the supporting pack layer is empty.
