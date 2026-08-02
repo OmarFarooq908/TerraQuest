@@ -33,6 +33,11 @@ from adventure_core.intent import (
 )
 from adventure_core.interpreters import interpret_rules
 from adventure_core.pack_manifest import PackManifest, PackSource
+from adventure_core.polarity import (
+    PolarityFinding,
+    detect_preference_inversions,
+    repair_preference_inversions,
+)
 from adventure_core.schemas import (
     Candidate,
     CandidateFeatures,
@@ -79,4 +84,7 @@ __all__ = [
     "DiscoveryMetrics",
     "load_place_labels",
     "compute_discovery_metrics",
+    "PolarityFinding",
+    "detect_preference_inversions",
+    "repair_preference_inversions",
 ]

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Open-source foundation: CI, Ruff/mypy, MkDocs, community docs, RFC process
 - Deterministic discovery catalog (named generators) with provenance
 - Pack validation and fixture catalog hash scripts
+- Evaluation place-label schema + discovery metrics harness (RFC-0002)
+- Preference polarity detection/repair against prompt cues (anti-inversion)
 
 ### Changed
 

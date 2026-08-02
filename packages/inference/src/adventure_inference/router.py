@@ -6,6 +6,7 @@ from typing import Literal
 
 from adventure_core.intent import MissionIntent
 from adventure_core.interpreters import interpret_rules
+from adventure_core.polarity import repair_preference_inversions
 
 from adventure_inference.ollama_interpreter import interpret_ollama, ollama_available
 
@@ -19,6 +20,7 @@ def interpret_mission(
     model: str = "llama3.2",
     mode: str | None = None,
     allow_rules_fallback: bool = True,
+    repair_polarity: bool = True,
 ) -> MissionIntent:
     notes: list[str] = []
     intent: MissionIntent
@@ -58,6 +60,9 @@ def interpret_mission(
                 }
             )
 
+    intent = intent.model_copy(update={"raw_prompt": prompt})
+    if repair_polarity:
+        intent, _findings = repair_preference_inversions(intent, prompt=prompt)
     if mode:
         intent = intent.merge_mode_prior(mode)
     return intent
