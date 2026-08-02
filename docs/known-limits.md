@@ -19,7 +19,10 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 ## MissionIntent repairs
 
 Unsafe LLM JSON is sanitized (`drop` unknown prefs/goals, clip to [-1, 1]). Semantic repairs land on `MissionIntent.intent_repairs` (and mirrored `interpreter_notes`). Unrecoverable cases (e.g. `days <= 0`) raise `IntentValidationError` and fail closed.
+
 ## Feature ranges
 
 Unit-interval features on `CandidateFeatures` (`remoteness`, `crowd`, …) are always in **[0, 1]** (Pydantic-enforced). Distance fields are non-negative kilometers or **`null`** when the supporting pack layer is empty.
-Propose changes via an RFC under the repository `RFC/` directory (see `RFC/README.md`).
+
+Propose changes via an RFC under the repository `RFC/` directory
+([RFC index](https://github.com/OmarFarooq908/TerraQuest/blob/main/RFC/README.md)).
