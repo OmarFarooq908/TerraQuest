@@ -94,6 +94,36 @@ vlm:
 Rebuilds with `enabled: false` remove leftover `vlm_features.geojson`.
 Synthetic fixture smoke: `fixtures/karakoram_mini/layers/vlm_features.geojson`.
 
+## OSM backends
+
+| Method | Status | Notes |
+|--------|--------|-------|
+| `geofabrik` / `osmium` / `pbf` | **Production** | LineStrings for track_terminus / road_spur |
+| `overpass` | **Degraded** | No `road_lines`; requires `allow_degraded_overpass: true` |
+
+### Pinning Geofabrik extracts (#60)
+
+`*-latest.osm.pbf` URLs move daily. For reproducible production packs, pin a
+**dated** extract and checksum:
+
+```yaml
+osm:
+  method: geofabrik
+  geofabrik_url: https://download.geofabrik.de/asia/pakistan-260801.osm.pbf
+  geofabrik_md5: 809f431e63dd87be8a69aea0e69c3fbe   # from Geofabrik *.md5 sibling
+  # geofabrik_sha256: <optional full SHA-256>
+  allow_latest: false
+  cache_pbf: pakistan-260801.osm.pbf
+```
+
+- `allow_latest: false` fails closed if the URL still contains `-latest`.
+- Checksums are verified on download **and** when reusing `data/cache/` (stale
+  cache with the wrong digest is deleted and re-fetched).
+- Pin metadata lands under `build_stats.json` → `osm.geofabrik_pin`.
+
+Browse dated files on the [Geofabrik Pakistan page](https://download.geofabrik.de/asia/pakistan.html).
+Do not commit PBF bytes.
+
 ## Hashes (RFC-0003)
 
 | Name | Covers |
@@ -136,13 +166,6 @@ catalog+seeds, missing `NOTICE` / incomplete `layers:` map on real packs,
 | Quotas, bbox, DEM/OSM refresh | Same `pack_id`; new `content_hash` |
 | Breaking catalog feature contract | `feature_schema_version` / `CATALOG_SCHEMA_VERSION` (RFC) |
 | Clean break of published pack identity | New `pack_id` (`skardu_v1` → `skardu_v2`) |
-
-## OSM backends
-
-| Method | Status | Notes |
-|--------|--------|-------|
-| `geofabrik` / `osmium` / `pbf` | **Production** | LineStrings for track_terminus / road_spur |
-| `overpass` | **Degraded** | Requires `osm.allow_degraded_overpass: true`; no road_lines |
 
 ## Derived query DB (RFC-0004)
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -17,6 +18,77 @@ USER_AGENT = (
     "TerraQuest/0.2 (packbuilder; local-first; +https://github.com/OmarFarooq908/TerraQuest)"
 )
 
+_LATEST_URL_MARKERS = ("-latest.osm.pbf", "-latest.osm.bz2", "/latest/")
+
+
+def is_latest_geofabrik_url(url: str) -> bool:
+    """True when the URL looks like a moving Geofabrik ``*-latest*`` extract."""
+    lower = url.strip().lower()
+    return any(m in lower for m in _LATEST_URL_MARKERS)
+
+
+def assert_geofabrik_url_allowed(url: str, *, allow_latest: bool) -> None:
+    """Fail closed when production configs forbid moving ``latest`` extracts."""
+    if allow_latest:
+        return
+    if is_latest_geofabrik_url(url):
+        raise ValueError(
+            f"osm.allow_latest is false but geofabrik_url looks like a moving extract: {url!r}. "
+            "Pin a dated file such as "
+            "https://download.geofabrik.de/asia/pakistan-260801.osm.pbf "
+            "(see docs/pack-builder.md)."
+        )
+
+
+def file_md5(path: Path) -> str:
+    h = hashlib.md5()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def parse_geofabrik_md5_text(text: str) -> str:
+    """Parse Geofabrik ``*.osm.pbf.md5`` contents → lowercase hex digest."""
+    token = text.strip().split()[0] if text.strip() else ""
+    digest = token.lower()
+    if len(digest) != 32 or any(c not in "0123456789abcdef" for c in digest):
+        raise ValueError(f"invalid Geofabrik md5 text: {text!r}")
+    return digest
+
+
+def verify_pbf_checksums(
+    path: Path,
+    *,
+    expected_md5: str | None = None,
+    expected_sha256: str | None = None,
+) -> dict[str, str]:
+    """Verify optional MD5 / SHA-256 pins; return computed digests that were checked."""
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    out: dict[str, str] = {}
+    if expected_md5:
+        want = expected_md5.strip().lower().split()[0]
+        got = file_md5(path)
+        out["md5"] = got
+        if got != want:
+            raise ValueError(f"PBF md5 mismatch for {path.name}: expected {want}, got {got}")
+    if expected_sha256:
+        want = expected_sha256.strip().lower().split()[0]
+        got = file_sha256(path)
+        out["sha256"] = got
+        if got != want:
+            raise ValueError(f"PBF sha256 mismatch for {path.name}: expected {want}, got {got}")
+    return out
+
 
 def require_osmium() -> str:
     path = shutil.which("osmium")
@@ -31,10 +103,31 @@ def require_osmium() -> str:
     return path
 
 
-def download_pbf(url: str, dest: Path, *, timeout_s: float = 600.0) -> Path:
+def download_pbf(
+    url: str,
+    dest: Path,
+    *,
+    timeout_s: float = 600.0,
+    expected_md5: str | None = None,
+    expected_sha256: str | None = None,
+    allow_latest: bool = True,
+    force: bool = False,
+) -> Path:
+    """Download a regional PBF (or reuse cache) and optionally verify checksums."""
+    assert_geofabrik_url_allowed(url, allow_latest=allow_latest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if dest.exists() and dest.stat().st_size > 1_000_000:
-        return dest
+
+    def _verify() -> None:
+        verify_pbf_checksums(dest, expected_md5=expected_md5, expected_sha256=expected_sha256)
+
+    if dest.exists() and dest.stat().st_size > 1_000_000 and not force:
+        try:
+            _verify()
+            return dest
+        except ValueError:
+            # Stale cache from a previous latest/dated file — replace.
+            dest.unlink(missing_ok=True)
+
     partial = dest.with_suffix(dest.suffix + ".partial")
     with (
         httpx.Client(
@@ -49,6 +142,7 @@ def download_pbf(url: str, dest: Path, *, timeout_s: float = 600.0) -> Path:
             for chunk in resp.iter_bytes(chunk_size=1024 * 1024):
                 f.write(chunk)
     partial.replace(dest)
+    _verify()
     return dest
 
 
@@ -296,11 +390,20 @@ def fetch_geofabrik_layers(
     *,
     pbf_url: str = "https://download.geofabrik.de/asia/pakistan-latest.osm.pbf",
     cache_pbf: Path | None = None,
+    expected_md5: str | None = None,
+    expected_sha256: str | None = None,
+    allow_latest: bool = True,
 ) -> tuple[dict[str, Any], dict[str, Path]]:
     """Download/clip/filter/export → layer FeatureCollections + artifact paths."""
     work_dir.mkdir(parents=True, exist_ok=True)
     cache = cache_pbf or (work_dir / "region.osm.pbf")
-    region = download_pbf(pbf_url, cache)
+    region = download_pbf(
+        pbf_url,
+        cache,
+        expected_md5=expected_md5,
+        expected_sha256=expected_sha256,
+        allow_latest=allow_latest,
+    )
     extract = work_dir / "bbox.osm.pbf"
     filtered = work_dir / "filtered.osm.pbf"
     exported = work_dir / "filtered.geojson"
@@ -311,6 +414,20 @@ def fetch_geofabrik_layers(
 
     fc = json.loads(exported.read_text(encoding="utf-8"))
     layers = geojson_to_layers(fc)
+    pin_meta = {
+        "geofabrik_url": pbf_url,
+        "allow_latest": allow_latest,
+        "cache_pbf": str(region),
+        "is_latest_url": is_latest_geofabrik_url(pbf_url),
+    }
+    if expected_md5:
+        pin_meta["geofabrik_md5"] = expected_md5.strip().lower().split()[0]
+        pin_meta["md5"] = file_md5(region)
+    if expected_sha256:
+        pin_meta["geofabrik_sha256"] = expected_sha256.strip().lower().split()[0]
+        pin_meta["sha256"] = file_sha256(region)
+    layers.setdefault("meta", {})
+    layers["meta"]["geofabrik_pin"] = pin_meta
     artifacts = {
         "region_pbf": region,
         "extract_pbf": extract,

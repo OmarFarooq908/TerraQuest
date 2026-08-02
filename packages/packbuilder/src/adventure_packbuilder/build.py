@@ -62,18 +62,26 @@ def build_pack(
     osm_cfg = config.osm or {}
     method = str(osm_cfg.get("method", "geofabrik")).lower()
     if method in {"geofabrik", "osmium", "pbf"}:
-        pbf_url = osm_cfg.get(
-            "geofabrik_url",
-            "https://download.geofabrik.de/asia/pakistan-latest.osm.pbf",
+        pbf_url = str(
+            osm_cfg.get(
+                "geofabrik_url",
+                "https://download.geofabrik.de/asia/pakistan-latest.osm.pbf",
+            )
         )
         cache_dir = root / osm_cfg.get("cache_dir", "data/cache")
         cache_name = osm_cfg.get("cache_pbf", "pakistan-latest.osm.pbf")
         cache_pbf = cache_dir / cache_name
+        allow_latest = bool(osm_cfg.get("allow_latest", True))
+        expected_md5 = osm_cfg.get("geofabrik_md5")
+        expected_sha256 = osm_cfg.get("geofabrik_sha256")
         layers, artifacts = fetch_geofabrik_layers(
             config.bbox,
             raw / "osmium",
             pbf_url=pbf_url,
             cache_pbf=cache_pbf,
+            expected_md5=str(expected_md5) if expected_md5 else None,
+            expected_sha256=str(expected_sha256) if expected_sha256 else None,
+            allow_latest=allow_latest,
         )
         meta = layers.pop("meta")
         osm_provider = "OpenStreetMap via Geofabrik + osmium"
