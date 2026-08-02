@@ -88,6 +88,60 @@ def test_calibration_hook_is_identity() -> None:
     assert hooked.model_dump() == base.model_dump()
 
 
+def test_strong_candidates_saturate_pack_ceilings() -> None:
+    cand = _strong_candidate()
+    assert build_confidence(cand, pack_synthetic=False).value == REAL_CONFIDENCE_CEILING
+    assert build_confidence(cand, pack_synthetic=True).value == SYNTHETIC_CONFIDENCE_CEILING
+
+
+def test_weak_evidence_scales_and_keeps_uncertainty_tags() -> None:
+    weak = Candidate(
+        id="w1",
+        name="weak",
+        lon=75.0,
+        lat=35.0,
+        claim="weak claim",
+        features=CandidateFeatures(
+            remoteness=0.1,
+            terrain_drama=0.1,
+            water=0.1,
+            viewpoint=0.1,
+            novelty=0.1,
+            access_fit=0.2,
+            camping=0.1,
+            forest=0.1,
+            crowd=0.4,
+            risk=0.7,
+            restriction=0.6,
+            dist_settlement_km=2.0,
+            dist_road_km=0.5,
+            dist_water_km=8.0,
+        ),
+        evidence={"source": "osm"},
+    )
+    real = build_confidence(weak, pack_synthetic=False)
+    synth = build_confidence(weak, pack_synthetic=True)
+    assert "few_independent_evidence_channels" in real.uncertainties
+    assert "elevated_hazard_flags" in real.uncertainties
+    assert "protected_or_restricted_area" in real.uncertainties
+    assert synth.value < real.value
+    assert synth.value == round(0.25 * 0.75 * 0.85 * 0.8, 3)
+
+
+def test_rank_missions_applies_pack_synthetic_ceiling() -> None:
+    from adventure_core.config import load_mode
+    from adventure_core.intent import MissionIntent
+    from adventure_scoring import rank_missions
+
+    mode = load_mode("fearless_far")
+    cand = _strong_candidate()
+    real = rank_missions([cand], mode, intent=MissionIntent(), max_results=1, pack_synthetic=False)
+    synth = rank_missions([cand], mode, intent=MissionIntent(), max_results=1, pack_synthetic=True)
+    assert real and synth
+    assert real[0].confidence.value == REAL_CONFIDENCE_CEILING
+    assert synth[0].confidence.value == SYNTHETIC_CONFIDENCE_CEILING
+
+
 def test_mission_notes_expose_calibration_version() -> None:
     from adventure_cli.pipeline import run_mission
 
@@ -100,7 +154,9 @@ def test_mission_notes_expose_calibration_version() -> None:
     )
     assert f"confidence_calibration={CALIBRATION_VERSION}" in result.notes
     assert "pack_kind=synthetic" in result.notes
+    assert "synthetic=True" in result.notes
     assert result.missions
     for m in result.missions:
         assert m.confidence.value <= SYNTHETIC_CONFIDENCE_CEILING
         assert "synthetic_pack_confidence_ceiling" in m.confidence.uncertainties
+        assert "confidence_not_empirically_calibrated" in m.confidence.uncertainties
