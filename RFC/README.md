@@ -13,7 +13,7 @@ Breaking changes to `MissionIntent` or catalog schema **require** an RFC while t
 
 | RFC | Title | Status |
 |-----|-------|--------|
-| [0002](0002-evaluation-dataset.md) | Evaluation dataset for discovery quality | Draft |
+| [0002](0002-evaluation-dataset.md) | Evaluation dataset for discovery quality | Accepted (regional fill ongoing) |
 | [0003](0003-region-pack-architecture.md) | Region Pack architecture freeze | Draft |
 | [0004](0004-duckdb-pack-query.md) | DuckDB local query layer over Region Packs | Draft |
 | [0005](0005-measure-adventure.md) | Measuring “adventure” (operational North Star) | Draft |

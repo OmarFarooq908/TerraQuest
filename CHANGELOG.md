@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Skardu evaluation seed + corpus CI (#56 / #9): provisional curator labels under `evaluation/skardu/`; `validate_place_label_corpus` gate (schema, ontology ids, unique catalog ids, opposite-interesting separation); RFC-0002 Accepted (infra; regional fill ongoing)
 - Measuring “adventure” (RFC-0005 / #29): operational North Star pin — primary `recall_at_k` (k=5) + `popularity_trap_at_k` guardrail; `configs/north_star.yaml` wired into eval harness defaults; threats-to-validity note
 - Pack-time VLM features (RFC-0007 / #22): optional `vlm_features` layer + evidence join; packbuilder attach from precomputed GeoJSON; never used as a ranker; `pack_vlm` pin in `configs/models.yaml`
 - Sentinel-2 indices (RFC-0006 / #21): optional `sentinel_indices` pack layer + featurize path; packbuilder attach via precomputed GeoJSON; ranking weights unchanged pending eval lift
