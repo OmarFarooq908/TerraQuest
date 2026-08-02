@@ -45,7 +45,10 @@ Synthetic packs must set `evidence.fixture=true` whenever `provenance.sources`
 includes `synthetic`. Real OSM/DEM packs must declare matching source kinds
 (`osm` / `dem`) and DEM features need `provenance.dem_tile`.
 
-Layer-byte hashes / DEM window polygons are **out of scope** for v1.
+Layer-byte hashes, required ``osm_id`` on every OSM feature, and DEM window
+polygons are **out of scope** for v1 (planned follow-up). Empty / whitespace
+``generator`` values and blank string evidence fields (e.g. ``water_kind: ""``)
+fail validation.
 Quotas and `min_spacing_km` are applied per generator, then soft global merge.
 
 ## Testing

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from adventure_core.catalog_validate import validate_catalog_feature
 from adventure_core.evidence_ledger import (
     EVIDENCE_LEDGER_VERSION,
@@ -110,6 +111,146 @@ def test_unknown_generator_and_empty_sources() -> None:
             feature_id="u2",
         )
     )
+
+
+def test_empty_generator_does_not_bypass_ledger() -> None:
+    feat = {
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [75.0, 35.5]},
+        "properties": {
+            "id": "blank_gen",
+            "name": "Blank",
+            "generator": "",
+            "provenance": {"sources": ["osm"], "method": "x", "layer": "water"},
+            "evidence": {},
+            "densify": {
+                "cell_id": "c",
+                "parent_id": None,
+                "densify_allowed": True,
+                "grid_res_deg": 0.02,
+            },
+        },
+    }
+    errs = validate_catalog_feature(feat, index=0)
+    assert any("non-empty string" in e for e in errs)
+
+
+def test_empty_string_evidence_values_rejected() -> None:
+    errs = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance={"sources": ["osm"], "method": "water_centroid", "layer": "water"},
+        evidence={
+            "discovery_score": 0.5,
+            "dist_settlement_km": 2.0,
+            "water_kind": "  ",
+            "named": True,
+        },
+        feature_id="w_empty",
+    )
+    assert any("water_kind" in e for e in errs)
+
+
+def test_named_false_is_allowed_for_unnamed_water() -> None:
+    errs = validate_evidence_ledger(
+        generator="unnamed_waterbody",
+        provenance={"sources": ["osm"], "method": "water_centroid", "layer": "water"},
+        evidence={
+            "discovery_score": 0.5,
+            "dist_settlement_km": 2.0,
+            "water_kind": "lake",
+            "named": False,
+        },
+        feature_id="uw1",
+    )
+    assert errs == []
+
+
+def test_synthetic_fixture_requires_fixture_even_without_synthetic_source() -> None:
+    errs = validate_evidence_ledger(
+        generator="synthetic_fixture",
+        provenance={"sources": ["osm"], "method": "unit_test", "layer": "catalog"},
+        evidence={"discovery_score": 0.5},
+        feature_id="sf1",
+    )
+    assert any("fixture=true" in e for e in errs)
+
+
+def test_required_keys_cover_shipping_generators() -> None:
+    from adventure_core.evidence_ledger import REQUIRED_EVIDENCE_KEYS, shipping_generator_names
+    from adventure_packbuilder.discovery.generators import GENERATORS
+
+    shipping = shipping_generator_names()
+    assert set(GENERATORS) == shipping
+    assert shipping <= set(REQUIRED_EVIDENCE_KEYS)
+    assert "synthetic_fixture" in REQUIRED_EVIDENCE_KEYS
+
+
+def test_dem_generator_outputs_satisfy_ledger(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    from adventure_core.catalog import DiscoveryConfig
+    from adventure_packbuilder.discovery.context import build_context
+    from adventure_packbuilder.discovery.generators import (
+        gen_dem_local_max,
+        gen_terrain_relief_hotspot,
+    )
+
+    def pt(lon: float, lat: float, **props):
+        return {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [lon, lat]},
+            "properties": props,
+        }
+
+    layers = {
+        "settlements": {
+            "type": "FeatureCollection",
+            "features": [pt(75.5, 35.3, name="Skardu", place="town")],
+        },
+        "water": {"type": "FeatureCollection", "features": []},
+        "road_nodes": {"type": "FeatureCollection", "features": []},
+        "road_lines": {"type": "FeatureCollection", "features": []},
+        "peaks": {"type": "FeatureCollection", "features": []},
+        "viewpoints": {"type": "FeatureCollection", "features": []},
+    }
+    dem = tmp_path / "N35E075.tif"
+    dem.write_bytes(b"fake")
+    ctx = build_context(
+        layers,
+        bbox=[75.35, 35.20, 75.85, 35.55],
+        config=DiscoveryConfig(min_spacing_km=0.5, grid_res_deg=0.05),
+        dem_paths=[dem],
+    )
+
+    def fake_elevs(coords, _paths):
+        # Peak at first grid point far enough from town
+        out = []
+        for lon, lat in coords:
+            # Higher toward NE corner → local max pattern
+            out.append(3000.0 + (lon - 75.35) * 2000 + (lat - 35.20) * 1500)
+        return out
+
+    def fake_relief(lon, lat, _paths, radius_deg=0.05):
+        return 800.0 if lon > 75.6 else 100.0
+
+    monkeypatch.setattr(
+        "adventure_packbuilder.discovery.generators.sample_elevations",
+        fake_elevs,
+    )
+    monkeypatch.setattr(
+        "adventure_packbuilder.discovery.generators.local_relief_from_dem",
+        fake_relief,
+    )
+
+    dem_cands = gen_dem_local_max(ctx)
+    relief_cands = gen_terrain_relief_hotspot(ctx)
+    assert dem_cands or relief_cands
+    for cand in dem_cands + relief_cands:
+        errs = validate_evidence_ledger(
+            generator=cand.generator,
+            provenance=cand.provenance.model_dump(),
+            evidence=cand.evidence,
+            feature_id=cand.id,
+        )
+        assert errs == [], (cand.generator, cand.id, errs)
 
 
 def test_dem_source_and_osm_layer_required() -> None:
