@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Geofabrik dated extract pins (#60): `allow_latest: false` requires checksum; optional `geofabrik_md5` / `geofabrik_sha256` verify (including cache reuse); `skardu_v1` pinned to `pakistan-260801`
 - GPX waypoint export (#58 / #28): `adventurectl mission run --export-gpx` writes GPX 1.1 waypoints (+ optional haversine rank-order track) for field eval; XML text sanitized; `max_results<=0` returns no missions
 - Skardu evaluation seed + corpus CI (#56 / #9): provisional curator labels under `evaluation/skardu/`; `validate_place_label_corpus` gate (schema, ontology ids, unique catalog ids, opposite-interesting separation); RFC-0002 Accepted (infra; regional fill ongoing)
 - Measuring “adventure” (RFC-0005 / #29): operational North Star pin — primary `recall_at_k` (k=5) + `popularity_trap_at_k` guardrail; `configs/north_star.yaml` wired into eval harness defaults; threats-to-validity note

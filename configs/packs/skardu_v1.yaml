@@ -11,9 +11,12 @@ notes: >
   Not a tourist ranking — access/isolation/terrain from open geospatial evidence.
 osm:
   method: geofabrik
-  geofabrik_url: https://download.geofabrik.de/asia/pakistan-latest.osm.pbf
+  # Dated Geofabrik extract (not *-latest*) for reproducible builds (#60).
+  geofabrik_url: https://download.geofabrik.de/asia/pakistan-260801.osm.pbf
+  geofabrik_md5: 809f431e63dd87be8a69aea0e69c3fbe
+  allow_latest: false
   cache_dir: data/cache
-  cache_pbf: pakistan-latest.osm.pbf
+  cache_pbf: pakistan-260801.osm.pbf
   overpass_url: https://overpass-api.de/api/interpreter
   timeout_s: 180
 dem:
