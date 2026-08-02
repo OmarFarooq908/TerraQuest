@@ -3,7 +3,7 @@
 - Status: Draft
 - Authors: Omar Farooq
 - Created: 2026-08-02
-- Tracking issue / discussion: https://github.com/OmarFarooq908/TerraQuest/issues/11
+- Tracking issue / discussion: https://github.com/OmarFarooq908/TerraQuest/issues/9
 
 ## Summary
 
