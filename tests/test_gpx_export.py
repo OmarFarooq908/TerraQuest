@@ -135,6 +135,60 @@ def test_write_mission_gpx(tmp_path: Path):
     assert gpx_waypoint_count(text) == 2
 
 
+def test_gpx_strips_illegal_xml_control_chars():
+    result = _result(
+        [_mission(cid="x", name="A\x00B\x08C", lon=75.0, lat=35.0, score=0.5, claim="ok\x01")]
+    )
+    xml = missions_to_gpx(result)
+    ET.fromstring(xml)  # must be well-formed
+    root = ET.fromstring(xml)
+    name = root.findtext(f"{{{GPX_NS}}}wpt/{{{GPX_NS}}}name")
+    assert name == "1. ABC"
+    assert "\x00" not in xml
+
+
+def test_gpx_rejects_nan_coordinates():
+    bad = _result([_mission(cid="x", name="Bad", lon=float("nan"), lat=35.0, score=0.1)])
+    with pytest.raises(ValueError, match="invalid WGS84"):
+        missions_to_gpx(bad)
+
+
+def test_write_mission_gpx_rejects_directory(tmp_path: Path):
+    result = _result([_mission(cid="a", name="A", lon=75.0, lat=35.0, score=0.5)])
+    with pytest.raises(OSError, match="directory"):
+        write_mission_gpx(tmp_path, result)
+
+
+def test_cli_export_gpx_with_json(tmp_path: Path):
+    from adventure_cli.main import app
+    from typer.testing import CliRunner
+
+    out = tmp_path / "mission.gpx"
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "mission",
+            "run",
+            "--pack",
+            "fixtures/karakoram_mini",
+            "--interpreter",
+            "rules",
+            "-p",
+            "rivers and forests",
+            "--json",
+            "--export-gpx",
+            str(out),
+            "--gpx-no-track",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert out.is_file()
+    root = ET.fromstring(out.read_text(encoding="utf-8"))
+    assert root.find(f"{{{GPX_NS}}}trk") is None
+    assert gpx_waypoint_count(out.read_text(encoding="utf-8")) >= 1
+
+
 def test_cli_export_gpx_smoke(tmp_path: Path):
     from adventure_cli.main import app
     from typer.testing import CliRunner
@@ -159,3 +213,20 @@ def test_cli_export_gpx_smoke(tmp_path: Path):
     assert result.exit_code == 0, result.output
     assert out.is_file()
     assert gpx_waypoint_count(out.read_text(encoding="utf-8")) >= 1
+
+
+def test_max_results_zero_exports_empty_gpx():
+    """Regression: rank_missions used to return 1 hit when max_results=0."""
+    from adventure_cli.pipeline import run_mission
+
+    result = run_mission(
+        pack="fixtures/karakoram_mini",
+        mode="fearless_far",
+        prompt="rivers",
+        max_results=0,
+        interpreter="rules",
+    )
+    assert result.missions == []
+    xml = missions_to_gpx(result)
+    assert gpx_waypoint_count(xml) == 0
+    assert ET.fromstring(xml).find(f"{{{GPX_NS}}}trk") is None

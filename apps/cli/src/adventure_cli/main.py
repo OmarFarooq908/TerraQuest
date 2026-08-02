@@ -291,7 +291,7 @@ def mission_run(
 
         try:
             gpx_path = write_mission_gpx(export_gpx, result, include_track=not gpx_no_track)
-        except ValueError as exc:
+        except (ValueError, OSError) as exc:
             console.print(f"[bold red]GPX export error[/bold red]: {exc}")
             raise typer.Exit(code=2) from exc
         console.print(f"[green]Wrote GPX[/green]: {gpx_path}")

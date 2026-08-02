@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any
-from xml.dom import minidom
 
 from adventure_core.schemas import MissionResult, RankedMission
 
@@ -19,10 +17,15 @@ GPX_SCHEMA_LOC = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GP
 GPX_CREATOR = "TerraQuest adventurectl"
 
 
+def _xml_safe(text: str) -> str:
+    """Strip characters illegal in XML 1.0 text nodes (keeps tab/LF/CR)."""
+    return "".join(ch for ch in text if ch in "\t\n\r" or ord(ch) >= 0x20)
+
+
 def _el(tag: str, text: str | None = None, **attrs: str) -> ET.Element:
     elem = ET.Element(tag, {k: v for k, v in attrs.items() if v is not None})
     if text is not None:
-        elem.text = text
+        elem.text = _xml_safe(text)
     return elem
 
 
@@ -42,6 +45,7 @@ def _wpt_desc(mission: RankedMission, *, rank: int) -> str:
 
 
 def _validate_lon_lat(lon: float, lat: float, *, context: str) -> None:
+    # NaN/Inf fail these comparisons in IEEE/Python.
     if not (-180.0 <= lon <= 180.0 and -90.0 <= lat <= 90.0):
         raise ValueError(f"{context}: invalid WGS84 lon/lat ({lon}, {lat})")
 
@@ -136,15 +140,11 @@ def missions_to_gpx(
         trk.append(seg)
         root.append(trk)
 
-    rough = ET.tostring(root, encoding="utf-8")
-    parsed = minidom.parseString(rough)
-    pretty = parsed.toprettyxml(indent="  ", encoding="utf-8").decode("utf-8")
-    # minidom adds an XML declaration; keep a single clean declaration.
-    lines = [ln for ln in pretty.splitlines() if ln.strip()]
-    if lines and lines[0].startswith("<?xml"):
-        body = "\n".join(lines[1:])
-        return '<?xml version="1.0" encoding="UTF-8"?>\n' + body + "\n"
-    return pretty
+    # Prefer ElementTree indent over minidom round-trip (minidom re-parses and
+    # rejects illegal control chars even after we could have escaped entities).
+    ET.indent(root, space="  ")
+    body = ET.tostring(root, encoding="unicode")
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + body + "\n"
 
 
 def write_mission_gpx(
@@ -155,6 +155,8 @@ def write_mission_gpx(
 ) -> Path:
     """Write GPX to ``path``; return the resolved path."""
     out = Path(path).expanduser().resolve()
+    if out.exists() and out.is_dir():
+        raise OSError(f"GPX path is a directory: {out}")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         missions_to_gpx(result, include_track=include_track),
@@ -167,16 +169,3 @@ def gpx_waypoint_count(gpx_xml: str) -> int:
     """Count ``wpt`` elements (helper for tests)."""
     root = ET.fromstring(gpx_xml)
     return len(root.findall(f"{{{GPX_NS}}}wpt"))
-
-
-def gpx_as_dict_summary(result: MissionResult) -> dict[str, Any]:
-    """Small summary for CLI/logs (not the GPX itself)."""
-    return {
-        "pack_id": result.pack_id,
-        "mode": result.mode,
-        "n_missions": len(result.missions),
-        "has_origin": (
-            result.request.intent.constraints.origin_lon is not None
-            and result.request.intent.constraints.origin_lat is not None
-        ),
-    }
