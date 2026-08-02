@@ -116,7 +116,8 @@ def build_confidence(
         if f.dist_road_km is None:
             road_detail = "road distance unknown (layer missing)"
         else:
-            road_detail = f"{f.dist_road_km:.1f} km from road network node"
+            hwy = f.nearest_highway or "unclassified"
+            road_detail = f"{f.dist_road_km:.1f} km from access road ({hwy})"
         channels.append(
             (
                 "road_access",

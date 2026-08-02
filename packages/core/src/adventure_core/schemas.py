@@ -42,6 +42,11 @@ class CandidateFeatures(BaseModel):
     elevation_m: float = 0.0
     relief_m: float = 0.0
 
+    # GIS depth (#23) — optional diagnostics; None when settlements/roads layer empty
+    settlement_density: float | None = Field(default=None, ge=0.0, le=1.0)
+    settlements_within_10km: int | None = Field(default=None, ge=0)
+    nearest_highway: str | None = None
+
 
 class Candidate(BaseModel):
     id: str
