@@ -15,12 +15,14 @@ from adventure_core.geo import Point, haversine_km
 PLACE_LABEL_SCHEMA_VERSION = "0.1.0"
 
 # North Star pin (RFC-0005) — must match configs/north_star.yaml.
+# Harness / metric defaults must use these (or load_north_star_config()), not literals.
 NORTH_STAR_PRIMARY_METRIC = "recall_at_k"
 NORTH_STAR_PRIMARY_LABEL_FILTER = "interesting"
 NORTH_STAR_K = 5
 NORTH_STAR_GUARDRAIL_METRIC = "popularity_trap_at_k"
 NORTH_STAR_POPULARITY_THRESHOLD = 7.0
 NORTH_STAR_MATCH_RADIUS_KM = 2.0
+NORTH_STAR_DEFAULT_MODE = "fearless_far"
 
 
 class NorthStarConfig(BaseModel):
@@ -32,7 +34,25 @@ class NorthStarConfig(BaseModel):
     guardrail_metric: str = NORTH_STAR_GUARDRAIL_METRIC
     popularity_threshold: float = NORTH_STAR_POPULARITY_THRESHOLD
     match_radius_km: float = NORTH_STAR_MATCH_RADIUS_KM
-    default_mode: str = "fearless_far"
+    default_mode: str = NORTH_STAR_DEFAULT_MODE
+
+
+def _pin_str(raw: dict[str, Any], key: str, default: str) -> str:
+    val = raw.get(key)
+    if val is None:
+        return default
+    text = str(val).strip()
+    return text if text else default
+
+
+def _pin_int(raw: dict[str, Any], key: str, default: int) -> int:
+    val = raw.get(key)
+    return default if val is None else int(val)
+
+
+def _pin_float(raw: dict[str, Any], key: str, default: float) -> float:
+    val = raw.get(key)
+    return default if val is None else float(val)
 
 
 def load_north_star_config() -> NorthStarConfig:
@@ -44,23 +64,17 @@ def load_north_star_config() -> NorthStarConfig:
         return NorthStarConfig()
     raw = load_yaml(path)
     return NorthStarConfig(
-        primary_metric=str(raw.get("primary_metric") or NORTH_STAR_PRIMARY_METRIC),
-        primary_label_filter=str(
-            raw.get("primary_label_filter") or NORTH_STAR_PRIMARY_LABEL_FILTER
+        primary_metric=_pin_str(raw, "primary_metric", NORTH_STAR_PRIMARY_METRIC),
+        primary_label_filter=_pin_str(
+            raw, "primary_label_filter", NORTH_STAR_PRIMARY_LABEL_FILTER
         ),
-        k=int(raw.get("k") if raw.get("k") is not None else NORTH_STAR_K),
-        guardrail_metric=str(raw.get("guardrail_metric") or NORTH_STAR_GUARDRAIL_METRIC),
-        popularity_threshold=float(
-            raw.get("popularity_threshold")
-            if raw.get("popularity_threshold") is not None
-            else NORTH_STAR_POPULARITY_THRESHOLD
+        k=_pin_int(raw, "k", NORTH_STAR_K),
+        guardrail_metric=_pin_str(raw, "guardrail_metric", NORTH_STAR_GUARDRAIL_METRIC),
+        popularity_threshold=_pin_float(
+            raw, "popularity_threshold", NORTH_STAR_POPULARITY_THRESHOLD
         ),
-        match_radius_km=float(
-            raw.get("match_radius_km")
-            if raw.get("match_radius_km") is not None
-            else NORTH_STAR_MATCH_RADIUS_KM
-        ),
-        default_mode=str(raw.get("default_mode") or "fearless_far"),
+        match_radius_km=_pin_float(raw, "match_radius_km", NORTH_STAR_MATCH_RADIUS_KM),
+        default_mode=_pin_str(raw, "default_mode", NORTH_STAR_DEFAULT_MODE),
     )
 
 
@@ -74,6 +88,7 @@ def north_star_constants_match_config(cfg: NorthStarConfig | None = None) -> boo
         and pin.guardrail_metric == NORTH_STAR_GUARDRAIL_METRIC
         and pin.popularity_threshold == NORTH_STAR_POPULARITY_THRESHOLD
         and pin.match_radius_km == NORTH_STAR_MATCH_RADIUS_KM
+        and pin.default_mode == NORTH_STAR_DEFAULT_MODE
     )
 
 
@@ -194,7 +209,7 @@ def match_ranked_to_labels(
     labels: Iterable[PlaceLabel],
     *,
     k: int,
-    match_radius_km: float = 2.0,
+    match_radius_km: float = NORTH_STAR_MATCH_RADIUS_KM,
 ) -> list[Match]:
     """Greedy match top-k ranked refs to labels (each label used at most once)."""
     label_list = list(labels)
@@ -285,8 +300,8 @@ def ndcg_at_k(
     ranked: Iterable[RankedRef],
     labels: Iterable[PlaceLabel],
     *,
-    k: int = 5,
-    match_radius_km: float = 2.0,
+    k: int = NORTH_STAR_K,
+    match_radius_km: float = NORTH_STAR_MATCH_RADIUS_KM,
     ideal_catalog_ids: Collection[str] | None = None,
 ) -> float | None:
     """nDCG@k using ``human_rating`` as graded relevance (RFC-0002 / issue #24).
@@ -333,9 +348,9 @@ def compute_discovery_metrics(
     ranked: Iterable[RankedRef],
     labels: Iterable[PlaceLabel],
     *,
-    k: int = 5,
-    match_radius_km: float = 2.0,
-    popularity_threshold: float = 7.0,
+    k: int = NORTH_STAR_K,
+    match_radius_km: float = NORTH_STAR_MATCH_RADIUS_KM,
+    popularity_threshold: float = NORTH_STAR_POPULARITY_THRESHOLD,
     ideal_catalog_ids: Collection[str] | None = None,
 ) -> DiscoveryMetrics:
     label_list = list(labels)
@@ -347,7 +362,12 @@ def compute_discovery_metrics(
     precision = sum(1 for m in matches if m.interesting) / len(matches) if matches else None
     with_pop = [m for m in matches if m.google_maps_popularity is not None]
     trap = (
-        sum(1 for m in with_pop if (m.google_maps_popularity or 0) >= popularity_threshold)
+        sum(
+            1
+            for m in with_pop
+            if m.google_maps_popularity is not None
+            and m.google_maps_popularity >= popularity_threshold
+        )
         / len(with_pop)
         if with_pop
         else None

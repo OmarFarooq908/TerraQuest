@@ -1,5 +1,7 @@
 # North Star measurement pin (RFC-0005 / issue #29)
-# Loaded by adventure_core.evaluation — keep in sync with NORTH_STAR_* constants.
+# Loaded by adventure_core.evaluation + scripts/eval_discovery.py defaults.
+# Keep in sync with adventure_core.evaluation.NORTH_STAR_* constants.
+# Default prompt text lives in scripts/eval_discovery.py::DEFAULT_PROMPT.
 
 primary_metric: recall_at_k
 primary_label_filter: interesting

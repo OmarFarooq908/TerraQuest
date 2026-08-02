@@ -56,6 +56,8 @@ Scope bounds:
 
 Pinned config: `configs/north_star.yaml` and
 `adventure_core.evaluation.NORTH_STAR_*` constants must agree.
+`scripts/eval_discovery.py` and metric function defaults read from that pin
+(not duplicated magic numbers).
 
 ## Primary North Star (freeze window)
 
