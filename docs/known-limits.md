@@ -12,6 +12,8 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 | Sentinel-2 | Not in v1 packs |
 | Mission-time densify | Schema hooks only (Phase C later) |
 | Missing GIS layers | Empty settlements/roads/water → `dist_*_km=null`, neutral remoteness 0.5, evidence `layer_flags` — never `-1` / `999` sentinels |
+| Legacy `seeds.geojson` | Runtime may still load seeds-only with a warning when `allow_legacy_seeds=True`; CI/`check_pack` rejects dual-path and seeds-only unless `--allow-legacy-seeds` |
+| Invalid catalog | `load_pack_data(..., strict=True)` raises `CatalogValidationError` — no silent property fill |
 
 ## MissionIntent repairs
 

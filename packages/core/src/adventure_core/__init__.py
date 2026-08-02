@@ -7,6 +7,11 @@ from adventure_core.catalog import (
     DiscoveryConfig,
     Provenance,
 )
+from adventure_core.catalog_validate import (
+    CatalogValidationError,
+    validate_catalog_feature,
+    validate_catalog_geojson,
+)
 from adventure_core.config import (
     ModeWeights,
     load_mode,
@@ -76,6 +81,9 @@ __all__ = [
     "DensifyHook",
     "DiscoveryConfig",
     "Provenance",
+    "CatalogValidationError",
+    "validate_catalog_feature",
+    "validate_catalog_geojson",
     "PackManifest",
     "PackSource",
     "ModeWeights",
