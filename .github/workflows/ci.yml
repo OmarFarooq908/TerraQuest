@@ -48,6 +48,14 @@ jobs:
           --interpreter rules
           -p "Three days, Suzuki Swift, rivers and forests, hate crowds."
           --max-results 3
+      - name: Discovery eval smoke (synthetic labels)
+        run: >
+          uv run python scripts/eval_discovery.py
+          --pack fixtures/karakoram_mini
+          --labels evaluation/fixtures/karakoram_mini
+          --interpreter rules
+          --k 5
+          --json
 
   docs:
     runs-on: ubuntu-latest

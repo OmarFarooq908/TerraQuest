@@ -15,6 +15,14 @@ from adventure_core.config import (
     repo_root,
 )
 from adventure_core.constraints import MissionConstraints, parse_constraints
+from adventure_core.evaluation import (
+    PLACE_LABEL_SCHEMA_VERSION,
+    DiscoveryMetrics,
+    PlaceLabel,
+    RankedRef,
+    compute_discovery_metrics,
+    load_place_labels,
+)
 from adventure_core.geo import Point, haversine_km
 from adventure_core.intent import (
     SCHEMA_VERSION,
@@ -65,4 +73,10 @@ __all__ = [
     "load_pack_manifest",
     "load_yaml",
     "repo_root",
+    "PLACE_LABEL_SCHEMA_VERSION",
+    "PlaceLabel",
+    "RankedRef",
+    "DiscoveryMetrics",
+    "load_place_labels",
+    "compute_discovery_metrics",
 ]

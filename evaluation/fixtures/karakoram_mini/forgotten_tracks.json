@@ -1,0 +1,32 @@
+[
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/forgotten_track",
+    "catalog_id": "seed_forgotten_track",
+    "geometry": { "type": "Point", "coordinates": [74.71, 35.71] },
+    "known": false,
+    "interesting": true,
+    "human_rating": 8.8,
+    "google_maps_popularity": 1.0,
+    "tags": ["track", "abandoned"],
+    "ontology_ids": ["experience.discovery"],
+    "notes": "Synthetic CI label.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  },
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/shepherd_ruins",
+    "catalog_id": "seed_shepherd_ruins",
+    "geometry": { "type": "Point", "coordinates": [75.02, 35.79] },
+    "known": true,
+    "interesting": true,
+    "human_rating": 7.5,
+    "google_maps_popularity": 2.5,
+    "tags": ["history", "pasture"],
+    "ontology_ids": ["experience.discovery"],
+    "notes": "Synthetic CI label.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  }
+]

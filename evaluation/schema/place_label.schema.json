@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OmarFarooq908/TerraQuest/evaluation/schema/place_label.schema.json",
+  "title": "TerraQuest place label",
+  "description": "RFC-0002 place label (schema_version 0.1.0)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "geometry",
+    "known",
+    "interesting",
+    "license",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "catalog_id": { "type": ["string", "null"] },
+    "geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "const": "Point" },
+        "coordinates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" }
+        }
+      }
+    },
+    "known": { "type": "boolean" },
+    "interesting": { "type": "boolean" },
+    "human_rating": { "type": ["number", "null"], "minimum": 0, "maximum": 10 },
+    "google_maps_popularity": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 10
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "ontology_ids": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": ["string", "null"] },
+    "license": { "type": "string", "minLength": 1 },
+    "synthetic": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}
