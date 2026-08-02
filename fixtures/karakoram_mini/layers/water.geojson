@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [75.18, 35.72] },
+      "properties": { "id": "lake_turquoise", "name": "Turquoise Lake", "kind": "lake" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.88, 35.62] },
+      "properties": { "id": "river_main", "name": "Main River", "kind": "river" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [75.00, 35.78] },
+      "properties": { "id": "lake_hidden", "name": "Hidden Tarn", "kind": "lake" }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+"""Core schemas for Adventure AI missions, candidates, and confidence."""
+
+from adventure_core.catalog import (
+    CATALOG_SCHEMA_VERSION,
+    CatalogCandidate,
+    DensifyHook,
+    DiscoveryConfig,
+    Provenance,
+)
+from adventure_core.config import (
+    ModeWeights,
+    load_mode,
+    load_pack_manifest,
+    load_yaml,
+    repo_root,
+)
+from adventure_core.constraints import MissionConstraints, parse_constraints
+from adventure_core.geo import Point, haversine_km
+from adventure_core.intent import (
+    SCHEMA_VERSION,
+    HardConstraints,
+    IntentCoverage,
+    MissionIntent,
+    PreferenceVector,
+)
+from adventure_core.interpreters import interpret_rules
+from adventure_core.pack_manifest import PackManifest, PackSource
+from adventure_core.schemas import (
+    Candidate,
+    CandidateFeatures,
+    Confidence,
+    MissionRequest,
+    MissionResult,
+    RankedMission,
+    ReasonCode,
+)
+
+__all__ = [
+    "Point",
+    "haversine_km",
+    "Candidate",
+    "CandidateFeatures",
+    "Confidence",
+    "MissionRequest",
+    "MissionResult",
+    "RankedMission",
+    "ReasonCode",
+    "MissionConstraints",
+    "parse_constraints",
+    "MissionIntent",
+    "PreferenceVector",
+    "HardConstraints",
+    "IntentCoverage",
+    "SCHEMA_VERSION",
+    "interpret_rules",
+    "CATALOG_SCHEMA_VERSION",
+    "CatalogCandidate",
+    "DensifyHook",
+    "DiscoveryConfig",
+    "Provenance",
+    "PackManifest",
+    "PackSource",
+    "ModeWeights",
+    "load_mode",
+    "load_pack_manifest",
+    "load_yaml",
+    "repo_root",
+]

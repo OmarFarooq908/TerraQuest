@@ -1,0 +1,7 @@
+# Local inference — capability → Ollama model (loaded by adventure_inference)
+default_model: llama3.2
+mission_interpreter: llama3.2
+fallback:
+  - llama3.2
+  - llama3.1:8b
+  - qwen3:8b

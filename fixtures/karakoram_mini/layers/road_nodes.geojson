@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.80, 35.33] },
+      "properties": { "id": "road_town", "name": "Main road near town" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.95, 35.48] },
+      "properties": { "id": "road_spur_a", "name": "Valley spur A" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [75.10, 35.60] },
+      "properties": { "id": "road_spur_b", "name": "High spur B" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.70, 35.70] },
+      "properties": { "id": "road_track_end", "name": "Track terminus" }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+mode_id: fearless_far
+description: >
+  Fearless & Far composite — Explorer + Lost World bias with hatchback-realistic access.
+weights:
+  remoteness: 1.3
+  terrain_drama: 1.2
+  water: 1.1
+  viewpoint: 1.0
+  novelty: 1.4
+  access_fit: 1.2
+  camping: 0.9
+risk_weight: 1.1
+restriction_weight: 1.0
+gates:
+  remoteness: 0.35
+  novelty: 0.40

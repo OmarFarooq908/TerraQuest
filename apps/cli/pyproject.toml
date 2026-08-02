@@ -1,0 +1,27 @@
+[project]
+name = "adventure-cli"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "adventure-core",
+  "adventure-gis",
+  "adventure-scoring",
+  "adventure-inference",
+  "adventure-packbuilder",
+  "typer>=0.12",
+  "rich>=13.0",
+]
+
+[project.scripts]
+adventurectl = "adventure_cli.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+adventure-core = { workspace = true }
+adventure-gis = { workspace = true }
+adventure-scoring = { workspace = true }
+adventure-inference = { workspace = true }
+adventure-packbuilder = { workspace = true }

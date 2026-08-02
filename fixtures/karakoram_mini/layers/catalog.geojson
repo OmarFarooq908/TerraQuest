@@ -1,0 +1,380 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.18,
+          35.72
+        ]
+      },
+      "properties": {
+        "id": "seed_turquoise_lake",
+        "name": "Turquoise Alpine Lake",
+        "kind": "alpine_lake",
+        "elevation_m": 3800,
+        "has_water": true,
+        "building_density": 0.02,
+        "crowd": 0.15,
+        "forest": 0.05,
+        "slope": 0.15,
+        "hazard": 0.25,
+        "protected": 0.1,
+        "tags": [
+          "water",
+          "alpine",
+          "lake"
+        ],
+        "generator": "named_waterbody",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.72_75.18",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.72,
+          35.82
+        ]
+      },
+      "properties": {
+        "id": "seed_silent_valley",
+        "name": "Silent Valley",
+        "kind": "hidden_valley",
+        "elevation_m": 3200,
+        "building_density": 0.01,
+        "crowd": 0.05,
+        "forest": 0.85,
+        "slope": 0.25,
+        "hazard": 0.3,
+        "protected": 0.0,
+        "tags": [
+          "valley",
+          "remote",
+          "forest"
+        ],
+        "generator": "isolation_maximum",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.82_74.72",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.12,
+          35.68
+        ]
+      },
+      "properties": {
+        "id": "seed_sunrise_ridge",
+        "name": "Sunrise Ridge",
+        "kind": "viewpoint",
+        "elevation_m": 4100,
+        "building_density": 0.0,
+        "crowd": 0.2,
+        "forest": 0.0,
+        "slope": 0.35,
+        "hazard": 0.55,
+        "protected": 0.0,
+        "tags": [
+          "viewpoint",
+          "ridge"
+        ],
+        "generator": "terrain_relief_hotspot",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.68_75.12",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.71,
+          35.71
+        ]
+      },
+      "properties": {
+        "id": "seed_forgotten_track",
+        "name": "Forgotten Spur Track",
+        "kind": "abandoned_track",
+        "elevation_m": 2900,
+        "building_density": 0.05,
+        "crowd": 0.1,
+        "forest": 0.35,
+        "slope": 0.2,
+        "hazard": 0.45,
+        "protected": 0.0,
+        "tags": [
+          "track",
+          "access"
+        ],
+        "generator": "track_terminus",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.71_74.71",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.02,
+          35.79
+        ]
+      },
+      "properties": {
+        "id": "seed_shepherd_ruins",
+        "name": "Upper Pasture Remnant",
+        "kind": "shepherd_settlement",
+        "elevation_m": 3550,
+        "building_density": 0.08,
+        "crowd": 0.08,
+        "forest": 0.1,
+        "slope": 0.18,
+        "hazard": 0.2,
+        "protected": 0.0,
+        "tags": [
+          "history",
+          "pasture"
+        ],
+        "generator": "isolation_maximum",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.79_75.02",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.9,
+          35.61
+        ]
+      },
+      "properties": {
+        "id": "seed_river_ford",
+        "name": "Stone Ford Crossing",
+        "kind": "river_crossing",
+        "elevation_m": 2600,
+        "has_water": true,
+        "building_density": 0.12,
+        "crowd": 0.25,
+        "forest": 0.55,
+        "slope": 0.1,
+        "hazard": 0.35,
+        "protected": 0.0,
+        "tags": [
+          "river",
+          "crossing",
+          "forest"
+        ],
+        "generator": "named_waterbody",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.61_74.90",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.55,
+          35.88
+        ]
+      },
+      "properties": {
+        "id": "seed_pine_river",
+        "name": "Pine Bend River Forest",
+        "kind": "forest_river",
+        "elevation_m": 2450,
+        "has_water": true,
+        "building_density": 0.03,
+        "crowd": 0.06,
+        "forest": 0.95,
+        "slope": 0.12,
+        "hazard": 0.18,
+        "protected": 0.0,
+        "tags": [
+          "river",
+          "forest",
+          "water"
+        ],
+        "generator": "named_waterbody",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.88_74.55",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85,
+          35.35
+        ]
+      },
+      "properties": {
+        "id": "seed_near_town_hill",
+        "name": "Town Overlook (control)",
+        "kind": "viewpoint",
+        "elevation_m": 2400,
+        "building_density": 0.4,
+        "crowd": 0.7,
+        "forest": 0.1,
+        "slope": 0.2,
+        "hazard": 0.1,
+        "protected": 0.0,
+        "tags": [
+          "viewpoint",
+          "control"
+        ],
+        "generator": "terrain_relief_hotspot",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "seeds"
+        },
+        "evidence": {
+          "discovery_score": 0.8,
+          "fixture": true
+        },
+        "densify": {
+          "cell_id": "c_35.35_74.85",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    }
+  ]
+}

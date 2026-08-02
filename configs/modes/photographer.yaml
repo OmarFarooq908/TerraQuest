@@ -1,0 +1,12 @@
+mode_id: photographer
+description: Optimize for scenery, viewpoints, and composition proxies.
+weights:
+  remoteness: 0.6
+  terrain_drama: 1.4
+  water: 1.2
+  viewpoint: 1.8
+  novelty: 0.7
+  access_fit: 0.8
+  camping: 0.4
+risk_weight: 0.9
+restriction_weight: 0.6

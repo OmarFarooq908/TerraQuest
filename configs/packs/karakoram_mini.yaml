@@ -1,0 +1,9 @@
+pack_id: karakoram_mini
+name: Karakoram Mini (synthetic fixture pack)
+bbox: [74.5, 35.0, 75.5, 36.0]
+crs: EPSG:4326
+feature_schema_version: "0.3.0"
+synthetic: true
+fixtures_dir: fixtures/karakoram_mini
+notes: >
+  SYNTHETIC — CI/offline only. Not real OSM/DEM. Use skardu_v1 for production packs.

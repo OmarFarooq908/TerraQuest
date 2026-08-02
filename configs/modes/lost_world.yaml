@@ -1,0 +1,12 @@
+mode_id: lost_world
+description: Rank places that feel untouched by humans.
+weights:
+  remoteness: 1.5
+  terrain_drama: 1.1
+  water: 0.9
+  viewpoint: 0.8
+  novelty: 1.8
+  access_fit: 0.4
+  camping: 0.6
+risk_weight: 1.0
+restriction_weight: 0.5

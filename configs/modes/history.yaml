@@ -1,0 +1,12 @@
+mode_id: history
+description: Favor forts, ruins, and old-track proxies (stub weights for vertical slice).
+weights:
+  remoteness: 0.9
+  terrain_drama: 0.6
+  water: 0.5
+  viewpoint: 0.5
+  novelty: 1.2
+  access_fit: 0.9
+  camping: 0.5
+risk_weight: 1.0
+restriction_weight: 0.8

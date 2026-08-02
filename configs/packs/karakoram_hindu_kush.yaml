@@ -1,0 +1,10 @@
+pack_id: karakoram_hindu_kush
+name: Karakoram–Hindu Kush (config stub → mini fixture)
+bbox: [74.5, 35.0, 75.5, 36.0]
+crs: EPSG:4326
+feature_schema_version: "0.3.0"
+synthetic: true
+fixtures_dir: fixtures/karakoram_mini
+notes: >
+  Stub pack id for a future wider AOI. Currently resolves to the synthetic
+  karakoram_mini fixture for offline tests — not a real multi-range extract.

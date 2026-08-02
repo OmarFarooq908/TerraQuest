@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Sync
+        run: uv sync --group dev
+      - name: Ruff check
+        run: uv run ruff check packages apps tests scripts
+      - name: Ruff format
+        run: uv run ruff format --check packages apps tests scripts
+      - name: Mypy (core)
+        run: uv run mypy packages/core/src/adventure_core
+      - name: Pytest + coverage
+        run: >
+          uv run pytest -q
+          --cov=adventure_core
+          --cov=adventure_gis
+          --cov=adventure_scoring
+          --cov-report=term-missing
+          --cov-fail-under=50
+      - name: Validate fixture pack
+        run: uv run python scripts/check_pack.py fixtures/karakoram_mini
+      - name: Fixture catalog hash
+        run: uv run python scripts/hash_fixture_catalog.py --check
+      - name: Mission smoke (rules)
+        run: >
+          uv run adventurectl mission run
+          --pack fixtures/karakoram_mini
+          --interpreter rules
+          -p "Three days, Suzuki Swift, rivers and forests, hate crowds."
+          --max-results 3
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --group docs
+      - run: uv run mkdocs build --strict

@@ -1,0 +1,15 @@
+mode_id: explorer
+description: Maximize novelty and rarity.
+weights:
+  remoteness: 1.4
+  terrain_drama: 1.0
+  water: 0.8
+  viewpoint: 0.7
+  novelty: 1.6
+  access_fit: 0.6
+  camping: 0.5
+risk_weight: 0.8
+restriction_weight: 0.7
+gates:
+  remoteness: 0.30
+  novelty: 0.35

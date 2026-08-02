@@ -1,0 +1,46 @@
+site_name: Adventure AI
+site_description: Local-first exploration intelligence — missions, not itineraries
+repo_url: https://github.com/OmarFarooq908/TerraQuest
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue grey
+      accent: teal
+  features:
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Development: development.md
+  - Pack builder: pack-builder.md
+  - MissionIntent: mission-intent.md
+  - Generators: generators.md
+  - Evaluation: evaluation.md
+  - CLI: cli.md
+  - Known limits: known-limits.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - packages/core/src
+            - packages/gis/src
+            - packages/scoring/src
+            - packages/inference/src
+            - packages/packbuilder/src
+            - apps/cli/src
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true

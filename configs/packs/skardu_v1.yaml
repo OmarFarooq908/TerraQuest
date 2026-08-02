@@ -1,0 +1,34 @@
+pack_id: skardu_v1
+name: Skardu Corridor (OSM + Copernicus DEM)
+bbox: [75.35, 35.20, 75.75, 35.50]
+crs: EPSG:4326
+feature_schema_version: "0.3.0"
+synthetic: false
+output_dir: data/packs/skardu_v1
+notes: >
+  Production Region Pack for the Skardu area. Candidates come from named
+  deterministic generators over OpenStreetMap (ODbL) and Copernicus GLO-30 DEM.
+  Not a tourist ranking — access/isolation/terrain from open geospatial evidence.
+osm:
+  method: geofabrik
+  geofabrik_url: https://download.geofabrik.de/asia/pakistan-latest.osm.pbf
+  cache_dir: data/cache
+  cache_pbf: pakistan-latest.osm.pbf
+  overpass_url: https://overpass-api.de/api/interpreter
+  timeout_s: 180
+dem:
+  method: copernicus_glo30_aws
+  resolution_m: 30
+discovery:
+  min_spacing_km: 0.6
+  grid_res_deg: 0.02
+  generators:
+    track_terminus: { quota: 25, min_spacing_km: 0.8 }
+    road_spur: { quota: 20, min_spacing_km: 0.8 }
+    unnamed_waterbody: { quota: 20 }
+    named_waterbody: { quota: 15 }
+    isolation_maximum: { quota: 20, min_spacing_km: 1.2 }
+    dem_local_max: { quota: 15, min_spacing_km: 1.0 }
+    terrain_relief_hotspot: { quota: 15, min_spacing_km: 1.0 }
+    osm_peak: { quota: 15 }
+    osm_viewpoint: { quota: 10 }

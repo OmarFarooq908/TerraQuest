@@ -1,0 +1,12 @@
+mode_id: survival
+description: Prioritize water, camping, and safer access.
+weights:
+  remoteness: 0.8
+  terrain_drama: 0.5
+  water: 1.6
+  viewpoint: 0.3
+  novelty: 0.5
+  access_fit: 1.4
+  camping: 1.5
+risk_weight: 1.6
+restriction_weight: 1.0

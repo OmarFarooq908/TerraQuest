@@ -1,0 +1,14 @@
+[project]
+name = "adventure-inference"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "adventure-core",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+adventure-core = { workspace = true }

@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: Adventure AI
+version: 0.2.0
+date-released: "2026-08-02"
+license: Apache-2.0
+repository-code: https://github.com/OmarFarooq908/TerraQuest
+abstract: >
+  Local-first exploration intelligence that discovers places with deterministic
+  GIS (OpenStreetMap + Copernicus DEM) and uses local LLMs only to interpret
+  language into MissionIntent preference vectors.
+keywords:
+  - geospatial
+  - openstreetmap
+  - exploration
+  - local-first
+  - preference-vector
+authors:
+  - family-names: Farooq
+    given-names: Omar
+    alias: OmarFarooq908
+    email: mohamed.omar.farooq@gmail.com

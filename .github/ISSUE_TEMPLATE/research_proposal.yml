@@ -1,0 +1,25 @@
+name: Research proposal
+description: Experiment, evaluation methodology, or paper-oriented work
+title: "[research] "
+labels: ["research"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: Method / data
+      description: Fixtures, packs, metrics, reproducibility needs
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on project contracts
+      description: Does this change MissionIntent, catalog schema, or generators?
+    validations:
+      required: true

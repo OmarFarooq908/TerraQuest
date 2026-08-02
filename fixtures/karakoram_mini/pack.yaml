@@ -1,0 +1,9 @@
+pack_id: karakoram_mini
+name: Karakoram Mini (synthetic fixture pack)
+bbox: [74.5, 35.0, 75.5, 36.0]
+crs: EPSG:4326
+feature_schema_version: "0.3.0"
+synthetic: true
+notes: >
+  SYNTHETIC GeoJSON for offline golden-mission tests. Not survey-grade geography.
+  Build a real pack with: adventurectl pack build --config skardu_v1

@@ -1,0 +1,22 @@
+# Discovery generators
+
+Every catalog candidate must originate from a named generator.
+
+| Generator | Evidence idea |
+|-----------|----------------|
+| `track_terminus` | Endpoints of track/path ways far from settlements |
+| `road_spur` | Track with one end near drivable network, far end remote |
+| `named_waterbody` / `unnamed_waterbody` | OSM water centroids |
+| `isolation_maximum` | Grid local max of distance-to-settlement |
+| `dem_local_max` | DEM elevation local maxima |
+| `terrain_relief_hotspot` | High local relief windows |
+| `osm_peak` / `osm_viewpoint` | OSM landmark nodes |
+| `synthetic_fixture` | CI fixtures only |
+
+Each feature stores:
+
+- `provenance` — sources, method, osm_id / dem_tile
+- `evidence` — discovery_score and measured distances
+- `densify` — `cell_id` / `parent_id` reserved for Phase C
+
+Quotas and `min_spacing_km` are applied per generator, then soft global merge.

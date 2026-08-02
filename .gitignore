@@ -1,0 +1,29 @@
+# Ignore all dotfiles and dot-directories unless explicitly allowlisted.
+.*
+!.gitignore
+!.github/
+!.github/**
+!.editorconfig
+!.pre-commit-config.yaml
+
+# Build / test / packaging artifacts (non-dot)
+__pycache__/
+*.py[cod]
+*$py.class
+htmlcov/
+coverage.xml
+dist/
+build/
+*.egg-info/
+
+# Local geospatial artifacts (large, regenerated)
+data/packs/
+data/cache/
+
+# OS / editor noise that is not always a leading-dot path
+*.swp
+*.swo
+*~
+
+# MkDocs build output
+site/

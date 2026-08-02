@@ -1,0 +1,12 @@
+mode_id: wildlife
+description: Habitat / ecosystem proxies (stub weights for vertical slice).
+weights:
+  remoteness: 1.1
+  terrain_drama: 0.7
+  water: 1.3
+  viewpoint: 0.4
+  novelty: 1.0
+  access_fit: 0.5
+  camping: 0.4
+risk_weight: 1.2
+restriction_weight: 0.4

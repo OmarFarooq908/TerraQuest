@@ -1,0 +1,35 @@
+name: Pack request
+description: Request a new Region Pack AOI or data sources
+title: "[pack] "
+labels: ["pack"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Proposed pack id
+      placeholder: e.g. hunza_v1
+    validations:
+      required: true
+  - type: textarea
+    id: bbox
+    attributes:
+      label: Bounding box
+      description: "west, south, east, north (EPSG:4326)"
+      placeholder: "74.0, 36.0, 75.0, 37.0"
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Preferred sources
+      description: OSM extract, DEM, future Sentinel, etc.
+      value: |
+        OSM (Geofabrik) + Copernicus GLO-30
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this AOI?
+    validations:
+      required: true

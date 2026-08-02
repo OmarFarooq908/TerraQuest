@@ -1,0 +1,42 @@
+name: Bug report
+description: Something broken in code, CLI, packs, or docs
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Confirm offline vs real-pack reproduction when possible.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Expected vs actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Commands, pack id (fixture vs skardu_v1), interpreter
+      placeholder: |
+        uv run adventurectl mission run --pack fixtures/karakoram_mini --interpreter rules -p "..."
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "macOS / Python 3.13 / uv / osmium 1.19 (if relevant)"
+    validations:
+      required: true
+  - type: dropdown
+    id: pack_kind
+    attributes:
+      label: Pack kind
+      options:
+        - Synthetic fixture
+        - Real OSM+DEM pack
+        - N/A
+    validations:
+      required: true
