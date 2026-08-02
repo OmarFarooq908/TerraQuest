@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Changed
 
+- CLI help/errors clarify fixture vs production packs and point to osmium install + `fixtures/karakoram_mini` when builds fail
 - Canonical candidate file is `catalog.geojson`; pack builder no longer writes deprecated `seeds.geojson`
 - `check_pack` / `validate_pack` fail on dual-path catalog+seeds (waive with `--allow-legacy-seeds`) and on `content_hash` mismatch when declared
 - Pack load no longer silently fills missing catalog fields (`strict=True` by default)
