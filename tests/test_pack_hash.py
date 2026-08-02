@@ -53,7 +53,7 @@ def test_fixture_pack_fingerprint_stable() -> None:
     assert h1 == h2
     assert len(h1) == 16
     # Pinned in evaluation/reports/karakoram_mini_baseline.md
-    assert h1 == "42a113a3b1c296f2"
+    assert h1 == "23405f3b9dafc17b"
 
 
 def test_default_layers_map_covers_required_keys() -> None:

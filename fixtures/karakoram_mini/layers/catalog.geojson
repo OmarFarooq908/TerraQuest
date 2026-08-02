@@ -44,7 +44,10 @@
           "dist_settlement_km": 12.0,
           "evidence_ledger": "1",
           "water_kind": "lake",
-          "named": true
+          "named": true,
+          "ontology_ids": [
+            "water.lake"
+          ]
         },
         "densify": {
           "cell_id": "c_35.72_75.18",
@@ -301,7 +304,10 @@
           "dist_settlement_km": 6.0,
           "evidence_ledger": "1",
           "water_kind": "river",
-          "named": true
+          "named": true,
+          "ontology_ids": [
+            "water.river"
+          ]
         },
         "densify": {
           "cell_id": "c_35.61_74.90",
@@ -354,7 +360,10 @@
           "dist_settlement_km": 8.5,
           "evidence_ledger": "1",
           "water_kind": "river",
-          "named": true
+          "named": true,
+          "ontology_ids": [
+            "water.river"
+          ]
         },
         "densify": {
           "cell_id": "c_35.88_74.55",
@@ -460,7 +469,10 @@
           "dist_settlement_km": 10.0,
           "evidence_ledger": "1",
           "water_kind": "lake",
-          "named": false
+          "named": false,
+          "ontology_ids": [
+            "water.lake"
+          ]
         },
         "densify": {
           "cell_id": "c_35.48_74.86",

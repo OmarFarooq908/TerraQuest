@@ -19,6 +19,7 @@ nav:
   - Development: development.md
   - Pack builder: pack-builder.md
   - MissionIntent: mission-intent.md
+  - Ontology: ontology.md
   - Generators: generators.md
   - GIS features: gis-features.md
   - Evaluation: evaluation.md

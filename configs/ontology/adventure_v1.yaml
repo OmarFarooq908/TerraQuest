@@ -1,0 +1,272 @@
+# Formal adventure ontology v1 — see RFC-0008.
+# Canonical ids: family.concept. Preference keys ⊆ PREFERENCE_DIMENSIONS.
+# Legacy short tokens remain as aliases (or dedicated concepts when weights differed).
+ontology_version: "1.0.0"
+id_scheme: family.concept
+
+concepts:
+  # --- water ---
+  water.body:
+    label: Water
+    family: water
+    aliases: [water]
+    preferences:
+      water: 0.9
+      beauty: 0.2
+
+  water.lake:
+    label: Lake
+    family: water
+    aliases: [lake, lakes]
+    preferences:
+      water: 0.9
+      beauty: 0.35
+      photography: 0.2
+
+  water.river:
+    label: River
+    family: water
+    aliases: [river, rivers]
+    preferences:
+      water: 0.95
+      beauty: 0.25
+
+  water.waterfall:
+    label: Waterfall
+    family: water
+    aliases: [waterfall, falls]
+    preferences:
+      water: 0.85
+      beauty: 0.5
+      photography: 0.4
+
+  water.tarn:
+    label: Tarn
+    family: water
+    aliases: [tarn]
+    preferences:
+      water: 0.85
+      beauty: 0.4
+      solitude: 0.25
+
+  water.glacier:
+    label: Glacier
+    family: water
+    aliases: [glacier]
+    preferences:
+      water: 0.5
+      geology: 0.45
+      beauty: 0.4
+      danger: 0.25
+
+  # --- terrain ---
+  terrain.valley:
+    label: Valley
+    family: terrain
+    aliases: [valley]
+    preferences:
+      beauty: 0.35
+      solitude: 0.3
+      hiking: 0.2
+
+  terrain.ridge:
+    label: Ridge
+    family: terrain
+    aliases: [ridge]
+    preferences:
+      geology: 0.4
+      beauty: 0.45
+      photography: 0.35
+      hiking: 0.25
+
+  terrain.peak:
+    label: Peak
+    family: terrain
+    aliases: [peak, summit]
+    preferences:
+      geology: 0.5
+      beauty: 0.4
+      photography: 0.35
+      hiking: 0.35
+
+  terrain.viewpoint:
+    label: Viewpoint
+    family: terrain
+    aliases: [viewpoint]
+    preferences:
+      photography: 0.9
+      beauty: 0.7
+      geology: 0.3
+
+  terrain.scenic:
+    label: Scenic
+    family: terrain
+    aliases: [scenic]
+    preferences:
+      beauty: 0.85
+      photography: 0.6
+
+  # --- vegetation ---
+  vegetation.forest:
+    label: Forest
+    family: vegetation
+    aliases: [forest]
+    preferences:
+      forest: 0.95
+      wildlife: 0.3
+      solitude: 0.2
+
+  # Legacy interpreter token "vegetation" kept weaker than forest (parity with pre-YAML map).
+  vegetation.cover:
+    label: Vegetation
+    family: vegetation
+    aliases: [vegetation]
+    preferences:
+      forest: 0.7
+
+  # --- access ---
+  access.easy:
+    label: Easy access
+    family: access
+    aliases: [easy_access]
+    preferences:
+      accessibility: 0.8
+      hiking: -0.2
+
+  access.safe_roads:
+    label: Safe roads
+    family: access
+    aliases: [safe_roads]
+    preferences:
+      danger: -0.85
+      accessibility: 0.55
+
+  # --- experience (eval + legacy interpreter tokens) ---
+  experience.discovery:
+    label: Discovery
+    family: experience
+    aliases: []
+    preferences:
+      novelty: 0.55
+      remoteness: 0.25
+
+  experience.surprise:
+    label: Surprise
+    family: experience
+    aliases: [surprise]
+    preferences:
+      novelty: 0.55
+      remoteness: 0.25
+
+  experience.magical:
+    label: Magical
+    family: experience
+    aliases: [magical]
+    preferences:
+      novelty: 0.7
+      beauty: 0.85
+      human_activity: -0.5
+      photography: 0.4
+
+  experience.remote:
+    label: Remote
+    family: experience
+    aliases: [remote]
+    preferences:
+      remoteness: 0.9
+      novelty: 0.4
+      solitude: 0.5
+      human_activity: -0.4
+
+  experience.solitude:
+    label: Solitude
+    family: experience
+    aliases: [solitude]
+    preferences:
+      solitude: 0.9
+      human_activity: -0.7
+      novelty: 0.3
+
+  experience.quiet:
+    label: Quiet
+    family: experience
+    aliases: [quiet]
+    preferences:
+      solitude: 0.8
+      human_activity: -0.6
+
+  experience.photography:
+    label: Photography
+    family: experience
+    aliases: []
+    preferences:
+      photography: 0.85
+      beauty: 0.5
+
+  experience.crowds:
+    label: Crowds
+    family: experience
+    aliases: [crowds]
+    preferences:
+      human_activity: 0.9
+      solitude: -0.7
+
+  experience.untouched:
+    label: Untouched
+    family: experience
+    aliases: [untouched]
+    preferences:
+      novelty: 0.95
+      human_activity: -0.85
+      remoteness: 0.7
+      beauty: 0.5
+
+  experience.camping:
+    label: Camping
+    family: experience
+    aliases: [camping]
+    preferences:
+      camping: 0.9
+      accessibility: 0.2
+
+  experience.hiking:
+    label: Hiking
+    family: experience
+    aliases: [hiking]
+    preferences:
+      hiking: 0.9
+      remoteness: 0.3
+
+  experience.history:
+    label: History
+    family: experience
+    aliases: [history]
+    preferences:
+      history: 0.9
+      novelty: 0.2
+
+  experience.wildlife:
+    label: Wildlife
+    family: experience
+    aliases: [wildlife]
+    preferences:
+      wildlife: 0.9
+      forest: 0.4
+      solitude: 0.3
+
+  experience.geology:
+    label: Geology
+    family: experience
+    aliases: [geology]
+    preferences:
+      geology: 0.9
+      beauty: 0.3
+
+  # --- risk ---
+  risk.danger:
+    label: Danger / challenge
+    family: risk
+    aliases: [danger]
+    preferences:
+      danger: 0.8
+      accessibility: -0.3

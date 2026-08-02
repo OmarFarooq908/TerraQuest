@@ -165,6 +165,44 @@ def test_named_false_is_allowed_for_unnamed_water() -> None:
     assert errs == []
 
 
+def test_ontology_ids_must_be_canonical_when_present() -> None:
+    base = {
+        "discovery_score": 0.5,
+        "dist_settlement_km": 2.0,
+        "water_kind": "lake",
+        "named": True,
+    }
+    prov = {"sources": ["osm"], "method": "water_centroid", "layer": "water"}
+    ok = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance=prov,
+        evidence={**base, "ontology_ids": ["water.lake"]},
+        feature_id="w_ok",
+    )
+    assert ok == []
+    alias = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance=prov,
+        evidence={**base, "ontology_ids": ["lake"]},
+        feature_id="w_alias",
+    )
+    assert any("canonical" in e for e in alias)
+    bad_type = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance=prov,
+        evidence={**base, "ontology_ids": "water.lake"},
+        feature_id="w_type",
+    )
+    assert any("must be a list" in e for e in bad_type)
+    unknown = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance=prov,
+        evidence={**base, "ontology_ids": ["water.not_a_thing"]},
+        feature_id="w_unk",
+    )
+    assert any("unknown ontology id" in e for e in unknown)
+
+
 def test_synthetic_fixture_requires_fixture_even_without_synthetic_source() -> None:
     errs = validate_evidence_ledger(
         generator="synthetic_fixture",

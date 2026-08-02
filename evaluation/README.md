@@ -42,4 +42,4 @@ ranking. Fixture baseline report: `reports/karakoram_mini_baseline.md` (pinned v
 1. Read RFC-0002 licensing rules (no ToS-violating scrapes; no PII).
 2. Add `*.json` arrays under the region directory.
 3. Set `synthetic: false` and a real `license` per record.
-4. Prefer `ontology_ids` once the ontology RFC lands; `tags` are transitional.
+4. Prefer `ontology_ids` (canonical `family.concept` ids; see [RFC-0008](../RFC/0008-formal-ontology.md) and [docs/ontology.md](../docs/ontology.md)); `tags` are transitional.
