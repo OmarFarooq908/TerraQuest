@@ -31,13 +31,9 @@ def _validate_lon_lat(coords: Any, *, index: int) -> tuple[float, float]:
             f"sentinel indices features[{index}] coordinates must be numeric"
         ) from exc
     if not (math.isfinite(lon) and math.isfinite(lat)):
-        raise Sentinel2BuildError(
-            f"sentinel indices features[{index}] coordinates must be finite"
-        )
+        raise Sentinel2BuildError(f"sentinel indices features[{index}] coordinates must be finite")
     if not (-180.0 <= lon <= 180.0 and -90.0 <= lat <= 90.0):
-        raise Sentinel2BuildError(
-            f"sentinel indices features[{index}] lon/lat out of WGS84 range"
-        )
+        raise Sentinel2BuildError(f"sentinel indices features[{index}] lon/lat out of WGS84 range")
     return lon, lat
 
 
@@ -145,9 +141,7 @@ def maybe_attach_sentinel_indices(
             cfg.get("license")
             or "Copernicus Sentinel data — https://sentinel.esa.int/documents/247904/690755/Sentinel_Data_Legal_Notice"
         ),
-        attribution=str(
-            cfg.get("attribution") or "Contains modified Copernicus Sentinel data"
-        ),
+        attribution=str(cfg.get("attribution") or "Contains modified Copernicus Sentinel data"),
         url=cfg.get("stac_api") or cfg.get("url"),
         content_hash=None,
         extra={

@@ -28,7 +28,10 @@ def test_fixture_loads_sentinel_indices():
     by_id = {c.id: c for c in cands}
     assert by_id["seed_turquoise_lake"].features.ndwi == pytest.approx(0.55)
     assert by_id["seed_pine_river"].features.ndvi == pytest.approx(0.72)
-    assert by_id["seed_turquoise_lake"].evidence["layer_flags"]["sentinel_indices_layer_empty"] is False
+    assert (
+        by_id["seed_turquoise_lake"].evidence["layer_flags"]["sentinel_indices_layer_empty"]
+        is False
+    )
     assert by_id["seed_silent_valley"].features.ndvi is None  # not in synthetic layer
     assert by_id["seed_silent_valley"].evidence["sentinel"] is None
 
@@ -53,9 +56,7 @@ def test_lookup_prefers_catalog_id_over_nearby_point():
         _pt("wrong", 75.0, 35.5, catalog_id="other", ndvi=0.1, ndwi=0.1),
         _pt("right", 75.1, 35.6, catalog_id="seed_a", ndvi=0.8, ndwi=0.2),
     ]
-    ndvi, ndwi, meta = lookup_sentinel_indices(
-        "seed_a", Point(lon=75.0, lat=35.5), indices
-    )
+    ndvi, ndwi, meta = lookup_sentinel_indices("seed_a", Point(lon=75.0, lat=35.5), indices)
     assert ndvi == pytest.approx(0.8)
     assert ndwi == pytest.approx(0.2)
     assert meta["match_via"] == "catalog_id"
@@ -73,12 +74,8 @@ def test_lookup_does_not_steal_neighbor_catalog_id():
     indices = [
         _pt("b_idx", 75.001, 35.5, catalog_id="seed_b", ndvi=0.9, ndwi=0.1),
     ]
-    ndvi_a, _, meta_a = lookup_sentinel_indices(
-        "seed_a", Point(lon=75.0, lat=35.5), indices
-    )
-    ndvi_b, _, meta_b = lookup_sentinel_indices(
-        "seed_b", Point(lon=75.001, lat=35.5), indices
-    )
+    ndvi_a, _, meta_a = lookup_sentinel_indices("seed_a", Point(lon=75.0, lat=35.5), indices)
+    ndvi_b, _, meta_b = lookup_sentinel_indices("seed_b", Point(lon=75.001, lat=35.5), indices)
     assert ndvi_a is None and meta_a == {}
     assert ndvi_b == pytest.approx(0.9)
     assert meta_b["match_via"] == "catalog_id"

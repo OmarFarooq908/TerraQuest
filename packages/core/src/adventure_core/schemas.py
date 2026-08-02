@@ -51,6 +51,7 @@ class CandidateFeatures(BaseModel):
     ndvi: float | None = Field(default=None, ge=-1.0, le=1.0)
     ndwi: float | None = Field(default=None, ge=-1.0, le=1.0)
 
+
 class Candidate(BaseModel):
     id: str
     name: str

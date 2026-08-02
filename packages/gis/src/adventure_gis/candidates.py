@@ -299,9 +299,7 @@ def generate_candidates(
             "water_layer_empty": dist_water is None,
             "sentinel_indices_layer_empty": not pack.sentinel_indices,
         }
-        ndvi, ndwi, sentinel_meta = lookup_sentinel_indices(
-            seed.id, origin, pack.sentinel_indices
-        )
+        ndvi, ndwi, sentinel_meta = lookup_sentinel_indices(seed.id, origin, pack.sentinel_indices)
         if dist_settlement is None:
             remoteness = _UNKNOWN_REMOTENESS
         else:

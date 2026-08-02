@@ -250,7 +250,11 @@ products under ODbL share-alike obligations.
                     "enabled": bool((config.sentinel2 or {}).get("enabled")),
                     "wrote_layer": sentinel_wrote,
                     "feature_count": (
-                        len(json.loads((layers_dir / "sentinel_indices.geojson").read_text())["features"])
+                        len(
+                            json.loads((layers_dir / "sentinel_indices.geojson").read_text())[
+                                "features"
+                            ]
+                        )
                         if sentinel_wrote
                         else 0
                     ),
