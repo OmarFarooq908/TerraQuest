@@ -30,8 +30,7 @@ and `seeds.geojson` fail `scripts/check_pack.py` unless `--allow-legacy-seeds`.
 Production builds list every shipped GeoJSON:
 
 `settlements`, `water`, `road_nodes`, `road_lines`, `peaks`, `viewpoints`,
-`catalog`, `elevation`. Optional: `sentinel_indices` (RFC-0006) when the layer is
-written.
+`catalog`, `elevation`. Optional: `sentinel_indices` (RFC-0006) and/or `vlm_features` (RFC-0007) when those layers are written.
 
 ## Sentinel-2 indices (RFC-0006 / issue #21)
 
@@ -68,6 +67,32 @@ empty collections, duplicate `catalog_id`s, and out-of-range coordinates.
 
 Synthetic fixture smoke: `fixtures/karakoram_mini/layers/sentinel_indices.geojson`
 (not real EO).
+
+## Pack-time VLM features (RFC-0007 / issue #22)
+
+Opt-in structured scene / landcover labels for catalog points. **Default off.**
+The VLM must **never** rank missions or invent coordinates — labels land in
+`evidence["vlm"]` only; preference weights unchanged until eval lift.
+
+```yaml
+# configs/packs/skardu_v1.yaml
+vlm:
+  enabled: false
+  model: llava
+  prompt_id: pack_vlm_v1
+  features_geojson: data/cache/inference/vlm/skardu_v1_features.geojson  # when enabling
+```
+
+1. Build OSM+DEM pack as today.
+2. Produce a Point FeatureCollection (`catalog_id`, `concept_ids`, `attributes`,
+   `model`, `vlm_version`, `prompt_id`) — live Ollama vision is a follow-up.
+3. Set `vlm.enabled: true` + `features_geojson`; rebuild.
+4. Confirm `layers:` lists `vlm_features` and NOTICE mentions pack-time VLM labels.
+5. Compare discovery eval vs GIS-only baseline (RFC-0005 metrics); publish delta
+   even if ≤ 0 before enabling any preference blend.
+
+Rebuilds with `enabled: false` remove leftover `vlm_features.geojson`.
+Synthetic fixture smoke: `fixtures/karakoram_mini/layers/vlm_features.geojson`.
 
 ## Hashes (RFC-0003)
 

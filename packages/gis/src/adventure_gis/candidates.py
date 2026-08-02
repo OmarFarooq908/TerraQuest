@@ -10,6 +10,7 @@ from adventure_core.schemas import Candidate, CandidateFeatures
 
 from adventure_gis.pack_data import NamedPoint, PackData
 from adventure_gis.sentinel import lookup_sentinel_indices
+from adventure_gis.vlm_join import lookup_vlm_features
 
 # Remoteness when settlement layer is absent — neutral unknown, not "maximally remote".
 _UNKNOWN_REMOTENESS = 0.5
@@ -298,8 +299,10 @@ def generate_candidates(
             "roads_layer_empty": dist_road is None,
             "water_layer_empty": dist_water is None,
             "sentinel_indices_layer_empty": not pack.sentinel_indices,
+            "vlm_features_layer_empty": not pack.vlm_features,
         }
         ndvi, ndwi, sentinel_meta = lookup_sentinel_indices(seed.id, origin, pack.sentinel_indices)
+        vlm_evidence = lookup_vlm_features(seed.id, pack.vlm_features)
         if dist_settlement is None:
             remoteness = _UNKNOWN_REMOTENESS
         else:
@@ -420,6 +423,7 @@ def generate_candidates(
                     "ndvi": ndvi,
                     "ndwi": ndwi,
                     "sentinel": sentinel_meta or None,
+                    "vlm": vlm_evidence,
                     "osm_id": (provenance.get("osm_id") if isinstance(provenance, dict) else None)
                     or seed.properties.get("osm_id"),
                     "provenance": provenance,

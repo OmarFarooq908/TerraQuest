@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.55, 35.88] },
+      "properties": {
+        "catalog_id": "seed_pine_river",
+        "vlm_version": "vlm-features-v1",
+        "model": "synthetic-fixture",
+        "concept_ids": ["forest", "river", "quiet"],
+        "attributes": { "landcover": "forest", "water_present": true },
+        "confidence": 0.7,
+        "prompt_id": "pack_vlm_v1",
+        "image_ref": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [75.18, 35.72] },
+      "properties": {
+        "catalog_id": "seed_turquoise_lake",
+        "vlm_version": "vlm-features-v1",
+        "model": "synthetic-fixture",
+        "concept_ids": ["lake", "scenic"],
+        "attributes": { "landcover": "water", "water_present": true },
+        "confidence": 0.65,
+        "prompt_id": "pack_vlm_v1",
+        "image_ref": null
+      }
+    }
+  ]
+}

@@ -41,3 +41,10 @@ sentinel2:
   # indices_geojson: data/cache/sentinel2/skardu_v1_indices.geojson
   provider: Copernicus Sentinel-2 L2A via Earth Search (Element84)
 
+vlm:
+  enabled: false
+  model: llava
+  prompt_id: pack_vlm_v1
+  # Pilot: precompute Point FC then set enabled: true + features_geojson
+  # (see RFC-0007 / docs/pack-builder.md). Example:
+  # features_geojson: data/cache/inference/vlm/skardu_v1_features.geojson

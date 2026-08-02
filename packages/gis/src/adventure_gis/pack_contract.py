@@ -15,7 +15,7 @@ REQUIRED_PACK_LAYER_KEYS: tuple[str, ...] = (
 )
 
 # Optional layers: allowed in the map when present on disk; never required.
-OPTIONAL_PACK_LAYER_KEYS: tuple[str, ...] = ("sentinel_indices",)
+OPTIONAL_PACK_LAYER_KEYS: tuple[str, ...] = ("sentinel_indices", "vlm_features")
 
 
 def default_layers_map() -> dict[str, str]:

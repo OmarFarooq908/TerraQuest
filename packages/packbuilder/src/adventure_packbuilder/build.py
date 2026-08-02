@@ -19,6 +19,7 @@ from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojso
 from adventure_packbuilder.geofabrik import fetch_geofabrik_layers
 from adventure_packbuilder.osm import fetch_overpass, overpass_to_layers
 from adventure_packbuilder.sentinel2 import maybe_attach_sentinel_indices
+from adventure_packbuilder.vlm import maybe_attach_vlm_features
 
 
 def load_build_config(pack_id_or_path: str) -> PackManifest:
@@ -164,6 +165,9 @@ def build_pack(
     sentinel_source, sentinel_wrote = maybe_attach_sentinel_indices(config, layers_dir)
     if sentinel_source is not None:
         sources.append(sentinel_source)
+    vlm_source, vlm_wrote = maybe_attach_vlm_features(config, layers_dir)
+    if vlm_source is not None:
+        sources.append(vlm_source)
 
     # Production OSM path must retain road geometries for access generators
     road_lines = layers.get("road_lines") or {"features": []}
@@ -201,6 +205,8 @@ def build_pack(
     layers_map = default_layers_map()
     if sentinel_wrote:
         layers_map["sentinel_indices"] = "layers/sentinel_indices.geojson"
+    if vlm_wrote:
+        layers_map["vlm_features"] = "layers/vlm_features.geojson"
     pack_yaml = {
         **manifest.model_dump(
             exclude={
@@ -208,6 +214,7 @@ def build_pack(
                 "dem",
                 "discovery",
                 "sentinel2",
+                "vlm",
                 "candidate_limits",
                 "output_dir",
                 "fixtures_dir",
@@ -233,6 +240,11 @@ https://spacedata.copernicus.eu/
 Contains modified Copernicus Sentinel-2 data (indices sampled at catalog points).
 https://sentinel.esa.int/documents/247904/690755/Sentinel_Data_Legal_Notice
 """
+    if vlm_wrote:
+        notice += """
+Pack-time VLM labels (structured features only — not used as a ranker).
+See RFC-0007. Model weights remain under their upstream licenses (e.g. Ollama).
+"""
     notice += """
 Candidates are produced by named deterministic generators (track_terminus,
 road_spur, isolation_maximum, dem_local_max, …). Redistribute OSM-derived
@@ -256,6 +268,19 @@ products under ODbL share-alike obligations.
                             ]
                         )
                         if sentinel_wrote
+                        else 0
+                    ),
+                },
+                "vlm": {
+                    "enabled": bool((config.vlm or {}).get("enabled")),
+                    "wrote_layer": vlm_wrote,
+                    "feature_count": (
+                        len(
+                            json.loads((layers_dir / "vlm_features.geojson").read_text())[
+                                "features"
+                            ]
+                        )
+                        if vlm_wrote
                         else 0
                     ),
                 },
