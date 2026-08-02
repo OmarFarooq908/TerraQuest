@@ -2,9 +2,9 @@
 
 Local-first exploration OS: **deterministic GIS discovers**, LLMs only interpret language into `MissionIntent`.
 
+- [Pack builder](pack-builder.md)
 - [Architecture](architecture.md)
 - [Development](development.md)
-- [Pack builder](pack-builder.md)
 - [MissionIntent](mission-intent.md)
 - [Generators](generators.md)
 - [GIS features](gis-features.md)

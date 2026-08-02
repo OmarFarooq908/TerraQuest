@@ -32,7 +32,7 @@ Project model (three tracks + P0–P4): [#10](https://github.com/OmarFarooq908/T
 - Stronger content hashes across all layers
 - Intent / schema regression suites (P0)
 - Evidence ledger completeness
-- Region Pack architecture RFC
+- [x] Region Pack architecture RFC
 
 ## Then — Public beta (0.4)
 

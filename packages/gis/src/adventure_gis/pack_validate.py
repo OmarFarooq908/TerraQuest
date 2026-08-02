@@ -1,4 +1,4 @@
-"""Strict Region Pack layout + catalog validation (issue #13)."""
+"""Strict Region Pack layout + catalog validation (issue #13 / RFC-0003)."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from adventure_core.catalog import CATALOG_SCHEMA_VERSION
 from adventure_core.catalog_validate import CatalogValidationError, validate_catalog_geojson
 from adventure_core.config import load_pack_manifest
 
+from adventure_gis.pack_contract import REQUIRED_PACK_LAYER_KEYS
 from adventure_gis.pack_data import load_pack_data
 from adventure_gis.pack_hash import pack_content_hash
 
@@ -61,6 +62,12 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
             f"expected {CATALOG_SCHEMA_VERSION}"
         )
 
+    if not manifest.synthetic:
+        notice = pack_dir / "NOTICE"
+        if not notice.is_file():
+            errors.append("missing NOTICE (required for non-synthetic packs; see RFC-0003)")
+        errors.extend(_validate_layers_map(manifest.layers, layers, allow_legacy_seeds))
+
     if manifest.content_hash:
         stats_path = pack_dir / "build_stats.json"
         if not stats_path.exists():
@@ -69,11 +76,41 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
             )
         else:
             blob = json.loads(stats_path.read_text(encoding="utf-8"))
-            stats = blob.get("discovery") or {}
-            actual = pack_content_hash(layers, stats)
+            actual = pack_content_hash(layers, blob)
             if actual != manifest.content_hash:
                 errors.append(
                     f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
                 )
 
+    return errors
+
+
+def _validate_layers_map(
+    layers_map: dict[str, str],
+    layers_dir: Path,
+    allow_legacy_seeds: bool,
+) -> list[str]:
+    """Ensure production manifests list required keys and match on-disk GeoJSON."""
+    errors: list[str] = []
+    if not layers_map:
+        errors.append(
+            "manifest layers map missing or empty; rebuild with current packbuilder (RFC-0003)"
+        )
+        return errors
+
+    missing_keys = [k for k in REQUIRED_PACK_LAYER_KEYS if k not in layers_map]
+    if missing_keys:
+        errors.append("manifest layers map missing required keys: " + ", ".join(missing_keys))
+
+    mapped_names = {Path(p).name for p in layers_map.values()}
+    for path in sorted(layers_dir.glob("*.geojson")):
+        if path.name == "seeds.geojson" and allow_legacy_seeds:
+            continue
+        if path.name == "seeds.geojson":
+            # Dual-path already reported separately; still a map hygiene issue.
+            continue
+        if path.name not in mapped_names:
+            errors.append(
+                f"layers/{path.name} present on disk but not listed in manifest layers map"
+            )
     return errors

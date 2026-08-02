@@ -57,8 +57,11 @@ uv run pytest
 1. Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
 2. Run `uv run pre-commit run --all-files` and `uv run pytest`.
 3. Do not commit `data/packs/`, `data/cache/`, `.env`, or large binaries.
+   Built Region Packs are local artifacts only ([RFC-0003](RFC/0003-region-pack-architecture.md)).
+   PRs that add them will be rejected.
 4. If you touch OSM/DEM handling, update attribution notes / pack `NOTICE` template as needed (ODbL / Copernicus).
 5. New discovery generators need unit tests and docs under `docs/generators.md`.
+6. Pack layout / hash / schema versioning changes need an [RFC](RFC/README.md) while we are in `0.x`.
 
 ## Coverage gates (P0)
 
