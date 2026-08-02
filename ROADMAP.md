@@ -19,6 +19,10 @@ Milestone: **North Star — discovery quality** (see issues). Start here:
 
 Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/TerraQuest/issues/8).
 
+### Research hygiene
+
+Every research issue must be **time-boxed**, produce an **RFC or experiment note**, and conclude with **build / defer / reject**. Do not open speculative implementation issues without that evidence. Feasibility work belongs in the existing `track:research` / `needs-rfc` path — not as parallel milestone dumps or permanent “look into X someday” tickets.
+
 ## Near term — OSS foundation (0.2)
 
 - [x] Deterministic discovery catalog (named generators)
@@ -60,3 +64,4 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 - Calling external closed model APIs (OpenAI/Anthropic/Google) as defaults
 - Committing built `data/packs/` or raw PBF/DEM tiles
 - Filing missing future capabilities (routing, weather, map UI) as `bug`
+- Speculative implementation issues without a supporting RFC / experiment (**build / defer / reject**)
