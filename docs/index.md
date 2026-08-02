@@ -12,7 +12,8 @@ Local-first exploration intelligence: **deterministic GIS discovers** places; LL
 | [Architecture](architecture.md) | Non-negotiables and package map |
 | [Known limits](known-limits.md) | What not to “fix” with drive-by PRs |
 
-Offline smoke (from the repo root):
+Offline smoke (from the repo root — note `--pack` must be the fixture; the CLI
+default is `skardu_v1`):
 
 ```bash
 uv sync --group dev

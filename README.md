@@ -24,7 +24,7 @@ uv run adventurectl mission run \
   -p "Three days, Suzuki Swift, rivers and forests, hate crowds."
 ```
 
-You should see a red **SYNTHETIC PACK** banner and a short ranked list. The fixture pack is for CI and local smoke tests only — not real geography.
+You should see a red **SYNTHETIC PACK** banner and a short ranked list. The fixture pack is for CI and local smoke tests only — not real geography. Always pass `--pack fixtures/karakoram_mini` offline; the CLI default pack id is `skardu_v1` (a built production pack).
 
 More detail: [CLI](docs/cli.md) · [Development](docs/development.md) · [Known limits](docs/known-limits.md)
 

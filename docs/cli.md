@@ -12,7 +12,9 @@ uv run adventurectl pack query --pack fixtures/karakoram_mini \
 uv run adventurectl mission run --pack fixtures/karakoram_mini --interpreter rules -p "..."
 ```
 
-Offline smoke uses **`fixtures/karakoram_mini`**. Production packs use an id like `skardu_v1` after `pack build` (see [pack builder](pack-builder.md)).
+Offline smoke uses **`fixtures/karakoram_mini`** (pass it explicitly). The CLI
+default `--pack` is **`skardu_v1`**, which only works after a local
+`pack build` (see [pack builder](pack-builder.md)).
 
 ## Pack query (RFC-0004)
 
@@ -27,7 +29,7 @@ GeoJSON remains the source of truth; `query.duckdb` is gitignored.
 
 | Flag | Meaning |
 |------|---------|
-| `--pack` | Pack id (`skardu_v1`) or `fixtures/...` path |
+| `--pack` | Pack id or `fixtures/...` path (default **`skardu_v1`** — use `fixtures/karakoram_mini` offline) |
 | `--mode` | Scoring mode from `configs/modes/` (default `fearless_far`) |
 | `-p` / `--prompt` | Natural-language mission prompt |
 | `--interpreter` | `auto` \| `rules` \| `ollama` (unknown values exit 2) |
