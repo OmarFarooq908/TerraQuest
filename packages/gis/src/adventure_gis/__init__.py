@@ -22,7 +22,7 @@ from adventure_gis.pack_query import (
     materialize_pack_db,
     query_db_path,
 )
-from adventure_gis.pack_validate import validate_pack
+from adventure_gis.pack_validate import validate_pack, verify_pack
 from adventure_gis.sentinel import lookup_sentinel_indices
 from adventure_gis.vlm_join import lookup_vlm_features
 
@@ -47,4 +47,5 @@ __all__ = [
     "pack_content_hash",
     "query_db_path",
     "validate_pack",
+    "verify_pack",
 ]

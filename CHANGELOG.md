@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Offline pack verify CLI (#70 / #28): `adventurectl pack verify` wraps catalog/layout/`content_hash` checks and prints a layer fingerprint; `--json` (pure report, no banner) / `--allow-legacy-seeds`; `hash_match` only when `build_stats.json` is readable; stale `query.duckdb` is a warning; `scripts/check_pack.py` shares the same report helper
 - Markdown mission export (#68 / #28): `adventurectl mission run --export-md` writes a readable report (intent, ranks, claims, explanations) for field notes / eval logs; composable with GPX
 - Schema regression pins (#66): `schemas/mission_intent.schema.json` + `schemas/catalog_feature.schema.json` kept aligned with Pydantic via `tests/test_schema_regression.py`
 - Geofabrik dated extract pins (#60): `allow_latest: false` requires checksum; optional `geofabrik_md5` / `geofabrik_sha256` verify (including cache reuse); `skardu_v1` pinned to `pakistan-260801`

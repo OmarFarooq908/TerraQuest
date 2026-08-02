@@ -160,6 +160,9 @@ Pinned catalog Feature property schema:
 (kept in sync with `CatalogCandidate` / `Provenance` via `tests/test_schema_regression.py`).
 
 ```bash
+uv run adventurectl pack verify --pack fixtures/karakoram_mini
+uv run adventurectl pack verify --pack data/packs/skardu_v1
+# equivalent script entry:
 uv run python scripts/check_pack.py fixtures/karakoram_mini
 uv run python scripts/check_pack.py data/packs/skardu_v1
 ```

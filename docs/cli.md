@@ -6,6 +6,7 @@ Install the workspace first (`uv sync --group dev`), then:
 uv run adventurectl --help
 uv run adventurectl pack build --config skardu_v1
 uv run adventurectl pack info skardu_v1
+uv run adventurectl pack verify --pack fixtures/karakoram_mini
 uv run adventurectl pack materialize --pack fixtures/karakoram_mini
 uv run adventurectl pack query --pack fixtures/karakoram_mini \
   --sql "SELECT generator, count(*) AS n FROM catalog GROUP BY 1"
@@ -16,14 +17,31 @@ Offline smoke uses **`fixtures/karakoram_mini`** (pass it explicitly). The CLI
 default `--pack` is **`skardu_v1`**, which only works after a local
 `pack build` (see [pack builder](pack-builder.md)).
 
-## Pack query (RFC-0004)
+## Pack commands
 
 | Command | Meaning |
 |---------|---------|
+| `pack build` | Build a production pack (needs osmium + network) |
+| `pack info` | Manifest + honesty banner |
+| `pack verify` | Offline layout/catalog/`content_hash` checks (+ fingerprint) |
 | `pack materialize` | Build derived `query.duckdb` from GeoJSON layers |
 | `pack query --sql …` | Read-only SQL (auto-materializes if stale) |
 
-GeoJSON remains the source of truth; `query.duckdb` is gitignored.
+### Pack verify (offline)
+
+```bash
+uv run adventurectl pack verify --pack fixtures/karakoram_mini
+uv run adventurectl pack verify --pack data/packs/skardu_v1 --json
+```
+
+Same honesty bar as `scripts/check_pack.py` (catalog contract, dual-path seeds,
+NOTICE/layers for real packs, declared `content_hash` when present). Also prints
+the computed layer fingerprint for pinning. If `query.duckdb` exists, reports
+whether it is stale vs that fingerprint (warning only — does not fail verify).
+
+`--json` prints only the report object (no honesty banner), including `errors`,
+`warnings`, `fingerprint`, and `hash_match` (`null` when a declared hash cannot
+be checked because `build_stats.json` is missing/unreadable).
 
 ## Mission options
 

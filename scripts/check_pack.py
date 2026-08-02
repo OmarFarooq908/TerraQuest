@@ -7,10 +7,7 @@ import argparse
 import json
 import sys
 
-from adventure_core.catalog import CATALOG_SCHEMA_VERSION
-from adventure_core.config import load_pack_manifest
-from adventure_gis import load_pack_data
-from adventure_gis.pack_validate import validate_pack
+from adventure_gis import verify_pack
 
 
 def main() -> int:
@@ -22,22 +19,22 @@ def main() -> int:
         help="Allow deprecated seeds.geojson alongside or instead of catalog.geojson",
     )
     args = parser.parse_args()
-    errors = validate_pack(args.pack, allow_legacy_seeds=args.allow_legacy_seeds)
-    if errors:
+    report = verify_pack(args.pack, allow_legacy_seeds=args.allow_legacy_seeds)
+    if not report["ok"]:
         print("FAIL", args.pack, file=sys.stderr)
-        for e in errors:
+        for e in report["errors"]:
             print(f"  - {e}", file=sys.stderr)
         return 1
-    manifest, pack_dir = load_pack_manifest(args.pack)
-    data = load_pack_data(pack_dir)
+    # Stable CI-facing success payload (subset of verify_pack report).
     print(
         json.dumps(
             {
                 "ok": True,
-                "pack_id": manifest.pack_id,
-                "catalog_count": len(data.catalog),
-                "schema": CATALOG_SCHEMA_VERSION,
-                "dir": str(pack_dir),
+                "pack_id": report["pack_id"],
+                "catalog_count": report["catalog_count"],
+                "schema": report["schema"],
+                "dir": report["dir"],
+                "fingerprint": report["fingerprint"],
             },
             indent=2,
         )

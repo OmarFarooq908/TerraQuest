@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
+from typing import Any
 
 from adventure_core.catalog import CATALOG_SCHEMA_VERSION
 from adventure_core.catalog_validate import CatalogValidationError, validate_catalog_geojson
@@ -75,14 +76,106 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
                 "content_hash set on manifest but build_stats.json is missing (cannot verify)"
             )
         else:
-            blob = json.loads(stats_path.read_text(encoding="utf-8"))
-            actual = pack_content_hash(layers, blob)
-            if actual != manifest.content_hash:
-                errors.append(
-                    f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
-                )
+            try:
+                blob = json.loads(stats_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                errors.append(f"build_stats.json is not valid JSON: {exc}")
+            else:
+                actual = pack_content_hash(layers, blob)
+                if actual != manifest.content_hash:
+                    errors.append(
+                        f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
+                    )
 
     return errors
+
+
+def verify_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> dict[str, Any]:
+    """Validate a pack and return a structured offline-verify report.
+
+    ``ok`` is True iff ``errors`` is empty. Always includes a computed
+    ``fingerprint`` when ``layers/`` exists (fixtures without manifest
+    ``content_hash`` still get a layer fingerprint for pinning).
+
+    ``hash_match`` is True/False only when a declared ``content_hash`` can be
+    checked against a readable ``build_stats.json`` (same bar as
+    ``validate_pack``). Missing or unreadable stats → ``hash_match`` is None
+    (never a false "match").
+    """
+    errors = list(validate_pack(pack_ref, allow_legacy_seeds=allow_legacy_seeds))
+    warnings: list[str] = []
+    manifest, pack_dir = load_pack_manifest(pack_ref)
+    layers = pack_dir / "layers"
+    stats_path = pack_dir / "build_stats.json"
+    stats: dict[str, Any] | None = None
+    stats_readable = False
+    if stats_path.is_file():
+        try:
+            stats = json.loads(stats_path.read_text(encoding="utf-8"))
+            stats_readable = True
+        except json.JSONDecodeError as exc:
+            msg = f"build_stats.json is not valid JSON: {exc}"
+            if msg not in errors:
+                # validate_pack only flags this when content_hash is declared.
+                warnings.append(msg)
+            stats = None
+
+    fingerprint: str | None = None
+    if layers.is_dir():
+        fingerprint = pack_content_hash(layers, stats)
+
+    catalog_count = 0
+    try:
+        data = load_pack_data(pack_dir, allow_legacy_seeds=True, strict=False)
+        catalog_count = len(data.catalog)
+    except CatalogValidationError:
+        catalog_count = 0
+
+    declared = manifest.content_hash
+    # Only claim match/mismatch when we hashed with the same stats input
+    # validate_pack uses (readable build_stats). Layers-only fingerprint must
+    # not imply the declared content_hash was verified.
+    hash_match: bool | None = None
+    if declared and fingerprint is not None and stats_readable:
+        hash_match = declared == fingerprint
+
+    query_db: dict[str, Any] | None = None
+    db_path = pack_dir / "query.duckdb"
+    if db_path.is_file() and fingerprint is not None:
+        try:
+            from adventure_gis.pack_query import read_pack_db_meta
+
+            meta = read_pack_db_meta(db_path)
+            db_hash = meta.get("content_hash")
+            stale = db_hash != fingerprint
+            query_db = {
+                "path": str(db_path),
+                "content_hash": db_hash,
+                "stale": stale,
+            }
+            if stale:
+                warnings.append(
+                    "query.duckdb content_hash is stale; run adventurectl pack materialize"
+                )
+        except Exception as exc:  # noqa: BLE001 — report, don't fail verify
+            query_db = {"path": str(db_path), "error": str(exc)}
+            warnings.append(f"query.duckdb unreadable: {exc}")
+
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "warnings": warnings,
+        "pack_id": manifest.pack_id,
+        "synthetic": bool(manifest.synthetic),
+        "dir": str(pack_dir),
+        "schema": CATALOG_SCHEMA_VERSION,
+        "feature_schema_version": manifest.feature_schema_version,
+        "catalog_count": catalog_count,
+        "content_hash": declared,
+        "fingerprint": fingerprint,
+        "hash_match": hash_match,
+        "query_db": query_db,
+    }
 
 
 def _validate_layers_map(

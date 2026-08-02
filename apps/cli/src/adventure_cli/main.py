@@ -130,6 +130,70 @@ def pack_info(
     console.print(manifest.model_dump_json(indent=2))
 
 
+@pack_app.command("verify")
+def pack_verify(
+    pack: str = typer.Option(
+        "fixtures/karakoram_mini",
+        "--pack",
+        help="Pack id or fixtures/... path to verify offline",
+    ),
+    allow_legacy_seeds: bool = typer.Option(
+        False,
+        "--allow-legacy-seeds",
+        help="Waive dual-path catalog+seeds rejection (legacy escape hatch)",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Print the verify report as JSON (including errors when failing)",
+    ),
+) -> None:
+    """Validate pack layout, catalog contract, and content_hash (offline).
+
+    Same honesty checks as ``scripts/check_pack.py``, plus a computed layer
+    fingerprint for pinning / comparing declared ``content_hash``.
+    """
+    from adventure_gis import verify_pack
+
+    # Keep --json stdout parseable (no honesty banner prefix).
+    if not json_out:
+        _print_pack_banner(pack)
+    report = verify_pack(pack, allow_legacy_seeds=allow_legacy_seeds)
+    if json_out:
+        console.print_json(data=report)
+        if not report["ok"]:
+            raise typer.Exit(code=1)
+        return
+
+    if not report["ok"]:
+        console.print(f"[bold red]FAIL[/bold red] {report['pack_id']} ({report['dir']})")
+        for err in report["errors"]:
+            console.print(f"  - {err}")
+        for warn in report.get("warnings") or []:
+            console.print(f"  [yellow]! {warn}[/yellow]")
+        raise typer.Exit(code=1)
+
+    console.print(f"[green]OK[/green] pack_id={report['pack_id']} synthetic={report['synthetic']}")
+    console.print(
+        f"[dim]catalog={report['catalog_count']} schema={report['schema']} "
+        f"fingerprint={report['fingerprint']}[/dim]"
+    )
+    if report.get("content_hash"):
+        match = report.get("hash_match")
+        if match is True:
+            status = "match"
+        elif match is False:
+            status = "mismatch"
+        else:
+            status = "unverified"
+        console.print(f"[dim]content_hash={report['content_hash']} ({status})[/dim]")
+    for warn in report.get("warnings") or []:
+        console.print(f"[yellow]! {warn}[/yellow]")
+    qdb = report.get("query_db")
+    if isinstance(qdb, dict) and qdb.get("stale") is False:
+        console.print(f"[dim]query.duckdb=in sync ({qdb.get('path')})[/dim]")
+
+
 @pack_app.command("materialize")
 def pack_materialize(
     pack: str = typer.Option(
