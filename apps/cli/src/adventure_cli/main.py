@@ -245,6 +245,19 @@ def mission_run(
     json_out: bool = typer.Option(
         False, "--json", help="Print MissionResult JSON instead of tables"
     ),
+    export_gpx: str | None = typer.Option(
+        None,
+        "--export-gpx",
+        help=(
+            "Write ranked missions as GPX 1.1 waypoints (optional haversine track). "
+            "For field eval / phone GPS — not a road router."
+        ),
+    ),
+    gpx_no_track: bool = typer.Option(
+        False,
+        "--gpx-no-track",
+        help="With --export-gpx, emit waypoints only (no connecting track)",
+    ),
 ) -> None:
     """Run a mission: interpret → GIS → preference-vector score.
 
@@ -272,6 +285,16 @@ def mission_run(
     except InferenceError as exc:
         console.print(f"[bold red]Inference error[/bold red]: {exc}")
         raise typer.Exit(code=2) from exc
+
+    if export_gpx:
+        from adventure_core.gpx import write_mission_gpx
+
+        try:
+            gpx_path = write_mission_gpx(export_gpx, result, include_track=not gpx_no_track)
+        except ValueError as exc:
+            console.print(f"[bold red]GPX export error[/bold red]: {exc}")
+            raise typer.Exit(code=2) from exc
+        console.print(f"[green]Wrote GPX[/green]: {gpx_path}")
 
     if json_out:
         console.print_json(result.model_dump_json(indent=2))
