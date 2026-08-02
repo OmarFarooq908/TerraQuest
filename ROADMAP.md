@@ -32,8 +32,8 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 
 - [x] Pinned Geofabrik dated extracts where practical (#60 — `skardu_v1` → `pakistan-260801`)
 - [x] Stronger content hashes across all layers (#62)
+- [x] Evidence ledger completeness (#19 v1, #64 v2 `osm_id`)
 - Intent / schema regression suites (P0)
-- Evidence ledger completeness
 - [x] Region Pack architecture RFC
 
 ## Then — Public beta (0.4)

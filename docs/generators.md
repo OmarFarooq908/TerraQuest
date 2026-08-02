@@ -22,13 +22,13 @@ samples) exist for geometric consistency — mission ranking still reads the cat
 Each feature stores:
 
 - `provenance` — sources, method, osm_id / dem_tile / layer
-- `evidence` — **ledger v1** required keys per generator (see below)
+- `evidence` — **ledger v2** required keys per generator (see below)
 - `densify` — `cell_id` / `parent_id` reserved for Phase C
 
-## Evidence ledger (v1)
+## Evidence ledger (v2)
 
 `scripts/check_pack.py` / `validate_catalog_geojson` enforce
-`adventure_core.evidence_ledger` (version string `1`):
+`adventure_core.evidence_ledger` (version string `2`):
 
 | Generator family | Required `evidence` keys |
 |------------------|--------------------------|
@@ -45,10 +45,16 @@ Synthetic packs must set `evidence.fixture=true` whenever `provenance.sources`
 includes `synthetic`. Real OSM/DEM packs must declare matching source kinds
 (`osm` / `dem`) and DEM features need `provenance.dem_tile`.
 
-Layer-byte hashes, required ``osm_id`` on every OSM feature, and DEM window
-polygons are **out of scope** for v1 (planned follow-up). Empty / whitespace
-``generator`` values and blank string evidence fields (e.g. ``water_kind: ""``)
-fail validation.
+**v2 provenance:** non-synthetic **OSM-element** generators
+(`track_terminus`, `road_spur`, named/unnamed water, `osm_peak`,
+`osm_viewpoint`) require `provenance.osm_id` as a positive int (integral
+floats like `123.0` accepted for GeoJSON interop). Packbuilder skips
+emitting those candidates when the source layer lacks a usable `osm_id`.
+Grid `isolation_maximum` and DEM generators do **not** require `osm_id`.
+DEM window polygons remain deferred.
+
+Empty / whitespace ``generator`` values and blank string evidence fields
+(e.g. ``water_kind: ""``) fail validation.
 Quotas and `min_spacing_km` are applied per generator, then soft global merge.
 
 ## Testing

@@ -1,4 +1,4 @@
-"""Evidence ledger v1 — required fields per generator (#19)."""
+"""Evidence ledger — required fields per generator (#19 / #64)."""
 
 from __future__ import annotations
 
@@ -6,16 +6,19 @@ import pytest
 from adventure_core.catalog_validate import validate_catalog_feature
 from adventure_core.evidence_ledger import (
     EVIDENCE_LEDGER_VERSION,
+    OSM_ELEMENT_GENERATORS,
     REQUIRED_EVIDENCE_KEYS,
     validate_evidence_ledger,
 )
 
 
 def test_ledger_version_and_covers_shipping_generators() -> None:
-    assert EVIDENCE_LEDGER_VERSION == "1"
+    assert EVIDENCE_LEDGER_VERSION == "2"
     assert "named_waterbody" in REQUIRED_EVIDENCE_KEYS
     assert "dem_local_max" in REQUIRED_EVIDENCE_KEYS
     assert "synthetic_fixture" in REQUIRED_EVIDENCE_KEYS
+    assert "isolation_maximum" not in OSM_ELEMENT_GENERATORS
+    assert "osm_peak" in OSM_ELEMENT_GENERATORS
 
 
 def test_missing_evidence_key_fails() -> None:
@@ -87,6 +90,111 @@ def test_happy_path_real_water() -> None:
     assert errs == []
 
 
+def test_osm_element_requires_positive_osm_id() -> None:
+    base_ev = {"discovery_score": 0.5, "dist_settlement_km": 4.0}
+    prov = {"sources": ["osm"], "method": "osm_peak_node", "layer": "peaks"}
+    missing = validate_evidence_ledger(
+        generator="osm_peak",
+        provenance=prov,
+        evidence=base_ev,
+        feature_id="p_miss",
+    )
+    assert any("osm_id" in e and "v2" in e for e in missing)
+
+    for bad in (0, -1, True, "12", 12.5, None):
+        errs = validate_evidence_ledger(
+            generator="osm_peak",
+            provenance={**prov, "osm_id": bad},
+            evidence=base_ev,
+            feature_id="p_bad",
+        )
+        assert any("osm_id" in e for e in errs), bad
+
+    for good in (123, 123.0):
+        ok = validate_evidence_ledger(
+            generator="osm_peak",
+            provenance={**prov, "osm_id": good},
+            evidence=base_ev,
+            feature_id="p_ok",
+        )
+        assert ok == [], good
+
+
+def test_coerce_positive_osm_id() -> None:
+    from adventure_core.evidence_ledger import coerce_positive_osm_id
+
+    assert coerce_positive_osm_id(7) == 7
+    assert coerce_positive_osm_id(7.0) == 7
+    assert coerce_positive_osm_id(0) is None
+    assert coerce_positive_osm_id(True) is None
+    assert coerce_positive_osm_id("9") is None
+    assert coerce_positive_osm_id(1.5) is None
+
+
+def test_whitespace_layer_and_dem_tile_rejected() -> None:
+    peak = validate_evidence_ledger(
+        generator="osm_peak",
+        provenance={
+            "sources": ["osm"],
+            "method": "osm_peak_node",
+            "layer": "  ",
+            "osm_id": 1,
+        },
+        evidence={"discovery_score": 0.5, "dist_settlement_km": 1.0},
+        feature_id="p_ws",
+    )
+    assert any("layer" in e for e in peak)
+    dem = validate_evidence_ledger(
+        generator="dem_local_max",
+        provenance={"sources": ["dem"], "method": "x", "dem_tile": " \t"},
+        evidence={
+            "discovery_score": 0.5,
+            "dist_settlement_km": 1.0,
+            "elevation_m": 100.0,
+        },
+        feature_id="d_ws",
+    )
+    assert any("dem_tile" in e for e in dem)
+
+
+def test_isolation_maximum_does_not_require_osm_id() -> None:
+    errs = validate_evidence_ledger(
+        generator="isolation_maximum",
+        provenance={
+            "sources": ["osm"],
+            "method": "settlement_distance_grid_local_max",
+            "layer": "settlements",
+        },
+        evidence={
+            "discovery_score": 0.8,
+            "dist_settlement_km": 12.0,
+            "grid_res_deg": 0.02,
+        },
+        feature_id="iso1",
+    )
+    assert errs == []
+
+
+def test_synthetic_osm_element_waives_osm_id() -> None:
+    errs = validate_evidence_ledger(
+        generator="named_waterbody",
+        provenance={
+            "sources": ["synthetic", "osm"],
+            "method": "fixture_seed",
+            "layer": "water",
+        },
+        evidence={
+            "discovery_score": 0.5,
+            "dist_settlement_km": 2.0,
+            "water_kind": "lake",
+            "named": True,
+            "fixture": True,
+        },
+        feature_id="syn_w",
+    )
+    assert errs == []
+
+
 def test_unknown_generator_and_empty_sources() -> None:
     assert any(
         "unknown generator" in e
@@ -153,7 +261,12 @@ def test_empty_string_evidence_values_rejected() -> None:
 def test_named_false_is_allowed_for_unnamed_water() -> None:
     errs = validate_evidence_ledger(
         generator="unnamed_waterbody",
-        provenance={"sources": ["osm"], "method": "water_centroid", "layer": "water"},
+        provenance={
+            "sources": ["osm"],
+            "method": "water_centroid",
+            "layer": "water",
+            "osm_id": 42,
+        },
         evidence={
             "discovery_score": 0.5,
             "dist_settlement_km": 2.0,
@@ -172,7 +285,12 @@ def test_ontology_ids_must_be_canonical_when_present() -> None:
         "water_kind": "lake",
         "named": True,
     }
-    prov = {"sources": ["osm"], "method": "water_centroid", "layer": "water"}
+    prov = {
+        "sources": ["osm"],
+        "method": "water_centroid",
+        "layer": "water",
+        "osm_id": 99,
+    }
     ok = validate_evidence_ledger(
         generator="named_waterbody",
         provenance=prov,

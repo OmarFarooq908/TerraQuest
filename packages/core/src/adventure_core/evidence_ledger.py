@@ -1,7 +1,8 @@
-"""Evidence ledger v1 — required catalog evidence/provenance per generator (#19).
+"""Evidence ledger v2 — required catalog evidence/provenance per generator (#19 / #64).
 
-This is a *field completeness* contract for science/trust, not empirical
-calibration and not content-addressed layer bytes / required ``osm_id`` (v2).
+Field-completeness contract for science/trust. v1: required evidence keys +
+source kinds. v2: required ``provenance.osm_id`` on OSM-*element* generators.
+DEM window polygons remain deferred.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ from typing import Any, get_args
 
 from adventure_core.catalog import GeneratorName
 
-EVIDENCE_LEDGER_VERSION = "1"
+EVIDENCE_LEDGER_VERSION = "2"
 
 # Required evidence keys present (non-null / non-blank where strings) per generator.
 REQUIRED_EVIDENCE_KEYS: dict[str, frozenset[str]] = {
@@ -44,6 +45,19 @@ OSM_SOURCE_GENERATORS = frozenset(
 )
 DEM_SOURCE_GENERATORS = frozenset({"dem_local_max", "terrain_relief_hotspot"})
 
+# Catalog points derived from a concrete OSM node/way/relation (ledger v2).
+# Grid isolation uses OSM settlements as input but is not itself an OSM element.
+OSM_ELEMENT_GENERATORS = frozenset(
+    {
+        "track_terminus",
+        "road_spur",
+        "named_waterbody",
+        "unnamed_waterbody",
+        "osm_peak",
+        "osm_viewpoint",
+    }
+)
+
 
 def shipping_generator_names() -> frozenset[str]:
     """Generator names that packbuilder ships (excludes schema-only aliases)."""
@@ -63,6 +77,26 @@ def _missing_keys(evidence: dict[str, Any], required: frozenset[str]) -> list[st
         ):
             missing.append(key)
     return missing
+
+
+def _valid_osm_id(value: Any) -> bool:
+    return coerce_positive_osm_id(value) is not None
+
+
+def coerce_positive_osm_id(value: Any) -> int | None:
+    """Return a positive OSM id, or None if missing/invalid.
+
+    Accepts ints and integral floats (common in GeoJSON). Rejects bools,
+    non-integral floats, strings, zero, and negatives.
+    """
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return value if value > 0 else None
+    if isinstance(value, float) and value.is_integer():
+        as_int = int(value)
+        return as_int if as_int > 0 else None
+    return None
 
 
 def validate_evidence_ledger(
@@ -105,13 +139,26 @@ def validate_evidence_ledger(
     if gen in DEM_SOURCE_GENERATORS and not synthetic and "dem" not in sources_list:
         errors.append(f"{feature_id}: provenance.sources must include 'dem' for {gen}")
 
-    if gen in DEM_SOURCE_GENERATORS and not synthetic and not provenance.get("dem_tile"):
-        errors.append(f"{feature_id}: provenance.dem_tile required for {gen}")
+    if gen in DEM_SOURCE_GENERATORS and not synthetic:
+        dem_tile = provenance.get("dem_tile")
+        if not (isinstance(dem_tile, str) and dem_tile.strip()):
+            errors.append(f"{feature_id}: provenance.dem_tile required for {gen}")
 
-    if not synthetic and gen != "synthetic_fixture" and not provenance.get("layer"):
+    if not synthetic and gen != "synthetic_fixture":
+        layer = provenance.get("layer")
         # DEM generators may omit layer when dem_tile is set
-        if gen not in DEM_SOURCE_GENERATORS:
+        if gen not in DEM_SOURCE_GENERATORS and not (isinstance(layer, str) and layer.strip()):
             errors.append(f"{feature_id}: provenance.layer required for {gen}")
+
+    if (
+        not synthetic
+        and gen in OSM_ELEMENT_GENERATORS
+        and not _valid_osm_id(provenance.get("osm_id"))
+    ):
+        errors.append(
+            f"{feature_id}: provenance.osm_id must be a positive int for {gen} "
+            "(evidence ledger v2; OSM-element generators)"
+        )
 
     if "ontology_ids" in evidence:
         raw_ids = evidence["ontology_ids"]
