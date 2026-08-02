@@ -309,7 +309,7 @@ def mission_run(
 
         try:
             md_path = write_mission_markdown(export_md, result)
-        except OSError as exc:
+        except (ValueError, OSError) as exc:
             console.print(f"[bold red]Markdown export error[/bold red]: {exc}")
             raise typer.Exit(code=2) from exc
         console.print(f"[green]Wrote Markdown[/green]: {md_path}")

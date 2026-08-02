@@ -86,12 +86,59 @@ def test_markdown_includes_ranks_and_escapes() -> None:
     assert "### 1. Lake \\*Ridge\\*" in md
     assert "### 2. Valley\\_X" in md
     assert "&lt;script&gt;" in md
-    assert "**bold**" not in md or "\\*\\*bold\\*\\*" in md
+    assert "\\*\\*bold\\*\\*" in md
     assert "pref_water" in md
     assert "named_waterbody" in md
     assert "human_activity=-0.90" in md
-    assert "pack\\_kind=synthetic" in md or "pack_kind=synthetic" in md
+    assert "pack\\_kind=synthetic" in md
     assert "35.720000, 75.180000" in md
+    assert "**Days:** 3" in md
+
+
+def test_markdown_blocks_structure_injection() -> None:
+    result = _result(
+        [
+            _mission(
+                cid="a",
+                name="Good\n## Injected heading",
+                lon=75.0,
+                lat=35.0,
+                score=0.5,
+                claim="ok\n- not a list",
+            )
+        ]
+    )
+    result.request.prompt = "line1\n## hijack"
+    md = missions_to_markdown(result)
+    assert "\n## Injected" not in md
+    assert "\n## hijack" not in md
+    assert "\n- not a list" not in md
+    assert "Good ## Injected heading" in md
+    assert "**Prompt:** line1 ## hijack" in md
+
+
+def test_markdown_blank_claim_and_nan_rejected() -> None:
+    md = missions_to_markdown(
+        _result([_mission(cid="a", name="A", lon=1.0, lat=2.0, score=0.5, claim="   ")])
+    )
+    assert "**Claim:** —" in md
+
+    with pytest.raises(ValueError, match="finite"):
+        missions_to_markdown(
+            _result(
+                [
+                    _mission(
+                        cid="a",
+                        name="A",
+                        lon=1.0,
+                        lat=2.0,
+                        score=float("nan"),
+                    )
+                ]
+            )
+        )
+    with pytest.raises(ValueError, match="WGS84|finite"):
+        missions_to_markdown(_result([_mission(cid="a", name="A", lon=999.0, lat=2.0, score=0.5)]))
 
 
 def test_markdown_empty_missions() -> None:

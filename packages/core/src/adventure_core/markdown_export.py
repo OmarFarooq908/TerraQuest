@@ -5,24 +5,33 @@ Readable companion to GPX export — not a ranking surface.
 
 from __future__ import annotations
 
+import math
+import re
 from pathlib import Path
 
 from adventure_core.schemas import MissionResult, RankedMission
+
+_WS = re.compile(r"\s+")
 
 
 def _strip_controls(text: str) -> str:
     return "".join(ch for ch in text if ch in "\t\n\r" or ord(ch) >= 0x20)
 
 
+def _one_line(text: str) -> str:
+    """Collapse whitespace so prose cannot inject new Markdown block structure."""
+    return _WS.sub(" ", _strip_controls(text)).strip()
+
+
 def _md_escape_code(text: str) -> str:
     """Safe text for inline code spans (preserve snake_case ids)."""
-    return _strip_controls(text).replace("`", "'")
+    return _one_line(text).replace("`", "'")
 
 
 def _md_escape(text: str) -> str:
     """Neutralize Markdown / HTML pitfalls in untrusted prompt/name/claim text."""
     out: list[str] = []
-    for ch in _strip_controls(text):
+    for ch in _one_line(text):
         if ch == "\\":
             out.append("\\\\")
         elif ch == "`":
@@ -46,6 +55,19 @@ def _md_escape(text: str) -> str:
     return "".join(out)
 
 
+def _require_finite(value: float, *, label: str) -> float:
+    if not math.isfinite(value):
+        raise ValueError(f"{label} must be a finite number, got {value!r}")
+    return float(value)
+
+
+def _validate_lon_lat(lon: float, lat: float, *, context: str) -> None:
+    _require_finite(lon, label=f"{context} lon")
+    _require_finite(lat, label=f"{context} lat")
+    if not (-180.0 <= lon <= 180.0 and -90.0 <= lat <= 90.0):
+        raise ValueError(f"{context}: invalid WGS84 lon/lat ({lon}, {lat})")
+
+
 def _fmt_prefs(result: MissionResult) -> str:
     active = result.request.intent.preferences.active()
     if not active:
@@ -54,13 +76,27 @@ def _fmt_prefs(result: MissionResult) -> str:
     return ", ".join(parts)
 
 
+def _fmt_optional_number(value: float | int | None) -> str:
+    if value is None:
+        return "—"
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value)
+
+
 def _mission_section(mission: RankedMission, *, rank: int) -> list[str]:
+    _validate_lon_lat(mission.lon, mission.lat, context=f"mission rank {rank}")
+    score = _require_finite(mission.score, label=f"mission rank {rank} score")
+    conf = _require_finite(mission.confidence.value, label=f"mission rank {rank} confidence")
+    claim = (mission.claim or "").strip()
+    name = (mission.name or "").strip() or f"(unnamed {mission.candidate_id})"
+
     lines = [
-        f"### {rank}. {_md_escape(mission.name)}",
+        f"### {rank}. {_md_escape(name)}",
         "",
-        f"- **Score:** {mission.score:.3f}",
-        f"- **Confidence:** {mission.confidence.value:.0%}",
-        f"- **Claim:** {_md_escape(mission.claim) if mission.claim else '—'}",
+        f"- **Score:** {score:.3f}",
+        f"- **Confidence:** {conf:.0%}",
+        f"- **Claim:** {_md_escape(claim) if claim else '—'}",
         f"- **Coordinates:** `{mission.lat:.6f}, {mission.lon:.6f}` (lat, lon)",
         f"- **Candidate id:** `{_md_escape_code(mission.candidate_id)}`",
     ]
@@ -79,10 +115,17 @@ def _mission_section(mission: RankedMission, *, rank: int) -> list[str]:
 
 
 def missions_to_markdown(result: MissionResult) -> str:
-    """Serialize a ``MissionResult`` to a Markdown mission report."""
+    """Serialize a ``MissionResult`` to a Markdown mission report.
+
+    Raises ``ValueError`` if a ranked mission has non-finite score/confidence
+    or invalid WGS84 coordinates (same honesty bar as GPX export).
+    """
     prompt = (result.request.prompt or "").strip() or "(no prompt)"
     intent = result.request.intent
     c = intent.constraints
+
+    if c.origin_lat is not None and c.origin_lon is not None:
+        _validate_lon_lat(c.origin_lon, c.origin_lat, context="origin")
 
     lines: list[str] = [
         f"# TerraQuest mission — `{_md_escape_code(result.pack_id)}`",
@@ -94,16 +137,16 @@ def missions_to_markdown(result: MissionResult) -> str:
         "",
         "## Intent",
         "",
-        f"- **Origin:** {_md_escape(c.origin) if c.origin else '—'}"
+        f"- **Origin:** {_md_escape(c.origin) if (c.origin or '').strip() else '—'}"
         + (
             f" (`{c.origin_lat:.5f}, {c.origin_lon:.5f}`)"
             if c.origin_lat is not None and c.origin_lon is not None
             else ""
         ),
-        f"- **Vehicle:** {_md_escape(c.vehicle) if c.vehicle else '—'}"
+        f"- **Vehicle:** {_md_escape(c.vehicle) if (c.vehicle or '').strip() else '—'}"
         + (f" (`{_md_escape_code(c.vehicle_class)}`)" if c.vehicle_class else ""),
-        f"- **Days:** {c.days if c.days is not None else '—'}",
-        f"- **Party size:** {c.party_size if c.party_size is not None else '—'}",
+        f"- **Days:** {_fmt_optional_number(c.days)}",
+        f"- **Party size:** {_fmt_optional_number(c.party_size)}",
         f"- **Preferences:** {_fmt_prefs(result)}",
         f"- **Goals:** {', '.join(f'`{_md_escape_code(g)}`' for g in intent.goals) or '—'}",
         "",
@@ -122,7 +165,9 @@ def missions_to_markdown(result: MissionResult) -> str:
         lines.append("## Notes")
         lines.append("")
         for note in result.notes:
-            lines.append(f"- {_md_escape(note)}")
+            text = _md_escape(note)
+            if text:
+                lines.append(f"- {text}")
         lines.append("")
 
     lines.append("---")
