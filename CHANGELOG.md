@@ -17,10 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Preference polarity detection/repair against prompt cues (anti-inversion)
 - GIS feature audit: no `-1`/`999` distance sentinels; missing layers → `null` + evidence flags
 - MissionIntent semantic validation + repair (`intent_repairs`) for LLM/rules paths
+- Strict catalog FeatureCollection validation (`adventure_core.catalog_validate`) at pack load and in `scripts/check_pack.py`
+- `adventure_gis.validate_pack` / `pack_content_hash` for CI and builder reuse
 
 ### Changed
 
-- Canonical candidate file is `catalog.geojson` (`seeds.geojson` deprecated alias)
+- Canonical candidate file is `catalog.geojson`; pack builder no longer writes deprecated `seeds.geojson`
+- `check_pack` / `validate_pack` fail on dual-path catalog+seeds (waive with `--allow-legacy-seeds`) and on `content_hash` mismatch when declared
+- Pack load no longer silently fills missing catalog fields (`strict=True` by default)
 - Default Ollama model unified to `llama3.2`
 - Overpass ingest requires explicit `allow_degraded_overpass`
 - `CandidateFeatures.dist_*_km` may be `null` when the pack layer is empty

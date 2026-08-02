@@ -11,6 +11,7 @@ import yaml
 from adventure_core.catalog import CATALOG_SCHEMA_VERSION, DiscoveryConfig
 from adventure_core.config import configs_dir, load_yaml, repo_root
 from adventure_core.pack_manifest import PackManifest, PackSource
+from adventure_gis.pack_hash import pack_content_hash
 
 from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
 from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojson
@@ -37,16 +38,6 @@ def _hash_bytes(data: bytes) -> str:
 
 def _hash_file(path: Path) -> str:
     return _hash_bytes(path.read_bytes())
-
-
-def _pack_content_hash(layers_dir: Path, stats: dict) -> str:
-    """Hash all layer GeoJSON bytes + selected generator counts."""
-    h = hashlib.sha256()
-    for path in sorted(layers_dir.glob("*.geojson")):
-        h.update(path.name.encode())
-        h.update(path.read_bytes())
-    h.update(json.dumps(stats.get("selected_by_generator", {}), sort_keys=True).encode())
-    return h.hexdigest()[:16]
 
 
 def build_pack(
@@ -162,9 +153,11 @@ def build_pack(
         discovery=discovery_cfg,
     )
     write_geojson(layers_dir / "catalog.geojson", discovered["catalog"])
-    # Temporary alias for one release cycle — prefer catalog.geojson
-    write_geojson(layers_dir / "seeds.geojson", discovered["catalog"])
     write_geojson(layers_dir / "elevation.geojson", discovered["elevation"])
+    # Remove deprecated dual-path alias if a prior build left it behind
+    legacy_seeds = layers_dir / "seeds.geojson"
+    if legacy_seeds.exists():
+        legacy_seeds.unlink()
 
     # Production OSM path must retain road geometries for access generators
     road_lines = layers.get("road_lines") or {"features": []}
@@ -185,7 +178,7 @@ def build_pack(
 
     built_at = datetime.now(UTC).isoformat()
     stats = discovered["stats"]
-    content_hash = _pack_content_hash(layers_dir, stats)
+    content_hash = pack_content_hash(layers_dir, stats)
     manifest = config.model_copy(
         update={
             "synthetic": False,
@@ -209,7 +202,6 @@ def build_pack(
             "road_nodes": "layers/road_nodes.geojson",
             "road_lines": "layers/road_lines.geojson",
             "catalog": "layers/catalog.geojson",
-            "seeds": "layers/seeds.geojson",
             "elevation": "layers/elevation.geojson",
         },
     }
