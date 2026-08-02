@@ -43,10 +43,16 @@ uv run adventurectl mission run \
 
 Base URL resolution (first match wins):
 
-1. `--` / API `base_url` argument (library)
+1. Library `base_url` argument
 2. `ADVENTURE_OLLAMA_BASE_URL`
 3. `OLLAMA_HOST` (Ollama’s own env; `host:port` or full URL)
 4. `configs/models.yaml` → `default_base_url` (`http://127.0.0.1:11434`)
+
+Model pin resolution (first match wins):
+
+1. `--model` / library `model` argument
+2. `configs/models.yaml` → `mission_interpreter` (then `default_model`)
+3. Built-in default `llama3.2`
 
 ## Interpreter modes
 

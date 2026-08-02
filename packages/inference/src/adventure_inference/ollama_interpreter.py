@@ -161,25 +161,30 @@ def _list_models(base_url: str) -> set[str]:
 
 
 def _model_matches(preferred: str, available: set[str]) -> str | None:
-    """Match an installed Ollama tag to a preferred pin (name or name:tag)."""
+    """Match an installed Ollama tag to a preferred pin (name or name:tag).
+
+    Untagged pins (``llama3.2``) prefer ``:latest``, then any same-name tag.
+    Tagged pins (``llama3.2:3b``) match only that tag or quantization variants
+    (``llama3.2:3b-…``) — never a sibling tag like ``llama3.2:latest``.
+    """
     if preferred in available:
         return preferred
-    for a in available:
-        if a.startswith(f"{preferred}:"):
-            return a
-    pref_base = preferred.split(":")[0]
-    for a in available:
-        if a.split(":")[0] == pref_base:
-            return a
-    return None
+    if ":" not in preferred:
+        latest = f"{preferred}:latest"
+        if latest in available:
+            return latest
+        tagged = sorted(a for a in available if a.startswith(f"{preferred}:"))
+        return tagged[0] if tagged else None
+    variants = sorted(a for a in available if a == preferred or a.startswith(f"{preferred}-"))
+    return variants[0] if variants else None
 
 
 def _pick_model(preferred: str, base_url: str) -> str:
     available = _list_models(base_url)
     if not available:
-        # Daemon up but empty tags, or tags call failed after availability check —
-        # still attempt preferred; chat will surface a clearer error if missing.
-        return preferred
+        # Tags call failed or daemon reports zero models — fail closed with the
+        # same actionable message rather than hoping /api/chat is clearer.
+        raise InferenceError(_missing_model_message(preferred, available, base_url))
     hit = _model_matches(preferred, available)
     if hit:
         return hit
@@ -198,7 +203,9 @@ def interpret_ollama(
     timeout: float = 120.0,
 ) -> MissionIntent:
     cfg = load_models_config()
-    preferred = model or cfg.mission_interpreter or cfg.default_model or DEFAULT_MODEL
+    preferred = (
+        (model or "").strip() or cfg.mission_interpreter or cfg.default_model or DEFAULT_MODEL
+    )
     url = ollama_base_url(base_url)
     if not ollama_available(url):
         raise InferenceError(_missing_ollama_message(url))

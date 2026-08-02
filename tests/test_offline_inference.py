@@ -72,8 +72,34 @@ def test_inference_cache_dir_default_and_override(
     assert path.is_dir()
 
 
+@pytest.mark.parametrize(
+    ("preferred", "available", "expected"),
+    [
+        ("llama3.2", {"llama3.2:latest"}, "llama3.2:latest"),
+        ("llama3.2", {"llama3.2:3b", "llama3.2:latest"}, "llama3.2:latest"),
+        ("llama3.2:3b", {"llama3.2:latest"}, None),
+        ("llama3.2:3b", {"llama3.2:3b"}, "llama3.2:3b"),
+        ("llama3.1:8b", {"llama3.1:8b-instruct-q4_0"}, "llama3.1:8b-instruct-q4_0"),
+        ("llama3.1:8b", {"llama3.1:70b"}, None),
+        ("qwen3", {"qwen3:8b"}, "qwen3:8b"),
+    ],
+)
+def test_model_matches_does_not_cross_tags(
+    preferred: str, available: set[str], expected: str | None
+) -> None:
+    assert oi._model_matches(preferred, available) == expected
+
+
+def test_pick_model_empty_tags_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(oi, "_list_models", lambda _url: set())
+    with pytest.raises(InferenceError) as exc:
+        oi._pick_model("llama3.2", "http://127.0.0.1:11434")
+    assert "llama3.2" in str(exc.value)
+    assert "ollama pull" in str(exc.value)
+
+
 def test_ollama_unavailable_raises_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(oi, "ollama_available", lambda *a, **k: False)
+    monkeypatch.setattr("adventure_inference.router.ollama_available", lambda *a, **k: False)
     with pytest.raises(InferenceError) as exc:
         interpret_mission_router("hello", interpreter="ollama")
     msg = str(exc.value)
@@ -101,6 +127,30 @@ def test_strict_auto_without_ollama_is_actionable(monkeypatch: pytest.MonkeyPatc
     assert "strict-llm" in str(exc.value) or "rules" in str(exc.value)
 
 
+def test_unknown_interpreter_rejected() -> None:
+    with pytest.raises(InferenceError) as exc:
+        interpret_mission_router("hello", interpreter="chatgpt")
+    assert "Unknown interpreter" in str(exc.value)
+
+
+def test_cli_unknown_interpreter_exits_2() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "mission",
+            "run",
+            "--pack",
+            "fixtures/karakoram_mini",
+            "--interpreter",
+            "chatgpt",
+            "-p",
+            "test",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Unknown interpreter" in result.stdout
+
+
 def test_cli_ollama_missing_exits_2(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         "adventure_cli.pipeline.interpret_mission",
@@ -126,13 +176,24 @@ def test_cli_ollama_missing_exits_2(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "Ollama" in result.stdout
 
 
+def test_model_none_uses_yaml_pin(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict[str, str] = {}
+
+    def fake_interpret_ollama(prompt: str, *, model: str | None = None, **kwargs):
+        seen["model"] = model or ""
+        return interpret_mission("hate crowds", interpreter="rules")
+
+    monkeypatch.setattr("adventure_inference.router.ollama_available", lambda *a, **k: True)
+    monkeypatch.setattr("adventure_inference.router.interpret_ollama", fake_interpret_ollama)
+    interpret_mission_router("hate crowds", interpreter="ollama", model=None)
+    assert seen["model"] == load_models_config().mission_interpreter
+
+
 def test_inference_package_does_not_read_cloud_keys(monkeypatch: pytest.MonkeyPatch) -> None:
     """Default Ollama path must not consult cloud provider env vars."""
     monkeypatch.setenv("OPENAI_API_KEY", "should-never-be-read")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "should-never-be-read")
-    # Reachability check only — no network model call required.
-    monkeypatch.setattr(oi, "ollama_available", lambda *a, **k: False)
+    monkeypatch.setattr("adventure_inference.router.ollama_available", lambda *a, **k: False)
     with pytest.raises(InferenceError):
         interpret_mission_router("x", interpreter="ollama")
-    # If cloud keys were required, this would have failed differently; assert they remain set.
     assert os.environ.get("OPENAI_API_KEY") == "should-never-be-read"

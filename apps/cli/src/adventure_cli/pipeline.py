@@ -46,7 +46,7 @@ def run_mission(
     prompt: str,
     max_results: int = 5,
     interpreter: str = "auto",
-    model: str = "llama3.2",
+    model: str | None = None,
     allow_rules_fallback: bool = True,
     include_generators: Collection[str] | None = None,
     exclude_generators: Collection[str] | None = None,

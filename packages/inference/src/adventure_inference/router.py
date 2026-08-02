@@ -14,12 +14,13 @@ from adventure_inference.models_config import DEFAULT_MODEL, load_models_config,
 from adventure_inference.ollama_interpreter import interpret_ollama, ollama_available
 
 InterpreterName = Literal["auto", "rules", "ollama"]
+_VALID_INTERPRETERS = frozenset({"auto", "rules", "ollama"})
 
 
 def interpret_mission(
     prompt: str,
     *,
-    interpreter: InterpreterName = "auto",
+    interpreter: InterpreterName | str = "auto",
     model: str | None = None,
     mode: str | None = None,
     allow_rules_fallback: bool = True,
@@ -30,8 +31,16 @@ def interpret_mission(
     notes: list[str] = []
     intent: MissionIntent
     cfg = load_models_config()
-    chosen_model = model or cfg.mission_interpreter or cfg.default_model or DEFAULT_MODEL
+    chosen_model = (
+        (model or "").strip() or cfg.mission_interpreter or cfg.default_model or DEFAULT_MODEL
+    )
     url = ollama_base_url(base_url)
+
+    if interpreter not in _VALID_INTERPRETERS:
+        raise InferenceError(
+            f"Unknown interpreter {interpreter!r}. "
+            "Use auto, rules, or ollama. See docs/offline-inference.md."
+        )
 
     if interpreter == "rules":
         intent = interpret_rules(prompt)
