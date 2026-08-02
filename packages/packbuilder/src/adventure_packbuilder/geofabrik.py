@@ -14,8 +14,7 @@ import httpx
 from adventure_packbuilder.osm import _fc, _point_feature
 
 USER_AGENT = (
-    "TerraQuest/0.2 (packbuilder; local-first; "
-    "+https://github.com/OmarFarooq908/TerraQuest)"
+    "TerraQuest/0.2 (packbuilder; local-first; +https://github.com/OmarFarooq908/TerraQuest)"
 )
 
 
