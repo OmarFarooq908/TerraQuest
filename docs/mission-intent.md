@@ -2,6 +2,10 @@
 
 `MissionIntent` is the only bridge from language to scoring. Interpreters must not emit rankings.
 
+Pinned JSON Schema: [`schemas/mission_intent.schema.json`](https://github.com/OmarFarooq908/TerraQuest/blob/main/schemas/mission_intent.schema.json)
+(regression: `tests/test_schema_regression.py`). Bumping the contract requires updating
+that pin alongside `SCHEMA_VERSION`.
+
 ## Fields
 
 | Field | Role |

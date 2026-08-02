@@ -155,6 +155,10 @@ Required Feature `properties` (schema `0.3.0`):
 See [generators](generators.md) for the per-generator evidence contract
 (`adventure_core.evidence_ledger`).
 
+Pinned catalog Feature property schema:
+[`schemas/catalog_feature.schema.json`](https://github.com/OmarFarooq908/TerraQuest/blob/main/schemas/catalog_feature.schema.json)
+(kept in sync with `CatalogCandidate` / `Provenance` via `tests/test_schema_regression.py`).
+
 ```bash
 uv run python scripts/check_pack.py fixtures/karakoram_mini
 uv run python scripts/check_pack.py data/packs/skardu_v1

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OmarFarooq908/TerraQuest/schemas/mission_intent.schema.json",
+  "title": "TerraQuest MissionIntent",
+  "description": "MissionIntent schema_version 1.0 — language→scoring contract (docs/mission-intent.md)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "constraints",
+    "preferences",
+    "goals",
+    "source"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "constraints": { "$ref": "#/$defs/HardConstraints" },
+    "preferences": { "$ref": "#/$defs/PreferenceVector" },
+    "goals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source": {
+      "type": "string",
+      "enum": ["rules", "llm", "hybrid"]
+    },
+    "interpreter_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "intent_repairs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "raw_prompt": { "type": ["string", "null"] }
+  },
+  "$defs": {
+    "HardConstraints": {
+      "type": "object",
+      "properties": {
+        "days": { "type": ["number", "null"] },
+        "vehicle": { "type": ["string", "null"] },
+        "vehicle_class": { "type": ["string", "null"] },
+        "party_size": { "type": ["integer", "null"] },
+        "budget_per_person": { "type": ["number", "null"] },
+        "currency": { "type": ["string", "null"] },
+        "origin": { "type": ["string", "null"] },
+        "origin_lon": { "type": ["number", "null"] },
+        "origin_lat": { "type": ["number", "null"] },
+        "departure": { "type": ["string", "null"] },
+        "return_by": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "PreferenceVector": {
+      "type": "object",
+      "required": [
+        "beauty",
+        "water",
+        "forest",
+        "geology",
+        "wildlife",
+        "remoteness",
+        "accessibility",
+        "novelty",
+        "photography",
+        "danger",
+        "solitude",
+        "hiking",
+        "camping",
+        "history",
+        "human_activity"
+      ],
+      "properties": {
+        "beauty": { "type": "number", "minimum": -1, "maximum": 1 },
+        "water": { "type": "number", "minimum": -1, "maximum": 1 },
+        "forest": { "type": "number", "minimum": -1, "maximum": 1 },
+        "geology": { "type": "number", "minimum": -1, "maximum": 1 },
+        "wildlife": { "type": "number", "minimum": -1, "maximum": 1 },
+        "remoteness": { "type": "number", "minimum": -1, "maximum": 1 },
+        "accessibility": { "type": "number", "minimum": -1, "maximum": 1 },
+        "novelty": { "type": "number", "minimum": -1, "maximum": 1 },
+        "photography": { "type": "number", "minimum": -1, "maximum": 1 },
+        "danger": { "type": "number", "minimum": -1, "maximum": 1 },
+        "solitude": { "type": "number", "minimum": -1, "maximum": 1 },
+        "hiking": { "type": "number", "minimum": -1, "maximum": 1 },
+        "camping": { "type": "number", "minimum": -1, "maximum": 1 },
+        "history": { "type": "number", "minimum": -1, "maximum": 1 },
+        "human_activity": { "type": "number", "minimum": -1, "maximum": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}
