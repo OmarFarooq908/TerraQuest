@@ -77,6 +77,62 @@ def test_empty_collection():
     assert any("empty" in e for e in errs)
 
 
+def test_geometry_edge_cases():
+    feat = _minimal_feature()
+    feat["geometry"] = "not-an-object"
+    assert any("geometry" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature()
+    feat["geometry"] = {"type": "LineString", "coordinates": [[0, 0], [1, 1]]}
+    assert any("Point" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature()
+    feat["geometry"] = {"type": "Point", "coordinates": [75.0]}
+    assert any("coordinates" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature()
+    feat["geometry"] = {"type": "Point", "coordinates": ["x", "y"]}
+    assert any("invalid coordinates" in e for e in validate_catalog_feature(feat, index=0))
+
+
+def test_feature_shape_errors():
+    assert validate_catalog_feature("x", index=3) == ["features[3]: not an object"]  # type: ignore[arg-type]
+    feat = _minimal_feature()
+    feat["type"] = "NotFeature"
+    assert any("Feature" in e for e in validate_catalog_feature(feat, index=0))
+    feat = _minimal_feature()
+    feat["properties"] = None
+    assert any("properties" in e for e in validate_catalog_feature(feat, index=0))
+
+
+def test_schema_version_and_provenance_types():
+    feat = _minimal_feature(catalog_schema_version="9.9.9")
+    assert any("catalog_schema_version" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature(provenance="bad")
+    assert any("provenance" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature(provenance={"sources": "synthetic", "method": "x"})
+    errs = validate_catalog_feature(feat, index=0)
+    assert errs and any("schema" in e or "sources" in e or "list" in e for e in errs)
+
+    feat = _minimal_feature(provenance={"sources": [], "method": ""})
+    assert any("method" in e for e in validate_catalog_feature(feat, index=0))
+
+    feat = _minimal_feature(evidence=[])
+    assert any("evidence" in e for e in validate_catalog_feature(feat, index=0))
+
+
+def test_root_document_errors():
+    assert validate_catalog_geojson([]) == ["catalog root must be an object"]  # type: ignore[arg-type]
+    errs = validate_catalog_geojson({"type": "Feature", "features": []})
+    assert any("FeatureCollection" in e for e in errs)
+    assert any(
+        "features must be a list" in e
+        for e in validate_catalog_geojson({"type": "FeatureCollection"})
+    )
+
+
 def test_dual_path_rejected(tmp_path: Path):
     dest = tmp_path / "pack"
     shutil.copytree(FIXTURE, dest)
