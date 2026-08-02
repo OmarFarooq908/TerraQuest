@@ -19,7 +19,7 @@ uv run python scripts/check_pack.py data/packs/skardu_v1
 | `layers/*.geojson` | Settlements, water, roads, peaks, viewpoints, DEM samples |
 | `pack.yaml` | Manifest + honesty metadata + `layers:` map + `content_hash` |
 | `NOTICE` | OSM ODbL + Copernicus attribution (required for real packs) |
-| `build_stats.json` | OSM meta, discovery counts, DEM tiles, `content_hash` |
+| `build_stats.json` | OSM meta, discovery counts, DEM tiles, `content_hash`, `layer_digests`, hash version |
 | `raw/` | Build cache only (optional; still under gitignored `data/packs/`) |
 
 `layers/seeds.geojson` is **removed**. Packs that still ship both `catalog.geojson`
@@ -131,12 +131,14 @@ Do not commit PBF bytes.
 
 | Name | Covers |
 |------|--------|
-| Pack `content_hash` | All `layers/*.geojson` + `discovery.selected_by_generator` (SHA-256 → 16 hex) |
+| Pack `content_hash` | Pack-content **v2**: all `layers/*.geojson` + discovery subset (`selected_by_generator`, `quotas`, `min_spacing_km`, `spacing_by_generator`, `grid_res_deg`, `catalog_schema_version`, `generators_run`) → SHA-256 truncated to 16 hex |
+| `layer_digests` | Per-layer full SHA-256 in `build_stats.json` (audit) |
 | `sources[].content_hash` | Per OSM/DEM artifact |
 | Fixture `catalog.sha256` | Catalog file only (full SHA-256) |
 
 `adventure_gis.pack_content_hash` accepts discovery stats **or** a full
-`build_stats.json` blob (normalized via `.discovery`).
+`build_stats.json` blob (normalized via `.discovery`). Domain separator:
+`PACK_CONTENT_HASH_VERSION` / `terraquest-pack-content-v2`.
 
 ## Catalog validation
 

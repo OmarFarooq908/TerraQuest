@@ -97,20 +97,30 @@ Canonical keys:
 
 | Name | Where | Covers | Encoding |
 |------|--------|--------|----------|
-| **Pack `content_hash`** | `pack.yaml` + `build_stats.json` | All `layers/*.geojson` (name + bytes, sorted) **plus** `selected_by_generator` JSON | SHA-256 truncated to **16 hex** |
+| **Pack `content_hash`** | `pack.yaml` + `build_stats.json` | Domain-separated **pack-content v2**: all `layers/*.geojson` (name + bytes, sorted) **plus** a stable discovery subset (see below) | SHA-256 truncated to **16 hex** |
+| **`layer_digests`** | `build_stats.json` | Per-file full SHA-256 of each `layers/*.geojson` (audit; not the pack fingerprint) | Full SHA-256 hex |
 | **`PackSource.content_hash`** | Each `sources[]` entry | OSM filtered PBF / Overpass JSON, or DEM tile concat | 16 hex |
 | **Eval `pack_content_hash`** | `scripts/eval_discovery.py` reports | Same function as pack `content_hash` | 16 hex |
 | **Fixture `catalog.sha256`** | `fixtures/.../catalog.sha256` | **Only** `layers/catalog.geojson` full file | Full SHA-256 |
 
-Implementation: `adventure_gis.pack_hash.pack_content_hash`.
+Implementation: `adventure_gis.pack_hash.pack_content_hash`
+(`PACK_CONTENT_HASH_VERSION`, domain prefix `terraquest-pack-content-v2\0`).
 
-**Stats object for hashing:** always the **discovery stats** dict (must contain
-`selected_by_generator`). Callers may pass either:
+**Discovery subset folded into the pack fingerprint** (keys hashed when present):
+
+`selected_by_generator`, `quotas`, `min_spacing_km`, `spacing_by_generator`,
+`grid_res_deg`, `catalog_schema_version`, `generators_run` (list values sorted
+for stability).
+
+**Stats object for hashing:** always the **discovery stats** dict. Callers may
+pass either:
 
 1. Discovery stats directly (pack builder), or
 2. A full `build_stats.json` blob — normalized by extracting `.discovery`.
 
 `validate_pack` and eval fingerprints **must** agree after normalization.
+Production builds also record `pack_content_hash_version` and `layer_digests`
+alongside `content_hash` in `build_stats.json`.
 
 Leftover `layers/seeds.geojson` **changes** the pack hash. Dual-path packs fail
 `check_pack` unless `--allow-legacy-seeds` (legacy escape hatch; rebuild to remove).
@@ -128,11 +138,17 @@ Leftover `layers/seeds.geojson` **changes** the pack hash. Dual-path packs fail
     "selected_by_generator": {},
     "quotas": {},
     "min_spacing_km": 0,
+    "spacing_by_generator": {},
     "grid_res_deg": 0.02,
     "generators_run": []
   },
   "dem_tiles": ["..."],
-  "content_hash": "0123456789abcdef"
+  "content_hash": "0123456789abcdef",
+  "pack_content_hash_version": 2,
+  "layer_digests": {
+    "catalog.geojson": "<64-hex sha256>",
+    "peaks.geojson": "<64-hex sha256>"
+  }
 }
 ```
 
@@ -206,6 +222,10 @@ pack `NOTICE`. Fixtures: Apache-2.0 synthetic GeoJSON, not survey-grade.
 - Dual-path `seeds.geojson`: keep `--allow-legacy-seeds` until known packs rebuild; then remove in a follow-up.
 - Eval reports that hashed full `build_stats` blobs without reading `.discovery`
   may change fingerprint once normalization lands — regenerate reports if needed.
+- **Pack-content hash v2** (#62): fingerprints change vs v1 even for identical layer
+  bytes (domain separator + broader discovery subset). Rebuild packs / retarget
+  eval pins after upgrading; `build_stats.json` gains `pack_content_hash_version`
+  and `layer_digests`.
 - Stale local packs (missing peaks/viewpoints in `layers:`, leftover `seeds.geojson`)
   fail `check_pack` until rebuilt with the current packbuilder.
 

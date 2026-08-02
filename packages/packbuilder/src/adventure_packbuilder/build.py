@@ -12,7 +12,11 @@ from adventure_core.catalog import CATALOG_SCHEMA_VERSION, DiscoveryConfig
 from adventure_core.config import configs_dir, load_yaml, repo_root
 from adventure_core.pack_manifest import PackManifest, PackSource
 from adventure_gis.pack_contract import default_layers_map
-from adventure_gis.pack_hash import pack_content_hash
+from adventure_gis.pack_hash import (
+    PACK_CONTENT_HASH_VERSION,
+    layer_file_digests,
+    pack_content_hash,
+)
 
 from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
 from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojson
@@ -266,6 +270,8 @@ products under ODbL share-alike obligations.
                 "discovery": stats,
                 "dem_tiles": [p.name for p in dem_paths],
                 "content_hash": content_hash,
+                "pack_content_hash_version": PACK_CONTENT_HASH_VERSION,
+                "layer_digests": layer_file_digests(layers_dir),
                 "sentinel2": {
                     "enabled": bool((config.sentinel2 or {}).get("enabled")),
                     "wrote_layer": sentinel_wrote,

@@ -45,8 +45,10 @@ Frozen in **RFC-0003**. Short form:
 | Synthetic fixture | `fixtures/<id>/` | Yes (CI) |
 
 Production tree: `pack.yaml`, `NOTICE`, `build_stats.json`, `layers/*.geojson`
-(catalog + support layers). Pack `content_hash` = SHA-256 of all layer GeoJSON
-bytes + `selected_by_generator`, truncated to 16 hex.
+(catalog + support layers). Pack `content_hash` (v2) = domain-separated SHA-256
+of all layer GeoJSON bytes + discovery knobs (`selected_by_generator`, quotas,
+spacing including per-generator overrides, grid, schema version, generators run),
+truncated to 16 hex. `build_stats.json` also records per-layer digests for audit.
 
 Versioning: refresh data → same `pack_id`, new hash; breaking catalog fields →
 bump `feature_schema_version`; intentional identity break → new `pack_id`.

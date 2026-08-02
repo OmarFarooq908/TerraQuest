@@ -123,6 +123,7 @@ def run_discovery(
         "selected_by_generator": {k: len(v) for k, v in per_gen.items()},
         "quotas": {k: cfg.quota_for(k) for k in GENERATORS},
         "min_spacing_km": cfg.min_spacing_km,
+        "spacing_by_generator": {k: cfg.spacing_for(k) for k in GENERATORS},
         "grid_res_deg": cfg.grid_res_deg,
         "generators_run": list(GENERATORS.keys()),
     }
