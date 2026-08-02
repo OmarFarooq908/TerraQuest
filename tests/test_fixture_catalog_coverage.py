@@ -34,6 +34,8 @@ def test_fixture_catalog_covers_all_shipping_generators() -> None:
 
 
 def test_fixture_catalog_features_marked_synthetic() -> None:
+    from adventure_core.evidence_ledger import REQUIRED_EVIDENCE_KEYS
+
     raw = json.loads((FIXTURE / "layers" / "catalog.geojson").read_text(encoding="utf-8"))
     bbox = [74.5, 35.0, 75.5, 36.0]
     for feat in raw["features"]:
@@ -45,6 +47,9 @@ def test_fixture_catalog_features_marked_synthetic() -> None:
         assert props["provenance"]["method"] == "fixture_seed"
         assert props["evidence"].get("fixture") is True
         assert props["catalog_schema_version"] == "0.3.0"
+        required = REQUIRED_EVIDENCE_KEYS[props["generator"]]
+        for key in required:
+            assert key in props["evidence"] and props["evidence"][key] is not None
 
 
 def test_fixture_support_layers_present() -> None:

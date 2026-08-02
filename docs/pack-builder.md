@@ -25,10 +25,12 @@ Required Feature `properties` (schema `0.3.0`):
 | Field | Notes |
 |-------|--------|
 | `id`, `name`, `generator` | Identity + named discovery generator |
-| `provenance` | `{sources, method, …}` — `method` required |
-| `evidence` | Object (may be empty) |
+| `provenance` | `{sources, method, layer/dem_tile, …}` — `method` + non-empty `sources` |
+| `evidence` | Object with **generator-family required keys** (evidence ledger v1) — empty `{}` fails |
 | `densify` | `{cell_id, parent_id, densify_allowed, grid_res_deg}` |
 | geometry | GeoJSON `Point` with lon/lat in range |
+
+See [generators](generators.md) for the per-generator evidence contract (`adventure_core.evidence_ledger`).
 
 ```bash
 uv run python scripts/check_pack.py fixtures/karakoram_mini

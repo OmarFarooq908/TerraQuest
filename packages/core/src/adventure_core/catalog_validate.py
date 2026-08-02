@@ -12,6 +12,7 @@ from adventure_core.catalog import (
     DensifyHook,
     Provenance,
 )
+from adventure_core.evidence_ledger import validate_evidence_ledger
 
 REQUIRED_FEATURE_KEYS = ("id", "name", "generator", "provenance", "evidence", "densify")
 
@@ -83,6 +84,19 @@ def validate_catalog_feature(feature: dict[str, Any], *, index: int) -> list[str
             DensifyHook.model_validate(props["densify"])
         if "evidence" in props and not isinstance(props["evidence"], dict):
             errors.append(f"{fid}: evidence must be an object")
+        elif isinstance(props.get("evidence"), dict) and isinstance(props.get("provenance"), dict):
+            gen = props.get("generator")
+            if not (isinstance(gen, str) and gen.strip()):
+                errors.append(f"{fid}: generator must be a non-empty string")
+            else:
+                errors.extend(
+                    validate_evidence_ledger(
+                        generator=gen,
+                        provenance=props["provenance"],
+                        evidence=props["evidence"],
+                        feature_id=str(fid),
+                    )
+                )
     except ValidationError as exc:
         errors.append(f"{fid}: schema error: {exc.errors()[0]['msg']}")
 
