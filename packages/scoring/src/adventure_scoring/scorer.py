@@ -306,13 +306,14 @@ def rank_missions(
     intent: MissionIntent,
     max_results: int = 5,
     min_confidence: float = 0.35,
+    pack_synthetic: bool | None = None,
 ) -> list[RankedMission]:
     ranked: list[RankedMission] = []
     for cand in candidates:
         if not _passes_gates(cand, mode):
             continue
         score, breakdown, adj = score_candidate(cand, mode, intent)
-        conf = build_confidence(cand)
+        conf = build_confidence(cand, pack_synthetic=pack_synthetic)
         if conf.value < min_confidence:
             continue
         ranked.append(

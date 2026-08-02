@@ -15,7 +15,7 @@ class ReasonCode(BaseModel):
 
 
 class Confidence(BaseModel):
-    """Calibrated claim confidence — never pretend certainty."""
+    """Heuristic claim confidence (pack-kind aware) — never pretend certainty."""
 
     value: float = Field(ge=0.0, le=1.0)
     reasons: list[ReasonCode] = Field(default_factory=list)

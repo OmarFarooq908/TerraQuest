@@ -21,6 +21,7 @@ nav:
   - MissionIntent: mission-intent.md
   - Generators: generators.md
   - Evaluation: evaluation.md
+  - Confidence: confidence.md
   - CLI: cli.md
   - Known limits: known-limits.md
 

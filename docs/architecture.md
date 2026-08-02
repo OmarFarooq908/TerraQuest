@@ -30,7 +30,7 @@ flowchart LR
 | `adventure-core` | Schemas, intent, catalog types, config loaders |
 | `adventure-packbuilder` | OSM/DEM ingest + discovery pipeline |
 | `adventure-gis` | Load catalog, compute features |
-| `adventure-scoring` | Preference alignment, gates, confidence |
+| `adventure-scoring` | Preference alignment, gates, [confidence](confidence.md) |
 | `adventure-inference` | Rules / Ollama router |
 | `adventure-cli` | `adventurectl` |
 
