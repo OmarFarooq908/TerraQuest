@@ -78,10 +78,15 @@ Checked-in fixture baseline:
 
 - Schema: `evaluation/schema/place_label.schema.json` and `adventure_core.evaluation.PlaceLabel`
 - CI uses **synthetic** labels under `evaluation/fixtures/karakoram_mini/`
-- Real regional labels live under `evaluation/skardu/` (etc.); start empty and grow with curator licenses
+- Real regional seed: `evaluation/skardu/` (provisional v0, issue #56) — grow with
+  field-verified curator licenses toward the North Star count targets
+- Corpus gate: `tests/test_evaluation_labels.py` (`validate_place_label_corpus`)
 
 See `evaluation/README.md`, `RFC/0002-evaluation-dataset.md`, and
 `RFC/0005-measure-adventure.md` (metric map + threats to validity).
+
+Skardu metrics require a pack covering Baltistan coordinates; fixture CI smoke stays
+on `karakoram_mini`.
 
 ## Threats to validity (summary)
 

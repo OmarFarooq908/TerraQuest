@@ -10,7 +10,8 @@ This is **not** the same as `eval/golden_prompts.yaml` (intent regression).
 |------|---------|
 | `schema/place_label.schema.json` | JSON Schema for a place label |
 | `fixtures/karakoram_mini/` | Synthetic labels aligned to the offline fixture pack (CI) |
-| `skardu/`, `swat/`, `gilgit/`, `astore/` | Real regional labels (curator-authored; start with README) |
+| `skardu/` | Real regional seed (provisional v0; #56) — grow toward ≥30 interesting + ≥15 controls |
+| `swat/`, `gilgit/`, `astore/` | Regional stubs (README only until curator labels land) |
 
 ## Run metrics
 
@@ -46,3 +47,6 @@ ranking. Fixture baseline report: `reports/karakoram_mini_baseline.md` (pinned v
 2. Add `*.json` arrays under the region directory.
 3. Set `synthetic: false` and a real `license` per record.
 4. Prefer `ontology_ids` (canonical `family.concept` ids; see [RFC-0008](../RFC/0008-formal-ontology.md) and [docs/ontology.md](../docs/ontology.md)); `tags` are transitional.
+5. Run `uv run pytest -q tests/test_evaluation_labels.py` — CI validates every
+   `evaluation/**/*.json` place-label array (schema + unique ids + ontology ids +
+   synthetic flag conventions).

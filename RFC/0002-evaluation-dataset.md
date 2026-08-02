@@ -1,13 +1,14 @@
 # RFC-0002: Evaluation dataset for discovery quality
 
-- Status: Draft
+- Status: Accepted (infra + metrics); regional fill ongoing
 - Authors: Omar Farooq
 - Created: 2026-08-02
 - Tracking issue / discussion: https://github.com/OmarFarooq908/TerraQuest/issues/9
+- Follow-up: https://github.com/OmarFarooq908/TerraQuest/issues/56 (Skardu seed + corpus CI)
 
 ## Summary
 
-Introduce a versioned, offline **evaluation dataset** of human- (or curator-) rated places so we can measure whether discovery generators and scorers find *interesting* locations — not only whether ranking is deterministic. Ship a Pydantic schema, on-disk layout under `evaluation/`, and an offline metrics harness. CI uses a **synthetic** fixture-aligned slice; real regional labels are curated separately with explicit licenses.
+Introduce a versioned, offline **evaluation dataset** of human- (or curator-) rated places so we can measure whether discovery generators and scorers find *interesting* locations — not only whether ranking is deterministic. Ship a Pydantic schema, on-disk layout under `evaluation/`, and an offline metrics harness. CI uses a **synthetic** fixture-aligned slice; real regional labels are curated separately with explicit licenses. Skardu has a **provisional v0** curator seed (#56); expand toward the North Star count targets with field verification.
 
 ## Motivation
 
@@ -29,7 +30,7 @@ evaluation/
     hidden_lakes.json
     forgotten_tracks.json
     controls.json
-  skardu/                           # real curator labels (start empty / README)
+  skardu/                           # real curator labels (provisional v0 seed)
   swat/
   gilgit/
   astore/
@@ -117,6 +118,6 @@ Additive. `eval/golden_prompts.yaml` remains for intent regression. `evaluation/
 
 ## Unresolved questions
 
-1. Exact N for first real Skardu set (propose ≥ 30 interesting + 15 controls).
-2. Whether `ontology_ids` become required after the ontology RFC lands.
+1. Exact N for first *field-verified* Skardu set (stretch ≥ 30 interesting + 15 controls; v0 seed is smaller — #56).
+2. Whether `ontology_ids` become required (CI already validates them when present; canonical-only).
 3. Whether reports publish under `evaluation/reports/` (gitignored) or `benchmarks/`.

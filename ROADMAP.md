@@ -12,7 +12,7 @@ Working balance: ~**80%** better data + evaluation, ~**20%** new features. Archi
 
 Milestone: **North Star — discovery quality** (see issues). Start here:
 
-1. [#9 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/9)
+1. [#9 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/9) — provisional Skardu seed + corpus CI ([#56](https://github.com/OmarFarooq908/TerraQuest/issues/56)); grow toward field-verified counts
 2. [#10 Formal ontology](https://github.com/OmarFarooq908/TerraQuest/issues/10)
 3. [#29 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/29) — RFC-0005
 4. P0 correctness issues (intent, inversion, schema, confidence)
