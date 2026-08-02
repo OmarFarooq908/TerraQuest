@@ -114,8 +114,29 @@ def _settlement_density_kernel(
     return _clamp01(weighted / _SETTLEMENT_DENSITY_REF), count
 
 
+def _is_light_vehicle(vehicle: str | None, vehicle_class: str | None) -> bool:
+    v = (vehicle or "").lower()
+    vc = (vehicle_class or "").lower()
+    return any(x in v for x in ("swift", "hatch", "sedan", "city", "corolla")) or vc in {
+        "hatchback",
+        "sedan",
+    }
+
+
+def _is_capable_vehicle(vehicle: str | None, vehicle_class: str | None) -> bool:
+    v = (vehicle or "").lower()
+    vc = (vehicle_class or "").lower()
+    return vc in {"suv", "suv_4x4"} or any(x in v for x in ("4x4", "jeep", "land cruiser", "prado"))
+
+
+def _highway_class_score(highway: str | None) -> float:
+    if not highway:
+        return 0.5
+    return _HIGHWAY_ACCESS.get(highway, 0.5)
+
+
 def _nearest_road(origin: Point, roads: list[NamedPoint]) -> tuple[float | None, str | None]:
-    """Nearest road-node distance and ``highway`` tag (lowercased), if any."""
+    """Geometric nearest road-node distance and ``highway`` tag (diagnostics)."""
     if not roads:
         return None, None
     best_d: float | None = None
@@ -126,6 +147,47 @@ def _nearest_road(origin: Point, roads: list[NamedPoint]) -> tuple[float | None,
             best_d = d
             raw = r.properties.get("highway")
             hwy = str(raw).strip().lower() if raw not in (None, "") else None
+            best_hwy = hwy
+    return best_d, best_hwy
+
+
+def _select_access_road(
+    origin: Point,
+    roads: list[NamedPoint],
+    *,
+    vehicle: str | None,
+    vehicle_class: str | None,
+) -> tuple[float | None, str | None]:
+    """Pick the road node that best explains *usable* access for this vehicle.
+
+    Pure nearest-node is wrong for sedans when a ``path`` sits closer than a
+    ``secondary``. Utility = effective_class / (1 + dist_km / 5), with shorter
+    distance winning ties.
+    """
+    if not roads:
+        return None, None
+    light = _is_light_vehicle(vehicle, vehicle_class)
+    capable = _is_capable_vehicle(vehicle, vehicle_class)
+
+    best_key: tuple[float, float, float] | None = None
+    best_d: float | None = None
+    best_hwy: str | None = None
+    for r in roads:
+        d = haversine_km(origin, r.point)
+        raw = r.properties.get("highway")
+        hwy = str(raw).strip().lower() if raw not in (None, "") else None
+        class_score = _highway_class_score(hwy)
+        if light:
+            effective = class_score
+        elif capable:
+            effective = max(class_score, 0.35)
+        else:
+            effective = 0.5 + 0.5 * class_score
+        utility = effective / (1.0 + d / 5.0)
+        key = (utility, -d, class_score)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_d = d
             best_hwy = hwy
     return best_d, best_hwy
 
@@ -153,17 +215,10 @@ def _access_fit(
     else:
         base = 0.1
 
-    v = (vehicle or "").lower()
-    vc = (vehicle_class or "").lower()
-    light = any(x in v for x in ("swift", "hatch", "sedan", "city", "corolla")) or vc in {
-        "hatchback",
-        "sedan",
-    }
-    capable = vc in {"suv", "suv_4x4"} or any(
-        x in v for x in ("4x4", "jeep", "land cruiser", "prado")
-    )
+    light = _is_light_vehicle(vehicle, vehicle_class)
+    capable = _is_capable_vehicle(vehicle, vehicle_class)
 
-    class_score = _HIGHWAY_ACCESS.get(highway, 0.5) if highway else 0.5
+    class_score = _highway_class_score(highway)
     rough = highway in {"track", "path", "footway", "bridleway", "pedestrian"}
 
     if light:
@@ -218,7 +273,13 @@ def generate_candidates(
     for seed in pack.catalog:
         origin = seed.point
         dist_settlement = _min_dist_km(origin, pack.settlements)
-        dist_road, nearest_highway = _nearest_road(origin, pack.roads)
+        dist_road_geom, nearest_highway_geom = _nearest_road(origin, pack.roads)
+        dist_road, access_highway = _select_access_road(
+            origin,
+            pack.roads,
+            vehicle=vehicle,
+            vehicle_class=vehicle_class,
+        )
         dist_water = _min_dist_km(origin, pack.water)
         settlement_density, settlements_within = _settlement_density_kernel(
             origin, pack.settlements
@@ -284,7 +345,7 @@ def generate_candidates(
             forest_prop = max(forest_prop, 0.75)
         forest = forest_prop
 
-        access = _access_fit(dist_road, nearest_highway, vehicle, vehicle_class, days)
+        access = _access_fit(dist_road, access_highway, vehicle, vehicle_class, days)
         camping = _clamp01(
             (1.0 - _prop_unit(seed.properties, "slope", 0.3)) * 0.6 + water * 0.25 + access * 0.15
         )
@@ -312,7 +373,7 @@ def generate_candidates(
             relief_m=round(relief, 1),
             settlement_density=settlement_density,
             settlements_within_10km=settlements_within,
-            nearest_highway=nearest_highway,
+            nearest_highway=access_highway,
         )
 
         provenance = seed.properties.get("provenance") or {}
@@ -340,6 +401,7 @@ def generate_candidates(
                     ),
                     "dist_settlement_km": features.dist_settlement_km,
                     "dist_road_km": features.dist_road_km,
+                    "dist_road_geom_km": _round_km(dist_road_geom),
                     "dist_water_km": features.dist_water_km,
                     "layer_flags": layer_flags,
                     "elevation_m": elev,
@@ -348,7 +410,8 @@ def generate_candidates(
                     "crowd": crowd,
                     "settlement_density": settlement_density,
                     "settlements_within_10km": settlements_within,
-                    "nearest_highway": nearest_highway,
+                    "nearest_highway": access_highway,
+                    "nearest_highway_geom": nearest_highway_geom,
                     "osm_id": (provenance.get("osm_id") if isinstance(provenance, dict) else None)
                     or seed.properties.get("osm_id"),
                     "provenance": provenance,

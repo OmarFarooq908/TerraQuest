@@ -11,7 +11,7 @@ See issue [#23](https://github.com/OmarFarooq908/TerraQuest/issues/23).
 | Signal | Status | Source |
 |--------|--------|--------|
 | `dist_settlement_km` / `remoteness` | Shipping | Haversine to `settlements.geojson` |
-| `dist_road_km` / `access_fit` | Shipping (+ **road class**) | Nearest `road_nodes` + `highway=*` |
+| `dist_road_km` / `access_fit` | Shipping (+ **road class**) | Best *usable* `road_nodes` node (class×distance) + `highway=*` |
 | `dist_water_km` / `water` | Shipping | Haversine to water points (centroids) |
 | `settlement_density` / crowd blend | **New (#23)** | Density kernel over settlements |
 | `elevation_m` / `relief_m` / `terrain_drama` | Shipping | Catalog props + elevation samples |
@@ -34,11 +34,15 @@ See issue [#23](https://github.com/OmarFarooq908/TerraQuest/issues/23).
 
 ### Road-class access
 
-- **Definition:** `access_fit` still uses distance buckets, then multiplies by an
-  OSM `highway=*` quality score. Light vehicles (sedan/hatchback) are penalized
-  harder for `track`/`path` nodes; capable `suv`/`4x4` less so.
+- **Definition:** Select an *access* road node by maximizing
+  `effective_highway_class / (1 + dist_km / 5)` for the mission vehicle (so a
+  nearby `path` does not beat a slightly farther `secondary` for sedans). Then
+  apply distance buckets × class multipliers; light vehicles are penalized harder
+  on `track`/`path`; capable `suv`/`4x4` less so.
 - **Data:** `layers/road_nodes.geojson` → `highway`.
-- **Evidence:** `nearest_highway` on the candidate.
+- **Fields / evidence:** `dist_road_km` + `nearest_highway` refer to the **selected
+  access** node. Geometric nearest is also recorded as `dist_road_geom_km` /
+  `nearest_highway_geom` in evidence for audit.
 
 ## Eval note
 
