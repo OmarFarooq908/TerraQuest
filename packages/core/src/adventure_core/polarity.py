@@ -42,19 +42,21 @@ POLARITY_CUES: tuple[PolarityCue, ...] = (
         pattern=re.compile(
             r"(?i)\b(hate|avoid|no|without)\b.{0,20}\bcrowds?\b"
             r"|\bcrowds?\b.{0,12}\b(hate|avoid)\b"
-            r"|\b(quiet|peaceful)\b(?!.{0,20}\b(party|festival)\b)"
         ),
         expectations={"human_activity": -1, "solitude": 1},
     ),
     PolarityCue(
         id="seek_solitude",
-        pattern=re.compile(r"(?i)\b(solitude|secluded|away from (people|crowds?))\b"),
+        pattern=re.compile(
+            r"(?i)\b(solitude|secluded|away from (people|crowds?))\b"
+            r"|\b(quiet|peaceful)\b(?!.{0,24}\b(party|festival|crowds?)\b)"
+        ),
         expectations={"solitude": 1, "human_activity": -1},
     ),
     PolarityCue(
         id="love_crowds",
         pattern=re.compile(
-            r"(?i)\b(love|want|enjoy)\b.{0,16}\bcrowds?\b"
+            r"(?i)\b(love|want|enjoy)\b(?:(?!\b(hate|avoid|no|without)\b).){0,12}\bcrowds?\b"
             r"|\b(lively|bustling|nightlife|busy (town|city|bazaar))\b"
         ),
         expectations={"human_activity": 1},

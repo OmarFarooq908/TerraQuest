@@ -50,6 +50,20 @@ def test_love_crowds_not_treated_as_hate():
     assert not any(f.kind == "inverted" for f in findings)
 
 
+def test_hate_crowds_not_confused_with_love_rivers():
+    """Regression: 'love rivers, hate crowds' must not match love_crowds."""
+    intent = interpret_mission(
+        "love rivers, hate crowds, don't want dangerous roads",
+        interpreter="rules",
+        repair_polarity=True,
+    )
+    assert intent.preferences.human_activity < -0.3
+    assert intent.preferences.water > 0.3
+    assert intent.preferences.danger < -0.3
+    findings = detect_preference_inversions("love rivers, hate crowds", intent.preferences)
+    assert not any(f.cue_id == "love_crowds" for f in findings)
+
+
 def _check_pref_expectation(prefs: PreferenceVector, key: str, bound: float) -> None:
     dim, op = key.rsplit("_", 1)
     value = float(getattr(prefs, dim))
