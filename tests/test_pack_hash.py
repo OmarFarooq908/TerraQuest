@@ -55,6 +55,7 @@ def test_fixture_pack_fingerprint_stable() -> None:
     # Pinned in evaluation/reports/karakoram_mini_baseline.md
     assert h1 == "42a113a3b1c296f2"
 
+
 def test_default_layers_map_covers_required_keys() -> None:
     m = default_layers_map()
     assert tuple(m) == REQUIRED_PACK_LAYER_KEYS
