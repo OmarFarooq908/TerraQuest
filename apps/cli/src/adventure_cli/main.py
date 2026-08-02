@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 from adventure_core.config import load_pack_manifest
+from adventure_inference import InferenceError
 from rich.console import Console
 from rich.table import Table
 
@@ -140,7 +141,11 @@ def mission_run(
         "--interpreter",
         help="Intent parser: auto (Ollama→rules), rules (offline), or ollama",
     ),
-    model: str = typer.Option("llama3.2", "--model", help="Ollama model when interpreter uses LLM"),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help="Ollama model pin (default: configs/models.yaml mission_interpreter)",
+    ),
     strict_llm: bool = typer.Option(
         False,
         "--strict-llm",
@@ -155,16 +160,27 @@ def mission_run(
     Use --pack fixtures/... for synthetic offline data; use a built pack id
     after `adventurectl pack build` for real OSM/DEM results.
     """
+    if interpreter not in {"auto", "rules", "ollama"}:
+        console.print(
+            f"[bold red]Inference error[/bold red]: Unknown interpreter {interpreter!r}. "
+            "Use auto, rules, or ollama. See docs/offline-inference.md."
+        )
+        raise typer.Exit(code=2)
+
     _print_pack_banner(pack)
-    result = run_mission(
-        pack=pack,
-        mode=mode,
-        prompt=prompt,
-        max_results=max_results,
-        interpreter=interpreter,
-        model=model,
-        allow_rules_fallback=not strict_llm,
-    )
+    try:
+        result = run_mission(
+            pack=pack,
+            mode=mode,
+            prompt=prompt,
+            max_results=max_results,
+            interpreter=interpreter,
+            model=model,
+            allow_rules_fallback=not strict_llm,
+        )
+    except InferenceError as exc:
+        console.print(f"[bold red]Inference error[/bold red]: {exc}")
+        raise typer.Exit(code=2) from exc
 
     if json_out:
         console.print_json(result.model_dump_json(indent=2))

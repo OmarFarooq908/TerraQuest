@@ -9,6 +9,7 @@ Local-first exploration OS: **deterministic GIS discovers**, LLMs only interpret
 - [Generators](generators.md)
 - [Evaluation](evaluation.md)
 - [CLI](cli.md)
+- [Offline inference](offline-inference.md)
 - [Known limits](known-limits.md)
 
 ```bash

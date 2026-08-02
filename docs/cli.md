@@ -12,10 +12,12 @@ uv run adventurectl mission run --pack fixtures/karakoram_mini --interpreter rul
 | Flag | Meaning |
 |------|---------|
 | `--pack` | Pack id or `fixtures/...` |
-| `--interpreter` | `auto` \| `rules` \| `ollama` |
-| `--model` | Ollama model (default `llama3.2`) |
+| `--interpreter` | `auto` \| `rules` \| `ollama` (unknown values exit 2) |
+| `--model` | Ollama model pin; default from `configs/models.yaml` (`mission_interpreter`) |
 | `--strict-llm` | With `auto`, do not fall back to rules |
 | `--json` | Machine-readable `MissionResult` |
+
+Local LLM setup, cache layout, and missing-model errors: [offline inference](offline-inference.md).
 
 ## Honesty banners
 

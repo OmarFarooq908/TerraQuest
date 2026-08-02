@@ -8,7 +8,7 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 | `party_size` | Parsed; camping capacity not scored |
 | Confidence | Heuristic noisy-OR with **pack-kind priors** (synthetic ceiling lower than real); not empirically calibrated — see [confidence](confidence.md) |
 | Overpass ingest | Degraded (no road_lines); opt-in only |
-| LLM intent | Validation + polarity repair in `interpret_mission`; `--interpreter rules` for CI |
+| LLM intent | Local Ollama only by default (no cloud keys); validation + polarity repair; `--interpreter rules` for CI — see [offline inference](offline-inference.md) |
 | Sentinel-2 | Not in v1 packs |
 | Mission-time densify | Schema hooks only (Phase C later) |
 | Missing GIS layers | Empty settlements/roads/water → `dist_*_km=null`, neutral remoteness 0.5, evidence `layer_flags` — never `-1` / `999` sentinels |

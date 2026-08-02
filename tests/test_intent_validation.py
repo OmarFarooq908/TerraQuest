@@ -77,7 +77,7 @@ def test_router_validate_then_polarity(monkeypatch: pytest.MonkeyPatch):
     )
     import adventure_inference.router as router
 
-    monkeypatch.setattr(router, "ollama_available", lambda: True)
+    monkeypatch.setattr(router, "ollama_available", lambda *a, **k: True)
     monkeypatch.setattr(router, "interpret_ollama", lambda *a, **k: bad)
 
     intent = interpret_mission("I hate crowds", interpreter="ollama")

@@ -1,7 +1,34 @@
-# Local inference — capability → Ollama model (loaded by adventure_inference)
+# Local inference pins — Ollama only on default paths (no cloud API keys).
+# Loaded by adventure_inference.models_config.
+
+runtime: ollama
+default_base_url: http://127.0.0.1:11434
+
 default_model: llama3.2
 mission_interpreter: llama3.2
+
 fallback:
   - llama3.2
   - llama3.1:8b
   - qwen3:8b
+  - llama3.2:3b
+
+# Approximate free-RAM floors for a usable local run (not hard gates).
+hardware_floors:
+  llama3.2:
+    ram_gb: 4
+    notes: "default 3B-class tag"
+  llama3.2:3b:
+    ram_gb: 4
+    notes: "smaller fallback"
+  llama3.1:8b:
+    ram_gb: 8
+    notes: ""
+  qwen3:8b:
+    ram_gb: 8
+    notes: ""
+
+cache:
+  # Adventure-managed artifacts (future embeddings / pack-time VLM).
+  # Ollama weights stay in Ollama's store (~/.ollama), not here.
+  inference_dir: data/cache/inference

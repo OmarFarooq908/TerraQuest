@@ -40,9 +40,10 @@ uv run adventurectl mission run \
 
 Real packs print a green **REAL PACK** banner with sources (`osm`, `dem`).
 
-Optional local LLM intent:
+Optional local LLM intent (Ollama only — no cloud API keys; see [docs/offline-inference.md](docs/offline-inference.md)):
 
 ```bash
+ollama pull llama3.2
 uv run adventurectl mission run \
   --pack skardu_v1 \
   --interpreter ollama \
