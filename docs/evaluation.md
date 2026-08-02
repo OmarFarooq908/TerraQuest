@@ -63,8 +63,12 @@ uv run python scripts/eval_discovery.py \
   --include-generators named_waterbody,unnamed_waterbody --json
 ```
 
-Metrics include `recall_at_k`, `precision_at_k`, `ndcg_at_k` (graded via `human_rating`),
+Metrics include `recall_at_k`, `precision_at_k`, `ndcg_at_k` (graded via `human_rating`;
+ablations use a **pool-relative** ideal so family comparisons are fair),
 `popularity_trap_at_k`, and `rating_spearman`. Reports record `pack_content_hash`.
+
+Filters rank among **existing catalog features** from selected generators; they do
+not re-run packbuilder discovery.
 
 Checked-in fixture baseline: [`evaluation/reports/karakoram_mini_baseline.md`](../evaluation/reports/karakoram_mini_baseline.md).
 

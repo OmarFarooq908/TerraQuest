@@ -21,9 +21,13 @@ def filter_candidates_by_generator(
     include_generators: Collection[str] | None = None,
     exclude_generators: Collection[str] | None = None,
 ) -> list[Candidate]:
-    """Filter catalog-derived candidates by discovery ``generator`` evidence."""
-    include = set(include_generators) if include_generators else None
-    exclude = set(exclude_generators) if exclude_generators else None
+    """Filter catalog-derived candidates by discovery ``generator`` evidence.
+
+    ``None`` means “no constraint”. An empty collection is intentional and may
+    yield zero candidates (unlike a falsy skip).
+    """
+    include = set(include_generators) if include_generators is not None else None
+    exclude = set(exclude_generators) if exclude_generators is not None else None
     out: list[Candidate] = []
     for cand in candidates:
         gen = str(cand.evidence.get("generator") or "")
@@ -72,7 +76,7 @@ def run_mission(
         vehicle_class=hc.vehicle_class,
         days=hc.days,
     )
-    if include_generators or exclude_generators:
+    if include_generators is not None or exclude_generators is not None:
         candidates = filter_candidates_by_generator(
             candidates,
             include_generators=include_generators,

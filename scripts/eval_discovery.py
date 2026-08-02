@@ -3,6 +3,9 @@
 
 Runs the normal mission pipeline, then scores ranked results against place labels.
 Does not invent candidates or call cloud APIs.
+
+Generator filters apply **after** catalog load (rank among features from those
+generators) — they do not re-run packbuilder discovery.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from adventure_core.evaluation import (
     load_place_labels,
     metrics_as_dict,
 )
+from adventure_gis import load_pack_data
 from adventure_gis.pack_hash import pack_content_hash
 
 DEFAULT_PROMPT = (
@@ -39,6 +43,9 @@ FIXTURE_ABLATIONS: dict[str, dict[str, Any]] = {
     },
     "access_only": {
         "include_generators": ["track_terminus", "road_spur"],
+    },
+    "osm_landmarks": {
+        "include_generators": ["osm_peak", "osm_viewpoint"],
     },
 }
 
@@ -61,6 +68,28 @@ def pack_fingerprint(pack: str) -> str:
     return pack_content_hash(layers, stats)
 
 
+def catalog_ids_for_generators(
+    pack: str,
+    *,
+    include_generators: list[str] | None = None,
+    exclude_generators: list[str] | None = None,
+) -> list[str]:
+    """Catalog feature ids in the filtered generator pool (for pool-relative nDCG)."""
+    _, pack_dir = load_pack_manifest(pack)
+    data = load_pack_data(pack_dir)
+    include = set(include_generators) if include_generators is not None else None
+    exclude = set(exclude_generators) if exclude_generators is not None else None
+    ids: list[str] = []
+    for seed in data.catalog:
+        gen = str(seed.properties.get("generator") or "")
+        if include is not None and gen not in include:
+            continue
+        if exclude is not None and gen in exclude:
+            continue
+        ids.append(seed.id)
+    return ids
+
+
 def run_eval(
     *,
     pack: str,
@@ -77,6 +106,11 @@ def run_eval(
     ablation_name: str | None = None,
 ) -> dict[str, Any]:
     labels = load_place_labels(labels_path)
+    pool_ids = catalog_ids_for_generators(
+        pack,
+        include_generators=include_generators,
+        exclude_generators=exclude_generators,
+    )
     result = run_mission(
         pack=pack,
         mode=mode,
@@ -95,22 +129,31 @@ def run_eval(
         )
         for m in result.missions
     ]
+    # Pool-relative ideal when filtering generators; global ideal for all_generators.
+    ideal_ids = (
+        pool_ids if include_generators is not None or exclude_generators is not None else None
+    )
     metrics = compute_discovery_metrics(
         ranked,
         labels,
         k=k,
         match_radius_km=match_radius_km,
         popularity_threshold=popularity_threshold,
+        ideal_catalog_ids=ideal_ids,
     )
     payload: dict[str, Any] = {
         "ablation": ablation_name or "custom",
         "pack_id": result.pack_id,
         "pack_content_hash": pack_fingerprint(pack),
+        "labels_path": str(labels_path),
         "mode": result.mode,
         "interpreter": result.request.intent.source,
         "prompt": prompt,
+        "match_radius_km": match_radius_km,
+        "popularity_threshold": popularity_threshold,
         "include_generators": include_generators,
         "exclude_generators": exclude_generators,
+        "pool_catalog_ids": pool_ids,
         "ranked_candidate_ids": [m.candidate_id for m in result.missions[:k]],
         "metrics": metrics_as_dict(metrics),
         "notes": result.notes,
@@ -127,17 +170,27 @@ def _fmt_metric(v: float | None) -> str:
 def write_markdown_report(runs: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     first = runs[0]
+    try:
+        rerun_path = str(path.resolve().relative_to(repo_root()))
+    except ValueError:
+        rerun_path = str(path)
     lines = [
         "# Discovery ranking comparison",
         "",
         f"- pack: `{first['pack_id']}`",
         f"- pack_content_hash: `{first['pack_content_hash']}`",
+        f"- labels: `{first.get('labels_path', '')}`",
         f"- interpreter: `{first['interpreter']}`",
         f"- mode: `{first['mode']}`",
         f"- k: `{first['metrics']['k']}`",
+        f"- match_radius_km: `{first.get('match_radius_km', 2.0)}`",
         f"- prompt: {first['prompt']!r}",
         "",
         "Synthetic fixture-scale ablation (issue #24). Not a Skardu field study.",
+        "Filters rank among **existing catalog features** from selected generators",
+        "(post-catalog); they do not re-run packbuilder discovery.",
+        "Ablation `nDCG@k` uses a **pool-relative** ideal (labels whose `catalog_id`",
+        "is in the filtered catalog); `all_generators` uses the global ideal.",
         "",
         "| Ablation | include_generators | recall@k | precision@k | nDCG@k | pop_trap@k | spearman | top ids |",
         "|----------|--------------------|----------|-------------|--------|------------|----------|---------|",
@@ -169,9 +222,10 @@ def write_markdown_report(runs: list[dict[str, Any]], path: Path) -> None:
             "## Notes",
             "",
             "- North Star: maximize `recall_at_k` on `interesting=true` without inflating `popularity_trap_at_k`.",
-            "- `nDCG@k` uses label `human_rating` as graded relevance.",
+            "- `nDCG@k` uses label `human_rating` with exponential gain `(2^rel - 1) / log2(rank+1)`.",
+            "- Precision@k denominator is matched labels only; unlabeled tops do not dilute it.",
             "- Re-run: `uv run python scripts/eval_discovery.py --ablations --write-report "
-            + str(path.relative_to(repo_root()) if path.is_absolute() else path)
+            + rerun_path
             + "`",
             "",
         ]
@@ -208,13 +262,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument(
         "--ablations",
         action="store_true",
-        help="Run fixture preset ablations (all / water / dem_terrain / access)",
+        help="Run fixture preset ablations (all / water / dem_terrain / access / osm)",
     )
     p.add_argument(
         "--write-report",
         type=Path,
         default=None,
-        help="Write markdown comparison table (implies --ablations if no single run)",
+        help="Write markdown comparison table (implies --ablations unless filters set)",
     )
     p.add_argument("--json", action="store_true", help="Print metrics JSON only")
     args = p.parse_args(argv)
@@ -231,8 +285,9 @@ def main(argv: list[str] | None = None) -> int:
         max_results=args.max_results,
     )
 
+    custom_filters = bool(args.include_generators or args.exclude_generators)
     runs: list[dict[str, Any]]
-    if args.ablations or (args.write_report and not args.include_generators):
+    if args.ablations or (args.write_report and not custom_filters):
         runs = []
         for name, cfg in FIXTURE_ABLATIONS.items():
             runs.append(

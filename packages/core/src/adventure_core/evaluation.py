@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable
 from pathlib import Path
 from typing import Any, Literal
 
@@ -225,14 +225,26 @@ def ndcg_at_k(
     *,
     k: int = 5,
     match_radius_km: float = 2.0,
+    ideal_catalog_ids: Collection[str] | None = None,
 ) -> float | None:
     """nDCG@k using ``human_rating`` as graded relevance (RFC-0002 / issue #24).
 
     Unmatched ranks contribute 0. Ideal DCG uses the top-k label ratings
-    (descending). Returns ``None`` when fewer than two rated labels exist.
+    (descending). When ``ideal_catalog_ids`` is set (generator ablations), the
+    ideal is restricted to those catalog ids so family pools are comparable.
+    Returns ``None`` when fewer than two rated labels remain in the ideal set.
     """
     label_list = list(labels)
-    rated = [float(lb.human_rating) for lb in label_list if lb.human_rating is not None]
+    if ideal_catalog_ids is not None:
+        allow = set(ideal_catalog_ids)
+        rated_labels = [
+            lb
+            for lb in label_list
+            if lb.human_rating is not None and lb.catalog_id is not None and lb.catalog_id in allow
+        ]
+    else:
+        rated_labels = [lb for lb in label_list if lb.human_rating is not None]
+    rated = [float(lb.human_rating) for lb in rated_labels if lb.human_rating is not None]
     if len(rated) < 2:
         return None
 
@@ -262,6 +274,7 @@ def compute_discovery_metrics(
     k: int = 5,
     match_radius_km: float = 2.0,
     popularity_threshold: float = 7.0,
+    ideal_catalog_ids: Collection[str] | None = None,
 ) -> DiscoveryMetrics:
     label_list = list(labels)
     ranked_list = list(ranked)
@@ -279,7 +292,13 @@ def compute_discovery_metrics(
     )
     rated = [(m.score, m.human_rating) for m in matches if m.human_rating is not None]
     spearman = _spearman([s for s, _ in rated], [float(r) for _, r in rated]) if rated else None
-    ndcg = ndcg_at_k(ranked_list, label_list, k=k, match_radius_km=match_radius_km)
+    ndcg = ndcg_at_k(
+        ranked_list,
+        label_list,
+        k=k,
+        match_radius_km=match_radius_km,
+        ideal_catalog_ids=ideal_catalog_ids,
+    )
     return DiscoveryMetrics(
         k=k,
         n_labels=len(label_list),
