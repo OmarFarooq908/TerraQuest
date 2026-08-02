@@ -14,7 +14,7 @@ def build_confidence(candidate: Candidate) -> Confidence:
     f = candidate.features
     channels: list[tuple[str, str, float]] = []
 
-    if f.dist_settlement_km >= 15:
+    if f.dist_settlement_km is not None and f.dist_settlement_km >= 15:
         channels.append(
             (
                 "isolation_from_settlement",
@@ -23,10 +23,14 @@ def build_confidence(candidate: Candidate) -> Confidence:
             )
         )
     if f.water >= 0.6:
+        if f.dist_water_km is None:
+            water_detail = f"water interest {f.water:.2f} (distance unknown)"
+        else:
+            water_detail = f"water interest {f.water:.2f} (dist {f.dist_water_km:.1f} km)"
         channels.append(
             (
                 "water_signal",
-                f"water interest {f.water:.2f} (dist {f.dist_water_km:.1f} km)",
+                water_detail,
                 0.35 + f.water * 0.4,
             )
         )
@@ -39,10 +43,14 @@ def build_confidence(candidate: Candidate) -> Confidence:
             )
         )
     if f.access_fit >= 0.4:
+        if f.dist_road_km is None:
+            road_detail = "road distance unknown (layer missing)"
+        else:
+            road_detail = f"{f.dist_road_km:.1f} km from road network node"
         channels.append(
             (
                 "road_access",
-                f"{f.dist_road_km:.1f} km from road network node",
+                road_detail,
                 0.25 + f.access_fit * 0.35,
             )
         )
@@ -73,6 +81,15 @@ def build_confidence(candidate: Candidate) -> Confidence:
         uncertainties.append("protected_or_restricted_area")
     if f.access_fit < 0.35:
         uncertainties.append("access_may_exceed_vehicle_or_time_budget")
+
+    layer_flags = candidate.evidence.get("layer_flags") or {}
+    if isinstance(layer_flags, dict):
+        if layer_flags.get("settlements_layer_empty"):
+            uncertainties.append("settlements_layer_missing")
+        if layer_flags.get("roads_layer_empty"):
+            uncertainties.append("roads_layer_missing")
+        if layer_flags.get("water_layer_empty"):
+            uncertainties.append("water_layer_missing")
 
     source = str(candidate.evidence.get("source") or "")
     generator = str(candidate.evidence.get("generator") or "")

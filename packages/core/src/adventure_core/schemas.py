@@ -35,9 +35,10 @@ class CandidateFeatures(BaseModel):
     risk: float = Field(ge=0.0, le=1.0)
     restriction: float = Field(ge=0.0, le=1.0)
 
-    dist_settlement_km: float = 0.0
-    dist_road_km: float = 0.0
-    dist_water_km: float = 0.0
+    # None = layer missing / distance unknown (never use sentinel magics like -1 or 999)
+    dist_settlement_km: float | None = None
+    dist_road_km: float | None = None
+    dist_water_km: float | None = None
     elevation_m: float = 0.0
     relief_m: float = 0.0
 

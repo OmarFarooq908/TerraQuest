@@ -15,12 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Pack validation and fixture catalog hash scripts
 - Evaluation place-label schema + discovery metrics harness (RFC-0002)
 - Preference polarity detection/repair against prompt cues (anti-inversion)
+- GIS feature audit: no `-1`/`999` distance sentinels; missing layers → `null` + evidence flags
 
 ### Changed
 
 - Canonical candidate file is `catalog.geojson` (`seeds.geojson` deprecated alias)
 - Default Ollama model unified to `llama3.2`
 - Overpass ingest requires explicit `allow_degraded_overpass`
+- `CandidateFeatures.dist_*_km` may be `null` when the pack layer is empty
 
 ## [0.2.0] — 2026-08-02
 
