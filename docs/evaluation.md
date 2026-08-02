@@ -70,7 +70,8 @@ ablations use a **pool-relative** ideal so family comparisons are fair),
 Filters rank among **existing catalog features** from selected generators; they do
 not re-run packbuilder discovery.
 
-Checked-in fixture baseline: [`evaluation/reports/karakoram_mini_baseline.md`](../evaluation/reports/karakoram_mini_baseline.md).
+Checked-in fixture baseline:
+[`evaluation/reports/karakoram_mini_baseline.md`](https://github.com/OmarFarooq908/TerraQuest/blob/main/evaluation/reports/karakoram_mini_baseline.md).
 
 - Schema: `evaluation/schema/place_label.schema.json` and `adventure_core.evaluation.PlaceLabel`
 - CI uses **synthetic** labels under `evaluation/fixtures/karakoram_mini/`
