@@ -8,39 +8,45 @@ Adventure AI discovers extraordinary places with **deterministic GIS** (OpenStre
 
 ## Status
 
-`0.x` — APIs may change with [RFCs](RFC/README.md). Offline CI uses **synthetic** fixtures; production packs are built locally from OSM + DEM.
+`0.x` — APIs may change with [RFCs](RFC/README.md). Offline CI uses **synthetic** fixtures; production packs are built locally from OSM + DEM and are **never committed**.
 
 ## Quick start (offline)
 
-```bash
-# Python 3.12+
-uv sync --group dev
+Needs Python **3.12+** and [uv](https://docs.astral.sh/uv/). No network, no Ollama, no `osmium` for this path.
 
+```bash
+uv sync --group dev
 uv run pytest
+
 uv run adventurectl mission run \
   --pack fixtures/karakoram_mini \
   --interpreter rules \
   -p "Three days, Suzuki Swift, rivers and forests, hate crowds."
 ```
 
-Synthetic packs print a red **SYNTHETIC PACK** banner.
+You should see a red **SYNTHETIC PACK** banner and a short ranked list. The fixture pack is for CI and local smoke tests only — not real geography.
+
+More detail: [CLI](docs/cli.md) · [Development](docs/development.md) · [Known limits](docs/known-limits.md)
 
 ## Build a real Region Pack
 
-Requires network once and [`osmium-tool`](https://osmcode.org/osmium-tool/):
+Needs network once and [`osmium-tool`](https://osmcode.org/osmium-tool/) on `PATH`:
 
 ```bash
-brew install osmium-tool   # macOS
+brew install osmium-tool   # macOS; see osmcode.org for other platforms
+
 uv run adventurectl pack build --config skardu_v1
+uv run python scripts/check_pack.py data/packs/skardu_v1
+
 uv run adventurectl mission run \
   --pack skardu_v1 \
   --interpreter rules \
   -p "I'm in Skardu. Honda City, weekend, love rivers, hate crowds."
 ```
 
-Real packs print a green **REAL PACK** banner with sources (`osm`, `dem`).
+Real packs print a green **REAL PACK** banner with sources (`osm`, `dem`). Built trees live under `data/packs/` (gitignored) — see [pack builder](docs/pack-builder.md).
 
-Optional local LLM intent (Ollama only — no cloud API keys; see [docs/offline-inference.md](docs/offline-inference.md)):
+Optional local LLM intent (Ollama only — no cloud API keys; see [offline inference](docs/offline-inference.md)):
 
 ```bash
 ollama pull llama3.2
@@ -48,7 +54,7 @@ uv run adventurectl mission run \
   --pack skardu_v1 \
   --interpreter ollama \
   --model llama3.2 \
-  -p "Fearless far from Skardu: alpine lakes, 3 days, 4x4"
+  -p "Fearless & Far from Skardu: alpine lakes, 3 days, 4x4"
 ```
 
 ## Architecture (one screen)
@@ -61,6 +67,8 @@ Pack Builder (Geofabrik/OSM + Copernicus DEM)
 Prompt → Mission Interpreter → MissionIntent
   → filter + featurize catalog → preference-vector score → ranked missions
 ```
+
+Full picture: [Architecture](docs/architecture.md) · [Generators](docs/generators.md) · [Evaluation](docs/evaluation.md)
 
 ## License & data
 

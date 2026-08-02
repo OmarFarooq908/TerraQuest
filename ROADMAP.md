@@ -10,12 +10,12 @@ Working balance: ~**80%** better data + evaluation, ~**20%** new features. Archi
 
 Milestone: **North Star — discovery quality** (see issues). Start here:
 
-1. [#11 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/9)
-2. [#12 Formal ontology](https://github.com/OmarFarooq908/TerraQuest/issues/8)
-3. [#31 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/29)
+1. [#9 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/9)
+2. [#10 Formal ontology](https://github.com/OmarFarooq908/TerraQuest/issues/10)
+3. [#29 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/29)
 4. P0 correctness issues (intent, inversion, schema, confidence)
 
-Project model (three tracks + P0–P4): [#10](https://github.com/OmarFarooq908/TerraQuest/issues/8).
+Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/TerraQuest/issues/8).
 
 ## Near term — OSS foundation (0.2)
 

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Docs polish (#4): tighter README/docs quick-start (fixture vs real pack), CLI flag table, fixed ROADMAP issue links, known-limits formatting
 - Offline inference contract (#25): `configs/models.yaml` pins, `InferenceError` UX, `data/cache/inference/` layout, `docs/offline-inference.md` (Ollama-only defaults; CI stays model-free)
 - GIS feature depth (#23): settlement density kernel (crowd/novelty) + road-class-aware `access_fit`; inventory in `docs/gis-features.md`
 - Region Pack architecture freeze (#18): RFC-0003 + aligned pack-builder/architecture docs; hash stats normalization; production `layers:` map lists peaks/viewpoints

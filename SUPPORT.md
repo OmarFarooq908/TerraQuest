@@ -14,8 +14,8 @@
 ## Before opening an issue
 
 1. Run offline tests: `uv run pytest`
-2. Confirm whether you used a **synthetic** fixture or a **real** pack (`REAL PACK` / `SYNTHETIC PACK` banner)
-3. Include `adventurectl` command, OS, Python version, and whether `osmium` is installed (`osmium --version`)
+2. Confirm whether you used a **synthetic** fixture (`fixtures/...`) or a **real** pack (`data/packs/...`) — check the `REAL PACK` / `SYNTHETIC PACK` banner
+3. Include the full `adventurectl` command, OS, Python version, and whether `osmium` is installed (`osmium --version`)
 
 ## Maintainer response
 

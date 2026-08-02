@@ -37,7 +37,7 @@ uv run pytest
 | `uv run pytest` | No | Uses `fixtures/karakoram_mini` |
 | `adventurectl mission run --pack fixtures/...` | No | Rules interpreter |
 | `adventurectl mission run --interpreter ollama` | Local Ollama | Optional |
-| `adventurectl pack build --config skardu_v1` | Yes | Needs osmium + Geofabrik/DEM download |
+| `adventurectl pack build --config skardu_v1` | Yes | Needs osmium + Geofabrik/DEM download; then `scripts/check_pack.py data/packs/skardu_v1` |
 
 ## Project layout
 

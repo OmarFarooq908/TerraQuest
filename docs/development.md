@@ -1,5 +1,8 @@
 # Development
 
+Follow the repository README **Quick start (offline)** for a fixture mission on
+`fixtures/karakoram_mini`. This page covers the contributor toolchain.
+
 ## Setup
 
 ```bash
@@ -14,8 +17,8 @@ uv run pytest
 | Tool | Required for | Install |
 |------|----------------|---------|
 | Python 3.12+ | everything | — |
-| uv | workspace | astral.sh/uv |
-| osmium-tool | `pack build` (Geofabrik) | `brew install osmium-tool` |
+| uv | workspace | [astral.sh/uv](https://docs.astral.sh/uv/) |
+| osmium-tool | `pack build` (Geofabrik) | `brew install osmium-tool` (macOS) |
 | Ollama | `--interpreter ollama` | optional, local — see [offline inference](offline-inference.md) |
 
 ## Quality gates
