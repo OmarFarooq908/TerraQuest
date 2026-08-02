@@ -43,7 +43,10 @@ uv run python scripts/hash_fixture_catalog.py --check
 
 ## Eval prompts
 
-See `eval/golden_prompts.yaml` for rules-interpreter property checks (extended over time).
+See `eval/golden_prompts.yaml` for rules-interpreter property checks, including
+**preference-inversion** cases (`inv_*`). Polarity repair runs in
+`interpret_mission` (`adventure_core.polarity`) so LLM sign flips like
+“hate crowds” → `human_activity=+…` are corrected before scoring.
 
 ## What “pass” means
 

@@ -1,4 +1,5 @@
 prompts:
+  # --- existing smoke ---
   - id: fearless_swift
     prompt: >
       I have three days, a Suzuki Swift, four friends, and PKR 20,000 each.
@@ -7,6 +8,10 @@ prompts:
       interpreter: rules
       days: 3
       vehicle_contains: swift
+      preferences:
+        remoteness_gt: 0.2
+        novelty_gt: 0.2
+
   - id: lahore_rivers_forests
     prompt: >
       I'm in Lahore. My friends and I can leave after work on Friday and need
@@ -19,3 +24,99 @@ prompts:
         water_gt: 0.5
         forest_gt: 0.5
         human_activity_lt: -0.3
+        danger_lt: -0.3
+
+  # --- inversion-focused (≥10) ---
+  - id: inv_hate_crowds
+    prompt: "Find a place with rivers. I hate crowds."
+    expect:
+      interpreter: rules
+      preferences:
+        human_activity_lt: -0.3
+        water_gt: 0.3
+
+  - id: inv_avoid_crowds
+    prompt: "Weekend trip — avoid crowds and tourist traps."
+    expect:
+      interpreter: rules
+      preferences:
+        human_activity_lt: -0.3
+
+  - id: inv_no_crowds
+    prompt: "Something quiet with no crowds please."
+    expect:
+      interpreter: rules
+      preferences:
+        human_activity_lt: -0.3
+        solitude_gt: 0.3
+
+  - id: inv_solitude
+    prompt: "Seeking solitude away from people."
+    expect:
+      interpreter: rules
+      preferences:
+        solitude_gt: 0.3
+        human_activity_lt: -0.3
+
+  - id: inv_love_crowds
+    prompt: "I love crowds and nightlife — lively bazaar energy."
+    expect:
+      interpreter: rules
+      preferences:
+        human_activity_gt: 0.3
+
+  - id: inv_avoid_danger
+    prompt: "Honda City only. Don't want dangerous roads."
+    expect:
+      interpreter: rules
+      preferences:
+        danger_lt: -0.3
+        accessibility_gt: 0.2
+
+  - id: inv_safe_roads
+    prompt: "Prefer safe roads and easy access."
+    expect:
+      interpreter: rules
+      preferences:
+        danger_lt: -0.3
+        accessibility_gt: 0.2
+
+  - id: inv_love_rivers
+    prompt: "We love rivers and want to camp nearby."
+    expect:
+      interpreter: rules
+      preferences:
+        water_gt: 0.3
+        camping_gt: 0.3
+
+  - id: inv_love_forests
+    prompt: "I love forests and hate hiking long distances."
+    expect:
+      interpreter: rules
+      preferences:
+        forest_gt: 0.3
+        hiking_lt: -0.3
+
+  - id: inv_remote_untouched
+    prompt: "Far from town, untouched and unexplored."
+    expect:
+      interpreter: rules
+      preferences:
+        remoteness_gt: 0.3
+        novelty_gt: 0.2
+
+  - id: inv_fearless_far
+    prompt: "Fearless & Far style — remote valleys only."
+    expect:
+      interpreter: rules
+      preferences:
+        remoteness_gt: 0.2
+        novelty_gt: 0.2
+
+  - id: inv_hate_hiking
+    prompt: "Avoid hiking and trekking; stay near the road."
+    expect:
+      interpreter: rules
+      preferences:
+        hiking_lt: -0.3
+        accessibility_gt: 0.2
