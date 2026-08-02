@@ -64,7 +64,8 @@ uv run python scripts/check_pack.py data/packs/skardu_v1
 ```
 
 Failure modes: missing required fields, out-of-range coordinates, dual-path
-catalog+seeds, `content_hash` mismatch when declared on the manifest.
+catalog+seeds, missing `NOTICE` / incomplete `layers:` map on real packs,
+`content_hash` mismatch when declared on the manifest.
 
 ## Versioning
 

@@ -31,6 +31,9 @@ class PackManifest(BaseModel):
     built_at: str | None = None
     content_hash: str | None = None
     notes: str | None = None
+    # Relative layer paths written into built pack.yaml (RFC-0003). Absent on
+    # build configs and most synthetic fixtures until populated by build_pack.
+    layers: dict[str, str] = Field(default_factory=dict)
     # Build config (present in configs/packs/*.yaml)
     osm: dict[str, Any] = Field(default_factory=dict)
     dem: dict[str, Any] = Field(default_factory=dict)

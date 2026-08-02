@@ -62,6 +62,13 @@ data/packs/<pack_id>/
 **Do not commit** `data/packs/`, `data/cache/`, PBF, or DEM tiles (`.gitignore` +
 CONTRIBUTING + PR template). CI never uploads built packs.
 
+`scripts/check_pack.py` / `validate_pack` **enforce** for `synthetic: false`:
+
+- `NOTICE` present
+- `layers:` map lists all `REQUIRED_PACK_LAYER_KEYS` (including peaks/viewpoints)
+- every non-legacy `layers/*.geojson` on disk appears in the map
+- `content_hash` matches `pack_content_hash` when declared
+
 #### Synthetic fixture pack (`fixtures/<id>/`) — committed
 
 ```text
@@ -197,7 +204,10 @@ pack `NOTICE`. Fixtures: Apache-2.0 synthetic GeoJSON, not survey-grade.
 
 - Rebuild production packs after accepting this RFC so `layers:` includes peaks/viewpoints.
 - Dual-path `seeds.geojson`: keep `--allow-legacy-seeds` until known packs rebuild; then remove in a follow-up.
-- Eval reports that hashed full `build_stats` blobs without `.discovery` may change fingerprint once normalization lands — regenerate reports if needed.
+- Eval reports that hashed full `build_stats` blobs without reading `.discovery`
+  may change fingerprint once normalization lands — regenerate reports if needed.
+- Stale local packs (missing peaks/viewpoints in `layers:`, leftover `seeds.geojson`)
+  fail `check_pack` until rebuilt with the current packbuilder.
 
 ## Unresolved questions
 

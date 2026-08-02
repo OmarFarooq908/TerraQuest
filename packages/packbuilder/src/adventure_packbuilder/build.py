@@ -11,6 +11,7 @@ import yaml
 from adventure_core.catalog import CATALOG_SCHEMA_VERSION, DiscoveryConfig
 from adventure_core.config import configs_dir, load_yaml, repo_root
 from adventure_core.pack_manifest import PackManifest, PackSource
+from adventure_gis.pack_contract import default_layers_map
 from adventure_gis.pack_hash import pack_content_hash
 
 from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
@@ -196,16 +197,7 @@ def build_pack(
         **manifest.model_dump(
             exclude={"osm", "dem", "discovery", "candidate_limits", "output_dir", "fixtures_dir"}
         ),
-        "layers": {
-            "settlements": "layers/settlements.geojson",
-            "water": "layers/water.geojson",
-            "road_nodes": "layers/road_nodes.geojson",
-            "road_lines": "layers/road_lines.geojson",
-            "peaks": "layers/peaks.geojson",
-            "viewpoints": "layers/viewpoints.geojson",
-            "catalog": "layers/catalog.geojson",
-            "elevation": "layers/elevation.geojson",
-        },
+        "layers": default_layers_map(),
     }
     (out / "pack.yaml").write_text(yaml.safe_dump(pack_yaml, sort_keys=False), encoding="utf-8")
 
