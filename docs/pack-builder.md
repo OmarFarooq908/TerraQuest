@@ -131,7 +131,7 @@ Do not commit PBF bytes.
 
 | Name | Covers |
 |------|--------|
-| Pack `content_hash` | Pack-content **v2**: all `layers/*.geojson` + discovery subset (`selected_by_generator`, `quotas`, `min_spacing_km`, `grid_res_deg`, `catalog_schema_version`, `generators_run`) → SHA-256 truncated to 16 hex |
+| Pack `content_hash` | Pack-content **v2**: all `layers/*.geojson` + discovery subset (`selected_by_generator`, `quotas`, `min_spacing_km`, `spacing_by_generator`, `grid_res_deg`, `catalog_schema_version`, `generators_run`) → SHA-256 truncated to 16 hex |
 | `layer_digests` | Per-layer full SHA-256 in `build_stats.json` (audit) |
 | `sources[].content_hash` | Per OSM/DEM artifact |
 | Fixture `catalog.sha256` | Catalog file only (full SHA-256) |

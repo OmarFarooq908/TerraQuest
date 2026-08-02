@@ -30,6 +30,12 @@ def test_discovery_stats_for_hash_accepts_discovery_or_blob() -> None:
     assert discovery_stats_for_hash({"osm": {}}) == {}
 
 
+def test_discovery_stats_keeps_knobs_without_selected_by_generator() -> None:
+    """Partial discovery dicts must not be silently wiped to {}."""
+    partial = {"min_spacing_km": 0.6, "quotas": {"osm_peak": 3}}
+    assert discovery_stats_for_hash(partial) == partial
+
+
 def test_discovery_stats_prefers_nested_when_build_stats_shaped() -> None:
     """Top-level selected_by_generator must not win over .discovery on real blobs."""
     blob = {
@@ -94,6 +100,7 @@ def test_pack_content_hash_changes_with_discovery_knobs(tmp_path: Path) -> None:
         "selected_by_generator": {"osm_peak": 1},
         "quotas": {"osm_peak": 3},
         "min_spacing_km": 2.0,
+        "spacing_by_generator": {"osm_peak": 2.0, "road_spur": 0.8},
         "grid_res_deg": 0.02,
         "catalog_schema_version": "0.3.0",
         "generators_run": ["osm_peak"],
@@ -102,6 +109,7 @@ def test_pack_content_hash_changes_with_discovery_knobs(tmp_path: Path) -> None:
     for key, val in (
         ("quotas", {"osm_peak": 4}),
         ("min_spacing_km", 3.0),
+        ("spacing_by_generator", {"osm_peak": 2.5, "road_spur": 0.8}),
         ("grid_res_deg", 0.01),
         ("catalog_schema_version", "0.4.0"),
         ("generators_run", ["osm_peak", "road_spur"]),
@@ -110,6 +118,27 @@ def test_pack_content_hash_changes_with_discovery_knobs(tmp_path: Path) -> None:
         mutated = dict(base)
         mutated[key] = val
         assert pack_content_hash(layers, mutated) != h0, key
+
+
+def test_pack_content_hash_rejects_nan_discovery_values(tmp_path: Path) -> None:
+    layers = tmp_path / "layers"
+    layers.mkdir()
+    (layers / "catalog.geojson").write_text("{}", encoding="utf-8")
+    try:
+        pack_content_hash(layers, {"min_spacing_km": float("nan")})
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError for NaN discovery values")
+
+
+def test_spacing_knob_alone_affects_hash(tmp_path: Path) -> None:
+    """Regression: knobs must hash even without selected_by_generator."""
+    layers = tmp_path / "layers"
+    layers.mkdir()
+    (layers / "catalog.geojson").write_text("{}", encoding="utf-8")
+    assert pack_content_hash(layers, {"min_spacing_km": 0.6}) != pack_content_hash(
+        layers, {"min_spacing_km": 0.9}
+    )
 
 
 def test_pack_content_hash_changes_with_layer_bytes(tmp_path: Path) -> None:

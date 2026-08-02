@@ -108,8 +108,9 @@ Implementation: `adventure_gis.pack_hash.pack_content_hash`
 
 **Discovery subset folded into the pack fingerprint** (keys hashed when present):
 
-`selected_by_generator`, `quotas`, `min_spacing_km`, `grid_res_deg`,
-`catalog_schema_version`, `generators_run` (list values sorted for stability).
+`selected_by_generator`, `quotas`, `min_spacing_km`, `spacing_by_generator`,
+`grid_res_deg`, `catalog_schema_version`, `generators_run` (list values sorted
+for stability).
 
 **Stats object for hashing:** always the **discovery stats** dict. Callers may
 pass either:
@@ -137,6 +138,7 @@ Leftover `layers/seeds.geojson` **changes** the pack hash. Dual-path packs fail
     "selected_by_generator": {},
     "quotas": {},
     "min_spacing_km": 0,
+    "spacing_by_generator": {},
     "grid_res_deg": 0.02,
     "generators_run": []
   },

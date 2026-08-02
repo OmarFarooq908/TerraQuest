@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Changed
 
-- Pack content hash v2 (#62 / #17): domain-separated fingerprint; discovery knobs (`quotas`, spacing, grid, schema version, `generators_run`) included alongside layers + `selected_by_generator`; per-layer SHA-256 digests in `build_stats.json`; fixture/baseline pins retargeted
+- Pack content hash v2 (#62 / #17): domain-separated fingerprint; discovery knobs (`quotas`, global + per-generator spacing, grid, schema version, `generators_run`) included alongside layers + `selected_by_generator`; per-layer SHA-256 digests in `build_stats.json`; fixture/baseline pins retargeted
 
 ### Added
 

@@ -19,6 +19,7 @@ _DISCOVERY_HASH_KEYS = (
     "grid_res_deg",
     "catalog_schema_version",
     "generators_run",
+    "spacing_by_generator",
 )
 
 
@@ -26,23 +27,28 @@ def discovery_stats_for_hash(stats_or_blob: dict[str, Any] | None) -> dict[str, 
     """Normalize discovery stats for ``pack_content_hash``.
 
     Accepts either:
-    - the discovery stats dict (has ``selected_by_generator``), or
+    - the discovery stats dict (any of the hashed discovery keys), or
     - a full ``build_stats.json`` blob (uses ``.discovery``).
 
     When a blob looks like ``build_stats.json`` (has ``discovery`` plus
-    ``osm`` / ``dem_tiles`` / ``content_hash``), prefer ``.discovery`` even if a
-    misleading top-level ``selected_by_generator`` key is present.
+    ``osm`` / ``dem_tiles`` / ``content_hash`` / ``layer_digests`` /
+    ``pack_content_hash_version``), prefer ``.discovery`` even if a misleading
+    top-level discovery key is present.
     """
     if not stats_or_blob:
         return {}
     discovery = stats_or_blob.get("discovery")
     looks_like_build_stats = isinstance(discovery, dict) and (
-        "osm" in stats_or_blob or "dem_tiles" in stats_or_blob or "content_hash" in stats_or_blob
+        "osm" in stats_or_blob
+        or "dem_tiles" in stats_or_blob
+        or "content_hash" in stats_or_blob
+        or "layer_digests" in stats_or_blob
+        or "pack_content_hash_version" in stats_or_blob
     )
     if looks_like_build_stats:
         assert isinstance(discovery, dict)
         return discovery
-    if "selected_by_generator" in stats_or_blob:
+    if any(k in stats_or_blob for k in _DISCOVERY_HASH_KEYS):
         return stats_or_blob
     if isinstance(discovery, dict):
         return discovery
@@ -89,5 +95,10 @@ def pack_content_hash(layers_dir: Path, stats: dict[str, Any] | None = None) -> 
         h.update(b"\0")
         h.update(path.read_bytes())
         h.update(b"\0")
-    h.update(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
+    # allow_nan=False: reject NaN/Inf so fingerprints stay portable JSON.
+    h.update(
+        json.dumps(
+            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode()
+    )
     return h.hexdigest()[:16]
