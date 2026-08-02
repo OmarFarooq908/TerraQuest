@@ -28,6 +28,10 @@ from adventure_core.evaluation import (
     compute_discovery_metrics,
     load_place_labels,
 )
+from adventure_core.evidence_ledger import (
+    EVIDENCE_LEDGER_VERSION,
+    validate_evidence_ledger,
+)
 from adventure_core.geo import Point, haversine_km
 from adventure_core.intent import (
     SCHEMA_VERSION,
@@ -84,6 +88,8 @@ __all__ = [
     "CatalogValidationError",
     "validate_catalog_feature",
     "validate_catalog_geojson",
+    "EVIDENCE_LEDGER_VERSION",
+    "validate_evidence_ledger",
     "PackManifest",
     "PackSource",
     "ModeWeights",

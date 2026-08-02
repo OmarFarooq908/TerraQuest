@@ -11,6 +11,7 @@ modules:
   adventure_core/polarity.py: 85
   adventure_core/intent_validate.py: 75
   adventure_core/catalog_validate.py: 85
+  adventure_core/evidence_ledger.py: 90
   adventure_core/interpreters.py: 90
   adventure_core/constraints.py: 75
   adventure_gis/pack_data.py: 85

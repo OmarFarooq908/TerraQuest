@@ -27,8 +27,8 @@ def _minimal_feature(**prop_overrides) -> dict:
         "generator": "synthetic_fixture",
         "generator_version": "1",
         "catalog_schema_version": "0.3.0",
-        "provenance": {"sources": ["synthetic"], "method": "unit_test"},
-        "evidence": {},
+        "provenance": {"sources": ["synthetic"], "method": "unit_test", "layer": "catalog"},
+        "evidence": {"discovery_score": 0.5, "fixture": True},
         "densify": {
             "cell_id": "c_0_0",
             "parent_id": None,

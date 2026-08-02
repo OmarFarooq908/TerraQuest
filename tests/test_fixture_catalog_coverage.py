@@ -45,6 +45,11 @@ def test_fixture_catalog_features_marked_synthetic() -> None:
         assert props["provenance"]["method"] == "fixture_seed"
         assert props["evidence"].get("fixture") is True
         assert props["catalog_schema_version"] == "0.3.0"
+        # Evidence ledger v1 — family keys beyond bare discovery_score
+        assert "discovery_score" in props["evidence"]
+        assert (
+            "dist_settlement_km" in props["evidence"] or props["generator"] == "synthetic_fixture"
+        )
 
 
 def test_fixture_support_layers_present() -> None:

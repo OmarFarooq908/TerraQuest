@@ -39,7 +39,12 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 12.0,
+          "evidence_ledger": "1",
+          "water_kind": "lake",
+          "named": true
         },
         "densify": {
           "cell_id": "c_35.72_75.18",
@@ -86,7 +91,11 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 18.5,
+          "evidence_ledger": "1",
+          "grid_res_deg": 0.02
         },
         "densify": {
           "cell_id": "c_35.82_74.72",
@@ -128,11 +137,17 @@
             "synthetic"
           ],
           "method": "fixture_seed",
-          "layer": "seeds"
+          "layer": "seeds",
+          "dem_tile": "synthetic_N35E075"
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 9.0,
+          "evidence_ledger": "1",
+          "relief_m": 650.0,
+          "dem_tile": "synthetic_N35E075"
         },
         "densify": {
           "cell_id": "c_35.68_75.12",
@@ -178,7 +193,12 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 7.5,
+          "evidence_ledger": "1",
+          "endpoint": "b",
+          "line_id": "fixture_track"
         },
         "densify": {
           "cell_id": "c_35.71_74.71",
@@ -224,7 +244,11 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 14.0,
+          "evidence_ledger": "1",
+          "grid_res_deg": 0.02
         },
         "densify": {
           "cell_id": "c_35.79_75.02",
@@ -272,7 +296,12 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 6.0,
+          "evidence_ledger": "1",
+          "water_kind": "river",
+          "named": true
         },
         "densify": {
           "cell_id": "c_35.61_74.90",
@@ -320,7 +349,12 @@
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 8.5,
+          "evidence_ledger": "1",
+          "water_kind": "river",
+          "named": true
         },
         "densify": {
           "cell_id": "c_35.88_74.55",
@@ -362,11 +396,17 @@
             "synthetic"
           ],
           "method": "fixture_seed",
-          "layer": "seeds"
+          "layer": "seeds",
+          "dem_tile": "synthetic_N35E075"
         },
         "evidence": {
           "discovery_score": 0.8,
-          "fixture": true
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 1.2,
+          "evidence_ledger": "1",
+          "relief_m": 650.0,
+          "dem_tile": "synthetic_N35E075"
         },
         "densify": {
           "cell_id": "c_35.35_74.85",
@@ -416,7 +456,11 @@
           "fixture": true,
           "synthetic": true,
           "water_name": "",
-          "layer": "water"
+          "layer": "water",
+          "dist_settlement_km": 10.0,
+          "evidence_ledger": "1",
+          "water_kind": "lake",
+          "named": false
         },
         "densify": {
           "cell_id": "c_35.48_74.86",
@@ -467,7 +511,11 @@
           "fixture": true,
           "synthetic": true,
           "near_drivable": true,
-          "layer": "road_lines"
+          "layer": "road_lines",
+          "dist_settlement_km": 5.5,
+          "evidence_ledger": "1",
+          "far_endpoint": "b",
+          "dist_drivable_near_end_km": 0.4
         },
         "densify": {
           "cell_id": "c_35.58_74.98",
@@ -511,14 +559,18 @@
             "synthetic"
           ],
           "method": "fixture_seed",
-          "layer": "elevation"
+          "layer": "elevation",
+          "dem_tile": "synthetic_N35E075"
         },
         "evidence": {
           "discovery_score": 0.75,
           "fixture": true,
           "synthetic": true,
           "dem_tile": "synthetic_N35E075",
-          "layer": "elevation"
+          "layer": "elevation",
+          "dist_settlement_km": 16.0,
+          "evidence_ledger": "1",
+          "elevation_m": 5050.0
         },
         "densify": {
           "cell_id": "c_35.88_75.35",
@@ -569,7 +621,10 @@
           "fixture": true,
           "synthetic": true,
           "osm_id": -1001,
-          "layer": "peaks"
+          "layer": "peaks",
+          "dist_settlement_km": 17.0,
+          "evidence_ledger": "1",
+          "osm_ele": 5200.0
         },
         "densify": {
           "cell_id": "c_35.90_75.40",
@@ -619,7 +674,9 @@
           "fixture": true,
           "synthetic": true,
           "osm_id": -1002,
-          "layer": "viewpoints"
+          "layer": "viewpoints",
+          "dist_settlement_km": 4.0,
+          "evidence_ledger": "1"
         },
         "densify": {
           "cell_id": "c_35.45_75.25",

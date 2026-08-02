@@ -21,10 +21,31 @@ samples) exist for geometric consistency — mission ranking still reads the cat
 
 Each feature stores:
 
-- `provenance` — sources, method, osm_id / dem_tile
-- `evidence` — discovery_score and measured distances
+- `provenance` — sources, method, osm_id / dem_tile / layer
+- `evidence` — **ledger v1** required keys per generator (see below)
 - `densify` — `cell_id` / `parent_id` reserved for Phase C
 
+## Evidence ledger (v1)
+
+`scripts/check_pack.py` / `validate_catalog_geojson` enforce
+`adventure_core.evidence_ledger` (version string `1`):
+
+| Generator family | Required `evidence` keys |
+|------------------|--------------------------|
+| `track_terminus` | `discovery_score`, `dist_settlement_km`, `endpoint` |
+| `road_spur` | `discovery_score`, `dist_settlement_km`, `far_endpoint` |
+| water (`named_` / `unnamed_`) | `discovery_score`, `dist_settlement_km`, `water_kind`, `named` |
+| `osm_peak` / `osm_viewpoint` | `discovery_score`, `dist_settlement_km` |
+| `isolation_maximum` | `discovery_score`, `dist_settlement_km`, `grid_res_deg` |
+| `dem_local_max` | `discovery_score`, `dist_settlement_km`, `elevation_m` |
+| `terrain_relief_hotspot` | `discovery_score`, `dist_settlement_km`, `relief_m` |
+| `synthetic_fixture` | `discovery_score`, `fixture` |
+
+Synthetic packs must set `evidence.fixture=true` whenever `provenance.sources`
+includes `synthetic`. Real OSM/DEM packs must declare matching source kinds
+(`osm` / `dem`) and DEM features need `provenance.dem_tile`.
+
+Layer-byte hashes / DEM window polygons are **out of scope** for v1.
 Quotas and `min_spacing_km` are applied per generator, then soft global merge.
 
 ## Testing
