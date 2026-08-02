@@ -38,7 +38,7 @@ On GitHub: Actions → CI → Run workflow → enable **run_ollama_goldens**
 
 `tests/test_golden_mission.py` still covers end-to-end ranking smoke (Fearless & Far vs river/forest prompts).
 
-## Discovery-quality harness (RFC-0002)
+## Discovery-quality harness (RFC-0002 / issue #24)
 
 ```bash
 uv run python scripts/eval_discovery.py \
@@ -48,6 +48,25 @@ uv run python scripts/eval_discovery.py \
   -p "Three days, Suzuki Swift, rivers and forests, hate crowds." \
   --k 5
 ```
+
+Generator ablations + pinned pack hash + markdown report:
+
+```bash
+uv run python scripts/eval_discovery.py --ablations \
+  --write-report evaluation/reports/karakoram_mini_baseline.md
+```
+
+Single-family filter:
+
+```bash
+uv run python scripts/eval_discovery.py \
+  --include-generators named_waterbody,unnamed_waterbody --json
+```
+
+Metrics include `recall_at_k`, `precision_at_k`, `ndcg_at_k` (graded via `human_rating`),
+`popularity_trap_at_k`, and `rating_spearman`. Reports record `pack_content_hash`.
+
+Checked-in fixture baseline: [`evaluation/reports/karakoram_mini_baseline.md`](../evaluation/reports/karakoram_mini_baseline.md).
 
 - Schema: `evaluation/schema/place_label.schema.json` and `adventure_core.evaluation.PlaceLabel`
 - CI uses **synthetic** labels under `evaluation/fixtures/karakoram_mini/`

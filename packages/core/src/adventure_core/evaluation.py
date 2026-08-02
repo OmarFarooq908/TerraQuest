@@ -99,6 +99,7 @@ class DiscoveryMetrics(BaseModel):
     precision_at_k: float | None
     popularity_trap_at_k: float | None
     rating_spearman: float | None
+    ndcg_at_k: float | None
     match_radius_km: float
     popularity_threshold: float
 
@@ -211,6 +212,49 @@ def _spearman(xs: list[float], ys: list[float]) -> float | None:
     return num / (den_x * den_y)
 
 
+def _dcg(relevances: list[float]) -> float:
+    total = 0.0
+    for i, rel in enumerate(relevances):
+        total += (2.0**rel - 1.0) / math.log2(i + 2.0)
+    return total
+
+
+def ndcg_at_k(
+    ranked: Iterable[RankedRef],
+    labels: Iterable[PlaceLabel],
+    *,
+    k: int = 5,
+    match_radius_km: float = 2.0,
+) -> float | None:
+    """nDCG@k using ``human_rating`` as graded relevance (RFC-0002 / issue #24).
+
+    Unmatched ranks contribute 0. Ideal DCG uses the top-k label ratings
+    (descending). Returns ``None`` when fewer than two rated labels exist.
+    """
+    label_list = list(labels)
+    rated = [float(lb.human_rating) for lb in label_list if lb.human_rating is not None]
+    if len(rated) < 2:
+        return None
+
+    matches = match_ranked_to_labels(ranked, label_list, k=k, match_radius_km=match_radius_km)
+    by_rank = {m.rank_index: m for m in matches}
+    gains: list[float] = []
+    for i in range(max(0, k)):
+        m = by_rank.get(i)
+        if m is not None and m.human_rating is not None:
+            gains.append(float(m.human_rating))
+        else:
+            gains.append(0.0)
+
+    ideal = sorted(rated, reverse=True)[: max(0, k)]
+    while len(ideal) < len(gains):
+        ideal.append(0.0)
+    idcg = _dcg(ideal)
+    if idcg <= 0.0:
+        return None
+    return _dcg(gains) / idcg
+
+
 def compute_discovery_metrics(
     ranked: Iterable[RankedRef],
     labels: Iterable[PlaceLabel],
@@ -235,6 +279,7 @@ def compute_discovery_metrics(
     )
     rated = [(m.score, m.human_rating) for m in matches if m.human_rating is not None]
     spearman = _spearman([s for s, _ in rated], [float(r) for _, r in rated]) if rated else None
+    ndcg = ndcg_at_k(ranked_list, label_list, k=k, match_radius_km=match_radius_km)
     return DiscoveryMetrics(
         k=k,
         n_labels=len(label_list),
@@ -245,6 +290,7 @@ def compute_discovery_metrics(
         precision_at_k=precision,
         popularity_trap_at_k=trap,
         rating_spearman=spearman,
+        ndcg_at_k=ndcg,
         match_radius_km=match_radius_km,
         popularity_threshold=popularity_threshold,
     )

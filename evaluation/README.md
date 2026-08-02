@@ -24,6 +24,18 @@ uv run python scripts/eval_discovery.py \
 ```
 
 Primary North Star metric: `recall_at_k` on `interesting=true` (see RFC-0002).
+Also reported: `ndcg_at_k` (human_rating), `popularity_trap_at_k`, `rating_spearman`.
+
+### Generator ablations
+
+```bash
+uv run python scripts/eval_discovery.py --ablations \
+  --write-report evaluation/reports/karakoram_mini_baseline.md
+```
+
+Optional `--include-generators` / `--exclude-generators` filter catalog features before
+ranking. Fixture baseline report: `reports/karakoram_mini_baseline.md` (pinned via
+`pack_content_hash`).
 
 ## Adding real labels
 
