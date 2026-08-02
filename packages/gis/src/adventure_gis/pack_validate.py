@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
+from typing import Any
 
 from adventure_core.catalog import CATALOG_SCHEMA_VERSION
 from adventure_core.catalog_validate import CatalogValidationError, validate_catalog_geojson
@@ -83,6 +84,69 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
                 )
 
     return errors
+
+
+def verify_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> dict[str, Any]:
+    """Validate a pack and return a structured offline-verify report.
+
+    ``ok`` is True iff ``errors`` is empty. Always includes a computed
+    ``fingerprint`` when ``layers/`` exists (fixtures without manifest
+    ``content_hash`` still get a layer fingerprint for pinning).
+    """
+    errors = validate_pack(pack_ref, allow_legacy_seeds=allow_legacy_seeds)
+    manifest, pack_dir = load_pack_manifest(pack_ref)
+    layers = pack_dir / "layers"
+    stats_path = pack_dir / "build_stats.json"
+    stats: dict[str, Any] | None = None
+    if stats_path.is_file():
+        stats = json.loads(stats_path.read_text(encoding="utf-8"))
+
+    fingerprint: str | None = None
+    if layers.is_dir():
+        fingerprint = pack_content_hash(layers, stats)
+
+    catalog_count = 0
+    try:
+        data = load_pack_data(pack_dir, allow_legacy_seeds=True, strict=False)
+        catalog_count = len(data.catalog)
+    except CatalogValidationError:
+        catalog_count = 0
+
+    declared = manifest.content_hash
+    hash_match: bool | None = None
+    if declared and fingerprint:
+        hash_match = declared == fingerprint
+
+    query_db: dict[str, Any] | None = None
+    db_path = pack_dir / "query.duckdb"
+    if db_path.is_file() and fingerprint is not None:
+        try:
+            from adventure_gis.pack_query import read_pack_db_meta
+
+            meta = read_pack_db_meta(db_path)
+            db_hash = meta.get("content_hash")
+            query_db = {
+                "path": str(db_path),
+                "content_hash": db_hash,
+                "stale": db_hash != fingerprint,
+            }
+        except Exception as exc:  # noqa: BLE001 — report, don't fail verify
+            query_db = {"path": str(db_path), "error": str(exc)}
+
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "pack_id": manifest.pack_id,
+        "synthetic": bool(manifest.synthetic),
+        "dir": str(pack_dir),
+        "schema": CATALOG_SCHEMA_VERSION,
+        "feature_schema_version": manifest.feature_schema_version,
+        "catalog_count": catalog_count,
+        "content_hash": declared,
+        "fingerprint": fingerprint,
+        "hash_match": hash_match,
+        "query_db": query_db,
+    }
 
 
 def _validate_layers_map(
