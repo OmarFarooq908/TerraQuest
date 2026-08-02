@@ -96,9 +96,5 @@ def pack_content_hash(layers_dir: Path, stats: dict[str, Any] | None = None) -> 
         h.update(path.read_bytes())
         h.update(b"\0")
     # allow_nan=False: reject NaN/Inf so fingerprints stay portable JSON.
-    h.update(
-        json.dumps(
-            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
-        ).encode()
-    )
+    h.update(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode())
     return h.hexdigest()[:16]
