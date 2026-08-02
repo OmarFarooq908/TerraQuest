@@ -6,4 +6,5 @@ feature_schema_version: "0.3.0"
 synthetic: true
 fixtures_dir: fixtures/karakoram_mini
 notes: >
-  SYNTHETIC — CI/offline only. Not real OSM/DEM. Use skardu_v1 for production packs.
+  SYNTHETIC — CI/offline only. Not real OSM/DEM. Catalog covers all nine
+  discovery generator names (hand-seeded). Use skardu_v1 for production packs.

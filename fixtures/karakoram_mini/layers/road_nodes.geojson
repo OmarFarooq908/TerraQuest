@@ -3,23 +3,78 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [74.80, 35.33] },
-      "properties": { "id": "road_town", "name": "Main road near town" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8,
+          35.33
+        ]
+      },
+      "properties": {
+        "id": "road_town",
+        "name": "Main road near town",
+        "highway": "secondary"
+      }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [74.95, 35.48] },
-      "properties": { "id": "road_spur_a", "name": "Valley spur A" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.95,
+          35.48
+        ]
+      },
+      "properties": {
+        "id": "road_spur_a",
+        "name": "Valley spur A",
+        "highway": "track"
+      }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [75.10, 35.60] },
-      "properties": { "id": "road_spur_b", "name": "High spur B" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.1,
+          35.6
+        ]
+      },
+      "properties": {
+        "id": "road_spur_b",
+        "name": "High spur B",
+        "highway": "track"
+      }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [74.70, 35.70] },
-      "properties": { "id": "road_track_end", "name": "Track terminus" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.7,
+          35.7
+        ]
+      },
+      "properties": {
+        "id": "road_track_end",
+        "name": "Track terminus",
+        "highway": "path"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.98,
+          35.58
+        ]
+      },
+      "properties": {
+        "id": "road_spur_far",
+        "name": "Remote spur end",
+        "highway": "track"
+      }
     }
   ]
 }

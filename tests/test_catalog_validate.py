@@ -55,7 +55,19 @@ def test_check_pack_fixture_passes():
 
 def test_load_pack_data_fixture():
     data = load_pack_data(FIXTURE)
-    assert len(data.catalog) == 8
+    assert len(data.catalog) == 13
+    generators = {c.properties.get("generator") for c in data.catalog}
+    assert generators >= {
+        "named_waterbody",
+        "unnamed_waterbody",
+        "isolation_maximum",
+        "terrain_relief_hotspot",
+        "track_terminus",
+        "road_spur",
+        "dem_local_max",
+        "osm_peak",
+        "osm_viewpoint",
+    }
 
 
 def test_missing_required_property():

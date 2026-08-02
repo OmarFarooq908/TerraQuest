@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Offline unit tests for individual discovery generators (`tests/test_generators.py`)
 - CLI help/error regression tests for fixture-vs-pack messaging (`tests/test_cli_help_errors.py`)
 - Pack-kind confidence priors/ceiling (`heuristic-v1`) + `docs/confidence.md`; synthetic packs cannot match real-pack confidence
+- Expanded `fixtures/karakoram_mini` catalog (13 features) covering all nine discovery generators; added peaks/viewpoints/road_lines support layers
+- Fixture catalog coverage regression tests (`tests/test_fixture_catalog_coverage.py`)
 
 ### Changed
 

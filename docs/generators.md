@@ -13,6 +13,12 @@ Every catalog candidate must originate from a named generator.
 | `osm_peak` / `osm_viewpoint` | OSM landmark nodes |
 | `synthetic_fixture` | CI fixtures only |
 
+The offline pack `fixtures/karakoram_mini` is hand-seeded and **SYNTHETIC**, but its
+`layers/catalog.geojson` includes at least one feature for each shipping generator
+name above (except `synthetic_fixture`, which is a schema alias for ad-hoc tests).
+Supporting layers (`peaks`, `viewpoints`, `road_lines`, unnamed water, extra DEM
+samples) exist for geometric consistency — mission ranking still reads the catalog.
+
 Each feature stores:
 
 - `provenance` — sources, method, osm_id / dem_tile

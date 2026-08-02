@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.4,
+          35.9
+        ]
+      },
+      "properties": {
+        "id": "peak_needle",
+        "name": "Needle Peak (synthetic)",
+        "elevation_m": 5200,
+        "ele": 5200,
+        "synthetic": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.6,
+          35.25
+        ]
+      },
+      "properties": {
+        "id": "peak_foothill",
+        "name": "Foothill Knob (synthetic)",
+        "elevation_m": 2800,
+        "ele": 2800,
+        "synthetic": true
+      }
+    }
+  ]
+}
