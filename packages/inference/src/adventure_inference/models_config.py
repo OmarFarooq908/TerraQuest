@@ -24,6 +24,7 @@ class ModelsConfig(BaseModel):
     default_base_url: str = DEFAULT_OLLAMA_BASE
     default_model: str = DEFAULT_MODEL
     mission_interpreter: str = DEFAULT_MODEL
+    pack_vlm: str = "llava"
     fallback: list[str] = Field(default_factory=lambda: list(DEFAULT_FALLBACKS))
     hardware_floors: dict[str, HardwareFloor] = Field(default_factory=dict)
     cache_inference_dir: str = "data/cache/inference"
@@ -69,6 +70,7 @@ def load_models_config() -> ModelsConfig:
         mission_interpreter=str(
             raw.get("mission_interpreter") or raw.get("default_model") or DEFAULT_MODEL
         ),
+        pack_vlm=str(raw.get("pack_vlm") or "llava"),
         fallback=[str(x) for x in (raw.get("fallback") or list(DEFAULT_FALLBACKS))],
         hardware_floors=floors,
         cache_inference_dir=str(inference_dir or "data/cache/inference"),

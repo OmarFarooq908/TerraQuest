@@ -29,6 +29,8 @@ class PackData:
     elevation_samples: list[NamedPoint]
     # Optional Sentinel-2 indices (RFC-0006); empty when layer absent.
     sentinel_indices: list[NamedPoint] = field(default_factory=list)
+    # Optional pack-time VLM labels (RFC-0007); empty when layer absent.
+    vlm_features: list[NamedPoint] = field(default_factory=list)
 
     @property
     def seeds(self) -> list[NamedPoint]:
@@ -122,4 +124,5 @@ def load_pack_data(
         catalog=catalog_pts,
         elevation_samples=_load_points(layers / "elevation.geojson", "elev"),
         sentinel_indices=_load_points(layers / "sentinel_indices.geojson", "sentinel"),
+        vlm_features=_load_points(layers / "vlm_features.geojson", "vlm"),
     )

@@ -17,3 +17,4 @@ Breaking changes to `MissionIntent` or catalog schema **require** an RFC while t
 | [0003](0003-region-pack-architecture.md) | Region Pack architecture freeze | Draft |
 | [0004](0004-duckdb-pack-query.md) | DuckDB local query layer over Region Packs | Draft |
 | [0006](0006-sentinel2-indices.md) | Sentinel-2 indices in Region Packs | Draft |
+| [0007](0007-vlm-pack-features.md) | VLM feature extraction at pack build (not ranking) | Draft |

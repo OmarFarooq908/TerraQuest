@@ -7,7 +7,8 @@ See [RFC-0003](../RFC/0003-region-pack-architecture.md) for the frozen pack cont
 |------|----------|---------------|
 | `data/cache/` | Geofabrik PBF downloads (~150MB+) | Created automatically by `adventurectl pack build` |
 | `data/cache/sentinel2/` | Precomputed Sentinel-2 index GeoJSON for pack attach (RFC-0006) | Manual pilot / future STAC recipe |
-| `data/cache/inference/` | Adventure-managed inference artifacts (future embeddings / VLM); not Ollama weights | Created on demand; override with `ADVENTURE_INFERENCE_CACHE` |
+| `data/cache/inference/` | Adventure-managed inference artifacts (embeddings / pack-time VLM outputs); not Ollama weights | Created on demand; override with `ADVENTURE_INFERENCE_CACHE` |
+| `data/cache/inference/vlm/` | Precomputed VLM feature GeoJSON for pack attach (RFC-0007) | Manual pilot / future Ollama vision |
 | `data/packs/<id>/` | Built packs (`pack.yaml`, `NOTICE`, `build_stats.json`, `layers/`, optional derived `query.duckdb`) | `uv run adventurectl pack build --config skardu_v1` then `pack materialize` |
 
 Derived `query.duckdb` files are gitignored (`**/query.duckdb`) — never commit them (RFC-0004).

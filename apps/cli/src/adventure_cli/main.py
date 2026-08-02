@@ -105,13 +105,15 @@ def pack_build(
     """
     from adventure_packbuilder import build_pack, load_build_config
     from adventure_packbuilder.sentinel2 import Sentinel2BuildError
+    from adventure_packbuilder.vlm import VlmBuildError
 
     cfg = load_build_config(config)
     console.print(f"Building pack [bold]{cfg.pack_id}[/bold] bbox={cfg.bbox} …")
     try:
         out = build_pack(cfg, skip_dem=skip_dem)
-    except Sentinel2BuildError as exc:
-        console.print(f"[red]Sentinel-2 build error[/red]: {exc}")
+    except (Sentinel2BuildError, VlmBuildError) as exc:
+        label = "Sentinel-2" if isinstance(exc, Sentinel2BuildError) else "VLM"
+        console.print(f"[red]{label} build error[/red]: {exc}")
         raise typer.Exit(code=2) from exc
     console.print(f"[green]Built[/green] {out}")
     console.print("Run a mission with:")

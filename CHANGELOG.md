@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Pack-time VLM features (RFC-0007 / #22): optional `vlm_features` layer + evidence join; packbuilder attach from precomputed GeoJSON; never used as a ranker; `pack_vlm` pin in `configs/models.yaml`
 - Sentinel-2 indices (RFC-0006 / #21): optional `sentinel_indices` pack layer + featurize path; packbuilder attach via precomputed GeoJSON; ranking weights unchanged pending eval lift
 - Docs polish (#4): tighter README/docs quick-start (fixture vs real pack, default `--pack` gotcha), CLI flag table, fixed ROADMAP issue links, known-limits formatting
 - Offline inference contract (#25): `configs/models.yaml` pins, `InferenceError` UX, `data/cache/inference/` layout, `docs/offline-inference.md` (Ollama-only defaults; CI stays model-free)

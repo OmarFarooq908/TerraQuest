@@ -11,6 +11,7 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 | Overpass ingest | Degraded (no road_lines); opt-in only |
 | LLM intent | Local Ollama only by default (no cloud keys); validation + polarity repair; `--interpreter rules` for CI — see [offline inference](offline-inference.md) |
 | Sentinel-2 | Optional pack layer (`sentinel_indices`) — RFC-0006; off by default; ranking weights unchanged until eval lift |
+| Pack-time VLM | Optional `vlm_features` evidence layer (RFC-0007); off by default; never ranks |
 | Mission-time densify | Schema hooks only (Phase C later) |
 | Missing GIS layers | Empty settlements/roads/water → `dist_*_km=null`, neutral remoteness 0.5, evidence `layer_flags` — never `-1` / `999` sentinels |
 | Legacy `seeds.geojson` | Runtime may still load seeds-only with a warning when `allow_legacy_seeds=True`; CI/`check_pack` rejects dual-path and seeds-only unless `--allow-legacy-seeds` |

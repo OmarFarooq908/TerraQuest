@@ -74,9 +74,17 @@ message and exits with code **2**.
 |------|----------|-------------|
 | Ollama store (e.g. `~/.ollama`) | Model weights | Outside repo |
 | `data/cache/` | Geofabrik PBF downloads | Yes |
-| `data/cache/inference/` | Adventure-managed inference artifacts (future embeddings / pack-time VLM) | Yes (under `data/cache/`) |
+| `data/cache/inference/` | Adventure-managed inference artifacts (embeddings / pack-time VLM **outputs**) | Yes (under `data/cache/`) |
+| `data/cache/inference/vlm/` | Precomputed VLM feature GeoJSON for pack attach (RFC-0007) | Yes |
 
 Override Adventure’s inference cache with `ADVENTURE_INFERENCE_CACHE=/path`.
+
+### Pack-time VLM (RFC-0007)
+
+Mission interpretation stays text→`MissionIntent`. Separately, packs may attach
+**structured** VLM labels (`concept_ids` / attributes) at build time. Those labels
+are evidence only — **not** a ranker. Pin: `configs/models.yaml` → `pack_vlm`.
+CI never requires a vision model; use precomputed GeoJSON or leave `vlm.enabled: false`.
 
 Do **not** commit model weights or `data/cache/**`.
 

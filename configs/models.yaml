@@ -6,6 +6,8 @@ default_base_url: http://127.0.0.1:11434
 
 default_model: llama3.2
 mission_interpreter: llama3.2
+# Pack-time vision labels (RFC-0007) — not used for mission ranking.
+pack_vlm: llava
 
 fallback:
   - llama3.2
@@ -27,8 +29,14 @@ hardware_floors:
   qwen3:8b:
     ram_gb: 8
     notes: ""
+  llava:
+    ram_gb: 10
+    notes: "pack-time VLM (RFC-0007); guidance only"
+  moondream:
+    ram_gb: 5
+    notes: "smaller pack-time VLM option"
 
 cache:
-  # Adventure-managed artifacts (future embeddings / pack-time VLM).
+  # Adventure-managed artifacts (embeddings / pack-time VLM outputs).
   # Ollama weights stay in Ollama's store (~/.ollama), not here.
   inference_dir: data/cache/inference

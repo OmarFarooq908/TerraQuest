@@ -18,6 +18,7 @@ from adventure_gis.pack_query import (
 )
 from adventure_gis.pack_validate import validate_pack
 from adventure_gis.sentinel import lookup_sentinel_indices
+from adventure_gis.vlm_join import lookup_vlm_features
 
 __all__ = [
     "PackData",
@@ -32,6 +33,7 @@ __all__ = [
     "generate_candidates",
     "load_pack_data",
     "lookup_sentinel_indices",
+    "lookup_vlm_features",
     "materialize_pack_db",
     "pack_content_hash",
     "query_db_path",
