@@ -118,6 +118,8 @@ def test_named_vs_unnamed_waterbody_split():
     assert len(unnamed) == 1 and unnamed[0].name.startswith("unnamed_")
     assert all(c.has_water for c in named + unnamed)
     assert all(c.provenance.method == "water_centroid" for c in named + unnamed)
+    assert named[0].evidence["ontology_ids"] == ["water.lake"]
+    assert unnamed[0].evidence["ontology_ids"] == ["water.lake"]
     # Cross-contamination must not occur
     assert {c.id for c in named}.isdisjoint({c.id for c in unnamed})
 

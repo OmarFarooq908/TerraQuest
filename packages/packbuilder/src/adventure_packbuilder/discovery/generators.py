@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from adventure_core.catalog import CatalogCandidate, Provenance
 from adventure_core.geo import Point
+from adventure_core.ontology import water_kind_to_ontology_id
 
 from adventure_packbuilder.dem import local_relief_from_dem, sample_elevations
 from adventure_packbuilder.discovery.context import DiscoveryContext
@@ -201,6 +202,7 @@ def _water_candidates(ctx: DiscoveryContext, *, named: bool) -> list[CatalogCand
                     "dist_settlement_km": round(dist_s, 2),
                     "water_kind": kind_raw,
                     "named": named,
+                    "ontology_ids": [water_kind_to_ontology_id(str(kind_raw))],
                 },
                 densify=ctx.densify_hook(pt.lon, pt.lat),
                 building_density=building,
