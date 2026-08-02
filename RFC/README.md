@@ -8,3 +8,9 @@ Design records for architecture and schema changes.
 4. Merge only after maintainer approval
 
 Breaking changes to `MissionIntent` or catalog schema **require** an RFC while the project is in `0.x`.
+
+## Index
+
+| RFC | Title | Status |
+|-----|-------|--------|
+| [0002](0002-evaluation-dataset.md) | Evaluation dataset for discovery quality | Draft |
