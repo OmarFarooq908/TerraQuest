@@ -71,7 +71,7 @@ def test_router_repairs_simulated_llm_inversion(monkeypatch: pytest.MonkeyPatch)
         source="llm",
     )
 
-    monkeypatch.setattr(router, "ollama_available", lambda: True)
+    monkeypatch.setattr(router, "ollama_available", lambda *a, **k: True)
     monkeypatch.setattr(router, "interpret_ollama", lambda *a, **k: bad)
 
     intent = interpret_mission("I hate crowds", interpreter="ollama", repair_polarity=True)

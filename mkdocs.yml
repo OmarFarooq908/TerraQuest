@@ -23,6 +23,7 @@ nav:
   - Evaluation: evaluation.md
   - Confidence: confidence.md
   - CLI: cli.md
+  - Offline inference: offline-inference.md
   - Known limits: known-limits.md
 
 plugins:

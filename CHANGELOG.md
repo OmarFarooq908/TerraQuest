@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- Offline inference contract (#25): `configs/models.yaml` pins, `InferenceError` UX, `data/cache/inference/` layout, `docs/offline-inference.md` (Ollama-only defaults; CI stays model-free)
 - Open-source foundation: CI, Ruff/mypy, MkDocs, community docs, RFC process
 - Deterministic discovery catalog (named generators) with provenance
 - Pack validation and fixture catalog hash scripts

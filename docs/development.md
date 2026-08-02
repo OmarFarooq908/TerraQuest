@@ -16,7 +16,7 @@ uv run pytest
 | Python 3.12+ | everything | — |
 | uv | workspace | astral.sh/uv |
 | osmium-tool | `pack build` (Geofabrik) | `brew install osmium-tool` |
-| Ollama | `--interpreter ollama` | optional, local |
+| Ollama | `--interpreter ollama` | optional, local — see [offline inference](offline-inference.md) |
 
 ## Quality gates
 

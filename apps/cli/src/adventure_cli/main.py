@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 from adventure_core.config import load_pack_manifest
+from adventure_inference import InferenceError
 from rich.console import Console
 from rich.table import Table
 
@@ -156,15 +157,19 @@ def mission_run(
     after `adventurectl pack build` for real OSM/DEM results.
     """
     _print_pack_banner(pack)
-    result = run_mission(
-        pack=pack,
-        mode=mode,
-        prompt=prompt,
-        max_results=max_results,
-        interpreter=interpreter,
-        model=model,
-        allow_rules_fallback=not strict_llm,
-    )
+    try:
+        result = run_mission(
+            pack=pack,
+            mode=mode,
+            prompt=prompt,
+            max_results=max_results,
+            interpreter=interpreter,
+            model=model,
+            allow_rules_fallback=not strict_llm,
+        )
+    except InferenceError as exc:
+        console.print(f"[bold red]Inference error[/bold red]: {exc}")
+        raise typer.Exit(code=2) from exc
 
     if json_out:
         console.print_json(result.model_dump_json(indent=2))
