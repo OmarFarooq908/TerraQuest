@@ -14,8 +14,8 @@ app = typer.Typer(
     help="Adventure AI — missions, not itineraries.",
     no_args_is_help=True,
 )
-mission_app = typer.Typer(help="Mission commands")
-pack_app = typer.Typer(help="Region Pack build & inspect")
+mission_app = typer.Typer(help="Run and inspect ranked exploration missions")
+pack_app = typer.Typer(help="Build/inspect region packs (production needs osmium-tool)")
 app.add_typer(mission_app, name="mission")
 app.add_typer(pack_app, name="pack")
 console = Console()
@@ -85,12 +85,23 @@ def _print_coverage(result) -> None:
 
 @pack_app.command("build")
 def pack_build(
-    config: str = typer.Option("skardu_v1", "--config", "-c", help="Pack config id or yaml path"),
+    config: str = typer.Option(
+        "skardu_v1",
+        "--config",
+        "-c",
+        help="Pack config id under configs/ or a yaml path (not a fixtures/ pack)",
+    ),
     skip_dem: bool = typer.Option(
-        False, "--skip-dem", help="OSM-only build (faster, less accurate)"
+        False,
+        "--skip-dem",
+        help="Skip DEM download; OSM-only build (faster, less elevation accuracy)",
     ),
 ) -> None:
-    """Build a production Region Pack from OSM (+ DEM). Requires network."""
+    """Build a production Region Pack from OSM (+ DEM).
+
+    Requires network and osmium-tool on PATH. Fixture packs under fixtures/
+    are for offline tests — do not pass them to pack build.
+    """
     from adventure_packbuilder import build_pack, load_build_config
 
     cfg = load_build_config(config)
@@ -116,25 +127,32 @@ def mission_run(
     pack: str = typer.Option(
         "skardu_v1",
         "--pack",
-        help="Pack id (skardu_v1) or fixtures/karakoram_mini for CI",
+        help=(
+            "Built pack id (e.g. skardu_v1) or a fixture path "
+            "(fixtures/karakoram_mini) for offline/CI runs"
+        ),
     ),
-    mode: str = typer.Option("fearless_far", "--mode"),
-    prompt: str = typer.Option(..., "--prompt", "-p"),
-    max_results: int = typer.Option(5, "--max-results"),
+    mode: str = typer.Option("fearless_far", "--mode", help="Scoring mode id from configs/modes"),
+    prompt: str = typer.Option(..., "--prompt", "-p", help="Natural-language mission prompt"),
+    max_results: int = typer.Option(5, "--max-results", help="Max ranked missions to print"),
     interpreter: str = typer.Option(
         "auto",
         "--interpreter",
-        help="auto | rules | ollama",
+        help="Intent parser: auto (Ollama→rules), rules (offline), or ollama",
     ),
-    model: str = typer.Option("llama3.2", "--model", help="Ollama model for interpreter"),
+    model: str = typer.Option("llama3.2", "--model", help="Ollama model when interpreter uses LLM"),
     strict_llm: bool = typer.Option(
         False,
         "--strict-llm",
         help="With interpreter=auto, fail instead of falling back to rules",
     ),
-    json_out: bool = typer.Option(False, "--json"),
+    json_out: bool = typer.Option(False, "--json", help="Print MissionResult JSON instead of tables"),
 ) -> None:
-    """Run a mission: interpret → GIS → preference-vector score."""
+    """Run a mission: interpret → GIS → preference-vector score.
+
+    Use --pack fixtures/... for synthetic offline data; use a built pack id
+    after `adventurectl pack build` for real OSM/DEM results.
+    """
     _print_pack_banner(pack)
     result = run_mission(
         pack=pack,
