@@ -148,7 +148,7 @@ Required Feature `properties` (schema `0.3.0`):
 |-------|--------|
 | `id`, `name`, `generator` | Identity + named discovery generator |
 | `provenance` | `{sources, method, layer/dem_tile, …}` — `method` + non-empty `sources` |
-| `evidence` | Object with **generator-family required keys** (evidence ledger v1) — empty `{}` fails |
+| `evidence` | Object with **generator-family required keys** (evidence ledger v2) — empty `{}` fails; OSM-element gens need `provenance.osm_id` |
 | `densify` | `{cell_id, parent_id, densify_allowed, grid_res_deg}` — reserved for Phase C; no runtime densify yet |
 | geometry | GeoJSON `Point` with lon/lat in range |
 
