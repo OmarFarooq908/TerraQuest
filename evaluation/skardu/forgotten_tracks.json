@@ -10,7 +10,7 @@
     "google_maps_popularity": 1.8,
     "tags": ["valley", "track", "hiking"],
     "ontology_ids": ["terrain.valley", "experience.hiking", "experience.remote"],
-    "notes": "Provisional curator seed (v0): Soq Valley headwaters track — low tourist footprint. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Soq Valley headwaters track — low tourist footprint. Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -25,7 +25,7 @@
     "google_maps_popularity": 2.0,
     "tags": ["valley", "solitude"],
     "ontology_ids": ["terrain.valley", "experience.solitude", "experience.discovery"],
-    "notes": "Provisional curator seed (v0): Chunda Valley quiet stretch (not roadside cafes). Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Chunda Valley quiet stretch (not roadside cafes). Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -40,7 +40,7 @@
     "google_maps_popularity": 2.8,
     "tags": ["plateau", "wildlife", "remote"],
     "ontology_ids": ["terrain.scenic", "experience.remote", "experience.wildlife"],
-    "notes": "Provisional curator seed (v0): Deosai interior point off the Ali Malik–Sheosar corridor. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Deosai interior point off the Ali Malik–Sheosar corridor. Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -55,7 +55,7 @@
     "google_maps_popularity": 4.0,
     "tags": ["waterfall", "trail"],
     "ontology_ids": ["water.waterfall", "experience.hiking", "experience.photography"],
-    "notes": "Provisional curator seed (v0): Manthokha approach trail (not the parking-lot selfie rail). Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Manthokha approach trail (not the parking-lot selfie rail). Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -63,14 +63,14 @@
     "schema_version": "0.1.0",
     "id": "skardu/forgotten_tracks/katpana_dunes_quiet",
     "catalog_id": null,
-    "geometry": { "type": "Point", "coordinates": [75.575, 35.368] },
+    "geometry": { "type": "Point", "coordinates": [75.590, 35.390] },
     "known": true,
     "interesting": true,
     "human_rating": 7.8,
     "google_maps_popularity": 3.2,
     "tags": ["desert", "dunes"],
     "ontology_ids": ["terrain.scenic", "experience.photography", "experience.quiet"],
-    "notes": "Provisional curator seed (v0): Katpana dunes away from hotel/resort strip. Distinct from high-popularity cold-desert control. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Katpana dunes anchor offset from resort-strip control so opposite-interesting separation > 2× match_radius. Ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -85,7 +85,7 @@
     "google_maps_popularity": 2.4,
     "tags": ["valley", "track"],
     "ontology_ids": ["terrain.valley", "experience.discovery", "experience.hiking"],
-    "notes": "Provisional curator seed (v0): Shigar side valley — not Shigar Fort. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Shigar side valley — not Shigar Fort. Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   }

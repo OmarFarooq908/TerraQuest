@@ -91,7 +91,10 @@ on `karakoram_mini`.
 ## Threats to validity (summary)
 
 - Synthetic fixture labels ≠ real explorers — do not ship product claims from fixture recall alone.
+- Provisional Skardu v0 ratings are **not** field-verified — treat as scaffolding until curator review.
 - Match radius / post-hoc `catalog_id` can inflate hits — prefer exact ids; report radius.
+- Dense tourist clusters (e.g. Upper vs Lower Kachura) can flip polarity under distance matching —
+  CI rejects opposite-interesting pairs within **2×** `match_radius_km`.
 - Prompt cherry-picking — use the documented default Fearless & Far prompt family.
 - Rising recall with rising popularity trap is not a win — quote both metrics.
 

@@ -8,7 +8,7 @@ from collections.abc import Collection, Iterable
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from adventure_core.geo import Point, haversine_km
 
@@ -108,6 +108,8 @@ class GeoJSONPoint(BaseModel):
 
 class PlaceLabel(BaseModel):
     """Curator or synthetic rating for a place used in discovery evaluation."""
+
+    model_config = ConfigDict(extra="forbid")
 
     schema_version: str = PLACE_LABEL_SCHEMA_VERSION
     id: str
@@ -220,9 +222,10 @@ def load_place_labels(path: Path) -> list[PlaceLabel]:
 def validate_place_label_corpus(evaluation_root: Path) -> list[str]:
     """Validate all place-label JSON under ``evaluation/``.
 
-    Checks Pydantic ``PlaceLabel`` shape, unique ids, JSON Schema required keys,
-    canonical ``ontology_ids``, and synthetic flag conventions
-    (``fixtures/`` → ``synthetic=true``; regional dirs → ``synthetic=false``).
+        Checks Pydantic ``PlaceLabel`` shape (``extra=forbid``), unique ids / catalog_ids,
+    JSON Schema required keys, canonical ``ontology_ids``, synthetic flag conventions
+    (``fixtures/`` → ``synthetic=true``; regional dirs → ``synthetic=false``), and
+    opposite-interesting pairwise separation (must exceed ``2 * match_radius_km``).
     """
     from adventure_core.ontology import validate_ontology_ids
 
@@ -235,6 +238,8 @@ def validate_place_label_corpus(evaluation_root: Path) -> list[str]:
     required = list(schema.get("required", [])) if schema else []
 
     seen_ids: dict[str, Path] = {}
+    seen_catalog: dict[str, str] = {}
+    loaded: list[PlaceLabel] = []
     files = place_label_json_files(root)
     if not files:
         errors.append(f"{root}: no place-label JSON files found")
@@ -268,6 +273,14 @@ def validate_place_label_corpus(evaluation_root: Path) -> list[str]:
                 errors.append(f"{loc}: duplicate id {label.id!r} (also in {seen_ids[label.id]})")
             else:
                 seen_ids[label.id] = rel
+            if label.catalog_id:
+                if label.catalog_id in seen_catalog:
+                    errors.append(
+                        f"{loc}: duplicate catalog_id {label.catalog_id!r} "
+                        f"(also on {seen_catalog[label.catalog_id]})"
+                    )
+                else:
+                    seen_catalog[label.catalog_id] = label.id
             if under_fixtures and not label.synthetic:
                 errors.append(f"{loc}: fixture labels must set synthetic=true")
             if not under_fixtures and label.synthetic:
@@ -275,6 +288,23 @@ def validate_place_label_corpus(evaluation_root: Path) -> list[str]:
             if label.ontology_ids:
                 for msg in validate_ontology_ids(label.ontology_ids, canonical_only=True):
                     errors.append(f"{loc}: {msg}")
+            loaded.append(label)
+
+    # Opposite-interesting pairs closer than 2× match radius can flip via midpoint
+    # distance matching (recall inflation / trap under-count). Same-polarity pairs
+    # may be denser (e.g. town tourist stops).
+    min_opposite_km = 2.0 * NORTH_STAR_MATCH_RADIUS_KM
+    for i, a in enumerate(loaded):
+        for b in loaded[i + 1 :]:
+            if a.interesting == b.interesting:
+                continue
+            d = haversine_km(a.geometry.as_point(), b.geometry.as_point())
+            if d <= min_opposite_km:
+                errors.append(
+                    f"opposite-interesting labels within {min_opposite_km:.1f} km "
+                    f"({d:.2f} km): {a.id!r} vs {b.id!r} — "
+                    f"distance match can assign the wrong polarity"
+                )
     return errors
 
 

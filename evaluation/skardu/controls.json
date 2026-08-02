@@ -1,21 +1,6 @@
 [
   {
     "schema_version": "0.1.0",
-    "id": "skardu/controls/shangrila_lower_kachura",
-    "catalog_id": null,
-    "geometry": { "type": "Point", "coordinates": [75.442, 35.428] },
-    "known": true,
-    "interesting": false,
-    "human_rating": 5.5,
-    "google_maps_popularity": 9.2,
-    "tags": ["resort", "lake", "control"],
-    "ontology_ids": ["water.lake", "experience.crowds", "experience.photography"],
-    "notes": "Provisional curator seed (v0): Shangrila / Lower Kachura resort circuit — popularity trap control. Public geography; ratings pending field verification.",
-    "license": "CC-BY-4.0",
-    "synthetic": false
-  },
-  {
-    "schema_version": "0.1.0",
     "id": "skardu/controls/kharpocho_fort",
     "catalog_id": null,
     "geometry": { "type": "Point", "coordinates": [75.644, 35.297] },
@@ -25,7 +10,7 @@
     "google_maps_popularity": 8.8,
     "tags": ["fort", "viewpoint", "control"],
     "ontology_ids": ["experience.history", "terrain.viewpoint", "experience.crowds"],
-    "notes": "Provisional curator seed (v0): Kharpocho Fort — classic Skardu tourist stop. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Kharpocho Fort — classic Skardu tourist stop. Approximate public geography; ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -40,7 +25,7 @@
     "google_maps_popularity": 8.5,
     "tags": ["heritage", "control"],
     "ontology_ids": ["experience.history", "experience.crowds"],
-    "notes": "Provisional curator seed (v0): Manthal Buddha Rock — high foot traffic control. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Manthal Buddha Rock — high foot traffic control. Same-polarity neighbor of Kharpocho (< match_radius) is OK; both are tourist traps. Ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -55,7 +40,7 @@
     "google_maps_popularity": 8.0,
     "tags": ["lake", "dam", "control"],
     "ontology_ids": ["water.lake", "terrain.viewpoint", "experience.crowds"],
-    "notes": "Provisional curator seed (v0): Satpara dam / main parking viewpoint — not the quiet shore label. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Satpara dam / main parking viewpoint — paired with quiet-shore interesting label at > 2× match_radius. Ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -70,7 +55,7 @@
     "google_maps_popularity": 8.6,
     "tags": ["desert", "resort", "control"],
     "ontology_ids": ["terrain.scenic", "experience.crowds", "experience.photography"],
-    "notes": "Provisional curator seed (v0): Katpana cold-desert resort / selfie strip — popularity trap vs quiet dunes label. Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Katpana cold-desert resort / selfie strip — paired with quiet-dunes interesting label at > 2× match_radius. Ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   },
@@ -85,7 +70,7 @@
     "google_maps_popularity": 8.3,
     "tags": ["fort", "heritage", "control"],
     "ontology_ids": ["experience.history", "experience.crowds"],
-    "notes": "Provisional curator seed (v0): Shigar Fort — heritage tourist control (contrast side-valley label). Public geography; ratings pending field verification.",
+    "notes": "Provisional curator seed (v0): Shigar Fort — heritage tourist control (contrast side-valley label). Ratings pending field verification.",
     "license": "CC-BY-4.0",
     "synthetic": false
   }

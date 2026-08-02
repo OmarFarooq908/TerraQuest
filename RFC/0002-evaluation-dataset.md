@@ -61,6 +61,10 @@ Matching ranked missions to labels:
 1. Prefer exact `catalog_id` match when present on both sides.
 2. Else nearest label within `match_radius_km` (default **2.0**) by haversine.
 
+Corpus CI (`validate_place_label_corpus`) additionally rejects **opposite-interesting**
+pairs closer than **2× match_radius** (midpoint distance match can flip polarity).
+Same-polarity clusters (e.g. adjacent tourist controls) are allowed.
+
 ### Metrics (v0)
 
 Computed offline by `scripts/eval_discovery.py` / `adventure_core.evaluation`:
