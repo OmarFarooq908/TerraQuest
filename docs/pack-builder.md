@@ -117,8 +117,11 @@ osm:
 ```
 
 - `allow_latest: false` fails closed if the URL still contains `-latest`.
-- Checksums are verified on download **and** when reusing `data/cache/` (stale
-  cache with the wrong digest is deleted and re-fetched).
+- **Checksum required** when `allow_latest: false` (`geofabrik_md5` and/or
+  `geofabrik_sha256`) so a stale `data/cache/*.osm.pbf` cannot be reused silently.
+- Checksums are verified on download **and** when reusing cache (mismatch deletes
+  the cache file and re-fetches; failed downloads clean up `.partial` files).
+- If `cache_pbf` is omitted, the filename is taken from the URL basename.
 - Pin metadata lands under `build_stats.json` → `osm.geofabrik_pin`.
 
 Browse dated files on the [Geofabrik Pakistan page](https://download.geofabrik.de/asia/pakistan.html).

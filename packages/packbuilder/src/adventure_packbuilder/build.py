@@ -16,7 +16,7 @@ from adventure_gis.pack_hash import pack_content_hash
 
 from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
 from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojson
-from adventure_packbuilder.geofabrik import fetch_geofabrik_layers
+from adventure_packbuilder.geofabrik import cache_pbf_name_from_url, fetch_geofabrik_layers
 from adventure_packbuilder.osm import fetch_overpass, overpass_to_layers
 from adventure_packbuilder.sentinel2 import maybe_attach_sentinel_indices
 from adventure_packbuilder.vlm import _as_enabled, maybe_attach_vlm_features
@@ -69,7 +69,7 @@ def build_pack(
             )
         )
         cache_dir = root / osm_cfg.get("cache_dir", "data/cache")
-        cache_name = osm_cfg.get("cache_pbf", "pakistan-latest.osm.pbf")
+        cache_name = osm_cfg.get("cache_pbf") or cache_pbf_name_from_url(pbf_url)
         cache_pbf = cache_dir / cache_name
         allow_latest = bool(osm_cfg.get("allow_latest", True))
         expected_md5 = osm_cfg.get("geofabrik_md5")

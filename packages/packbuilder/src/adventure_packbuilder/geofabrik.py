@@ -18,12 +18,13 @@ USER_AGENT = (
     "TerraQuest/0.2 (packbuilder; local-first; +https://github.com/OmarFarooq908/TerraQuest)"
 )
 
-_LATEST_URL_MARKERS = ("-latest.osm.pbf", "-latest.osm.bz2", "/latest/")
+_LATEST_URL_MARKERS = ("-latest", "/latest/")
 
 
 def is_latest_geofabrik_url(url: str) -> bool:
     """True when the URL looks like a moving Geofabrik ``*-latest*`` extract."""
     lower = url.strip().lower()
+    # Match filename tokens like ``pakistan-latest.osm.pbf`` and path ``/latest/``.
     return any(m in lower for m in _LATEST_URL_MARKERS)
 
 
@@ -38,6 +39,13 @@ def assert_geofabrik_url_allowed(url: str, *, allow_latest: bool) -> None:
             "https://download.geofabrik.de/asia/pakistan-260801.osm.pbf "
             "(see docs/pack-builder.md)."
         )
+
+
+def _normalize_hex_digest(value: str, *, kind: str, length: int) -> str:
+    token = value.strip().lower().split()[0] if value.strip() else ""
+    if len(token) != length or any(c not in "0123456789abcdef" for c in token):
+        raise ValueError(f"invalid {kind} digest: {value!r}")
+    return token
 
 
 def file_md5(path: Path) -> str:
@@ -58,11 +66,7 @@ def file_sha256(path: Path) -> str:
 
 def parse_geofabrik_md5_text(text: str) -> str:
     """Parse Geofabrik ``*.osm.pbf.md5`` contents → lowercase hex digest."""
-    token = text.strip().split()[0] if text.strip() else ""
-    digest = token.lower()
-    if len(digest) != 32 or any(c not in "0123456789abcdef" for c in digest):
-        raise ValueError(f"invalid Geofabrik md5 text: {text!r}")
-    return digest
+    return _normalize_hex_digest(text, kind="md5", length=32)
 
 
 def verify_pbf_checksums(
@@ -75,19 +79,45 @@ def verify_pbf_checksums(
     if not path.is_file():
         raise FileNotFoundError(path)
     out: dict[str, str] = {}
-    if expected_md5:
-        want = expected_md5.strip().lower().split()[0]
+    if expected_md5 is not None:
+        want = _normalize_hex_digest(expected_md5, kind="md5", length=32)
         got = file_md5(path)
         out["md5"] = got
         if got != want:
             raise ValueError(f"PBF md5 mismatch for {path.name}: expected {want}, got {got}")
-    if expected_sha256:
-        want = expected_sha256.strip().lower().split()[0]
+    if expected_sha256 is not None:
+        want = _normalize_hex_digest(expected_sha256, kind="sha256", length=64)
         got = file_sha256(path)
         out["sha256"] = got
         if got != want:
             raise ValueError(f"PBF sha256 mismatch for {path.name}: expected {want}, got {got}")
     return out
+
+
+def assert_pin_checksums_present(
+    *,
+    allow_latest: bool,
+    expected_md5: str | None,
+    expected_sha256: str | None,
+) -> None:
+    """Dated pins must carry a checksum so a wrong cache file cannot be reused silently."""
+    if allow_latest:
+        return
+    if expected_md5 or expected_sha256:
+        return
+    raise ValueError(
+        "osm.allow_latest is false but neither geofabrik_md5 nor geofabrik_sha256 is set. "
+        "Checksums are required so a stale data/cache/*.osm.pbf cannot be reused silently "
+        "(see docs/pack-builder.md)."
+    )
+
+
+def cache_pbf_name_from_url(url: str, *, fallback: str = "region.osm.pbf") -> str:
+    """Derive a cache filename from the Geofabrik URL path."""
+    name = Path(url.split("?", 1)[0].rstrip("/")).name
+    if name.endswith(".osm.pbf") or name.endswith(".osm.bz2"):
+        return name
+    return fallback
 
 
 def require_osmium() -> str:
@@ -115,6 +145,11 @@ def download_pbf(
 ) -> Path:
     """Download a regional PBF (or reuse cache) and optionally verify checksums."""
     assert_geofabrik_url_allowed(url, allow_latest=allow_latest)
+    assert_pin_checksums_present(
+        allow_latest=allow_latest,
+        expected_md5=expected_md5,
+        expected_sha256=expected_sha256,
+    )
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     def _verify() -> None:
@@ -129,20 +164,28 @@ def download_pbf(
             dest.unlink(missing_ok=True)
 
     partial = dest.with_suffix(dest.suffix + ".partial")
-    with (
-        httpx.Client(
-            timeout=timeout_s,
-            follow_redirects=True,
-            headers={"User-Agent": USER_AGENT},
-        ) as client,
-        client.stream("GET", url) as resp,
-    ):
-        resp.raise_for_status()
-        with partial.open("wb") as f:
-            for chunk in resp.iter_bytes(chunk_size=1024 * 1024):
-                f.write(chunk)
-    partial.replace(dest)
-    _verify()
+    try:
+        with (
+            httpx.Client(
+                timeout=timeout_s,
+                follow_redirects=True,
+                headers={"User-Agent": USER_AGENT},
+            ) as client,
+            client.stream("GET", url) as resp,
+        ):
+            resp.raise_for_status()
+            with partial.open("wb") as f:
+                for chunk in resp.iter_bytes(chunk_size=1024 * 1024):
+                    f.write(chunk)
+        partial.replace(dest)
+    except Exception:
+        partial.unlink(missing_ok=True)
+        raise
+    try:
+        _verify()
+    except ValueError:
+        dest.unlink(missing_ok=True)
+        raise
     return dest
 
 
