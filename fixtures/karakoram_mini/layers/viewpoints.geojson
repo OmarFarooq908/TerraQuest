@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.25,
+          35.45
+        ]
+      },
+      "properties": {
+        "id": "vp_granite_lookout",
+        "name": "Granite Lookout (synthetic)",
+        "synthetic": true
+      }
+    }
+  ]
+}

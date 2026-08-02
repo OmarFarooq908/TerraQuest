@@ -375,6 +375,259 @@
           "grid_res_deg": 0.02
         }
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.86,
+          35.48
+        ]
+      },
+      "properties": {
+        "id": "seed_unnamed_tarn",
+        "name": "Unnamed High Tarn (synthetic)",
+        "kind": "alpine_lake",
+        "elevation_m": 3600,
+        "building_density": 0.01,
+        "crowd": 0.12,
+        "forest": 0.08,
+        "slope": 0.2,
+        "hazard": 0.3,
+        "protected": 0.0,
+        "tags": [
+          "water",
+          "unnamed",
+          "synthetic"
+        ],
+        "generator": "unnamed_waterbody",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "water"
+        },
+        "evidence": {
+          "discovery_score": 0.75,
+          "fixture": true,
+          "synthetic": true,
+          "water_name": "",
+          "layer": "water"
+        },
+        "densify": {
+          "cell_id": "c_35.48_74.86",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        },
+        "has_water": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.98,
+          35.58
+        ]
+      },
+      "properties": {
+        "id": "seed_valley_spur",
+        "name": "Valley Spur End (synthetic)",
+        "kind": "track_spur",
+        "elevation_m": 3100,
+        "building_density": 0.02,
+        "crowd": 0.18,
+        "forest": 0.15,
+        "slope": 0.22,
+        "hazard": 0.25,
+        "protected": 0.0,
+        "tags": [
+          "spur",
+          "track",
+          "synthetic"
+        ],
+        "generator": "road_spur",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "road_lines"
+        },
+        "evidence": {
+          "discovery_score": 0.75,
+          "fixture": true,
+          "synthetic": true,
+          "near_drivable": true,
+          "layer": "road_lines"
+        },
+        "densify": {
+          "cell_id": "c_35.58_74.98",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        },
+        "highway": "track"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.35,
+          35.88
+        ]
+      },
+      "properties": {
+        "id": "seed_dem_summit",
+        "name": "DEM Local Summit (synthetic)",
+        "kind": "dem_peak",
+        "elevation_m": 5050,
+        "building_density": 0.0,
+        "crowd": 0.08,
+        "forest": 0.0,
+        "slope": 0.4,
+        "hazard": 0.45,
+        "protected": 0.0,
+        "tags": [
+          "dem",
+          "summit",
+          "synthetic"
+        ],
+        "generator": "dem_local_max",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "elevation"
+        },
+        "evidence": {
+          "discovery_score": 0.75,
+          "fixture": true,
+          "synthetic": true,
+          "dem_tile": "synthetic_N35E075",
+          "layer": "elevation"
+        },
+        "densify": {
+          "cell_id": "c_35.88_75.35",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        },
+        "relief_m": 650
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.4,
+          35.9
+        ]
+      },
+      "properties": {
+        "id": "seed_needle_peak",
+        "name": "Needle Peak (synthetic)",
+        "kind": "peak",
+        "elevation_m": 5200,
+        "building_density": 0.0,
+        "crowd": 0.1,
+        "forest": 0.0,
+        "slope": 0.5,
+        "hazard": 0.6,
+        "protected": 0.0,
+        "tags": [
+          "peak",
+          "osm",
+          "synthetic"
+        ],
+        "generator": "osm_peak",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "peaks"
+        },
+        "evidence": {
+          "discovery_score": 0.75,
+          "fixture": true,
+          "synthetic": true,
+          "osm_id": -1001,
+          "layer": "peaks"
+        },
+        "densify": {
+          "cell_id": "c_35.90_75.40",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.25,
+          35.45
+        ]
+      },
+      "properties": {
+        "id": "seed_granite_lookout",
+        "name": "Granite Lookout (synthetic)",
+        "kind": "viewpoint",
+        "elevation_m": 3400,
+        "building_density": 0.05,
+        "crowd": 0.35,
+        "forest": 0.05,
+        "slope": 0.3,
+        "hazard": 0.2,
+        "protected": 0.0,
+        "tags": [
+          "viewpoint",
+          "osm",
+          "synthetic"
+        ],
+        "generator": "osm_viewpoint",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "viewpoints"
+        },
+        "evidence": {
+          "discovery_score": 0.75,
+          "fixture": true,
+          "synthetic": true,
+          "osm_id": -1002,
+          "layer": "viewpoints"
+        },
+        "densify": {
+          "cell_id": "c_35.45_75.25",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
     }
   ]
 }

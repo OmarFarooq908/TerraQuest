@@ -6,4 +6,5 @@ feature_schema_version: "0.3.0"
 synthetic: true
 notes: >
   SYNTHETIC GeoJSON for offline golden-mission tests. Not survey-grade geography.
+  Catalog covers all nine discovery generator names (hand-seeded fixtures).
   Build a real pack with: adventurectl pack build --config skardu_v1
