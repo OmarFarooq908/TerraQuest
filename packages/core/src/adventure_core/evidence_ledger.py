@@ -113,4 +113,19 @@ def validate_evidence_ledger(
         if gen not in DEM_SOURCE_GENERATORS:
             errors.append(f"{feature_id}: provenance.layer required for {gen}")
 
+    if "ontology_ids" in evidence:
+        raw_ids = evidence["ontology_ids"]
+        if not isinstance(raw_ids, list):
+            errors.append(f"{feature_id}: evidence.ontology_ids must be a list")
+        else:
+            for i, item in enumerate(raw_ids):
+                if not isinstance(item, str):
+                    errors.append(f"{feature_id}: evidence.ontology_ids[{i}] must be a string")
+            str_ids = [x for x in raw_ids if isinstance(x, str)]
+            # Lazy import: ontology loads configs; keep ledger import light.
+            from adventure_core.ontology import validate_ontology_ids
+
+            for msg in validate_ontology_ids(str_ids, canonical_only=True):
+                errors.append(f"{feature_id}: evidence.ontology_ids — {msg}")
+
     return errors

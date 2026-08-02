@@ -7,6 +7,7 @@ only bridge from language to scoring; this module does not invent rankings.
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import lru_cache
@@ -39,8 +40,11 @@ class AdventureOntology:
     concept_to_dimensions: dict[str, dict[str, float]]
 
     def resolve(self, token: str) -> str | None:
-        """Return canonical id for a dotted id or legacy alias, else None."""
-        t = token.strip()
+        """Return canonical id for a dotted id or legacy alias, else None.
+
+        Matching is case-insensitive (RFC: ids are lowercase).
+        """
+        t = token.strip().lower()
         if not t:
             return None
         if t in self.concepts:
@@ -89,10 +93,12 @@ def validate_ontology_data(data: dict[str, Any]) -> list[str]:
             errors.append(f"{cid}: aliases must be a list of strings")
             aliases = []
         for alias in aliases:
-            a = alias.strip()
+            a = alias.strip().lower()
             if not a:
                 errors.append(f"{cid}: empty alias")
                 continue
+            if a != alias.strip():
+                errors.append(f"{cid}: alias {alias!r} must be lowercase")
             if a in concepts:
                 errors.append(f"{cid}: alias {a!r} collides with a canonical id")
             if a in seen_aliases and seen_aliases[a] != cid:
@@ -129,7 +135,9 @@ def _build_ontology(data: dict[str, Any], *, source: Path | str) -> AdventureOnt
     concept_to_dimensions: dict[str, dict[str, float]] = {}
 
     for cid, raw in data["concepts"].items():
-        aliases = tuple(str(a).strip() for a in (raw.get("aliases") or []) if str(a).strip())
+        aliases = tuple(
+            str(a).strip().lower() for a in (raw.get("aliases") or []) if str(a).strip()
+        )
         prefs = {str(k): float(v) for k, v in raw["preferences"].items()}
         cdef = ConceptDef(
             id=cid,
@@ -193,16 +201,28 @@ def resolve_concept(token: str) -> str | None:
     return get_ontology().resolve(token)
 
 
-def validate_ontology_ids(ids: Iterable[str]) -> list[str]:
-    """Return errors for unknown ontology ids (aliases accepted → no error)."""
+def validate_ontology_ids(
+    ids: Iterable[str],
+    *,
+    canonical_only: bool = False,
+) -> list[str]:
+    """Return errors for unknown ontology ids.
+
+    Aliases resolve successfully unless ``canonical_only`` is True (catalog /
+    eval fixtures should store dotted canonical ids).
+    """
     ont = get_ontology()
     errors: list[str] = []
     for raw in ids:
         if not isinstance(raw, str) or not raw.strip():
             errors.append(f"invalid ontology id: {raw!r}")
             continue
-        if ont.resolve(raw) is None:
+        token = raw.strip()
+        resolved = ont.resolve(token)
+        if resolved is None:
             errors.append(f"unknown ontology id: {raw!r}")
+        elif canonical_only and token.lower() != resolved:
+            errors.append(f"use canonical id {resolved!r}, not alias {raw!r}")
     return errors
 
 
@@ -214,9 +234,9 @@ def apply_concept(
     invert: bool = False,
 ) -> dict[str, float]:
     """Merge a concept (canonical or alias) into a preference dict. strength in [0, 1]."""
-    dims = CONCEPT_TO_DIMENSIONS.get(concept)
-    if not dims:
-        dims = get_ontology().concept_to_dimensions.get(concept)
+    # Always read from the loaded ontology — do not trust a mutated module-level map.
+    token = concept.strip().lower() if concept else ""
+    dims = get_ontology().concept_to_dimensions.get(token)
     if not dims:
         return prefs
     sign = -1.0 if invert else 1.0
@@ -227,9 +247,11 @@ def apply_concept(
     return out
 
 
-def water_kind_to_ontology_id(kind: str) -> str:
+def water_kind_to_ontology_id(kind: str | None) -> str:
     """Map generator ``water_kind`` values to canonical ontology ids."""
-    k = (kind or "lake").strip().lower()
+    k = ("" if kind is None else str(kind)).strip().lower()
+    if not k:
+        return "water.lake"  # match generator default when kind is missing/blank
     mapping = {
         "lake": "water.lake",
         "river": "water.river",
@@ -246,9 +268,10 @@ def _sync_compat(ont: AdventureOntology) -> None:
     CONCEPT_TO_DIMENSIONS = dict(ont.concept_to_dimensions)
 
 
-# Backward-compatible module-level map (canonical + aliases), populated on import.
+# Snapshot for importers; prefer get_ontology() / apply_concept for live lookups.
 CONCEPT_TO_DIMENSIONS: dict[str, dict[str, float]] = {}
 try:
     _sync_compat(load_ontology())
-except Exception:  # pragma: no cover - allow import when configs missing in odd envs
+except Exception as exc:  # pragma: no cover - allow import when configs missing
+    warnings.warn(f"adventure ontology not loaded at import: {exc}", UserWarning, stacklevel=1)
     CONCEPT_TO_DIMENSIONS = {}

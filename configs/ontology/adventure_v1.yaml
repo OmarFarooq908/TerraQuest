@@ -110,11 +110,19 @@ concepts:
   vegetation.forest:
     label: Forest
     family: vegetation
-    aliases: [forest, vegetation]
+    aliases: [forest]
     preferences:
       forest: 0.95
       wildlife: 0.3
       solitude: 0.2
+
+  # Legacy interpreter token "vegetation" kept weaker than forest (parity with pre-YAML map).
+  vegetation.cover:
+    label: Vegetation
+    family: vegetation
+    aliases: [vegetation]
+    preferences:
+      forest: 0.7
 
   # --- access ---
   access.easy:

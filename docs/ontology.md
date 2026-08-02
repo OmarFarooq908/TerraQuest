@@ -35,8 +35,11 @@ apply_concept({}, "lake")         # preference nudges
 validate_ontology_ids(["water.lake", "nope"])  # errors for unknown
 ```
 
-`CONCEPT_TO_DIMENSIONS` remains available and is loaded from the YAML (canonical
-ids **and** aliases).
+Matching is case-insensitive for resolve/apply. Catalog/eval evidence should
+store **canonical** dotted ids (`canonical_only` validation in the evidence ledger).
+
+`CONCEPT_TO_DIMENSIONS` remains available as an import-time snapshot; prefer
+`apply_concept` / `get_ontology()` for live lookups.
 
 ## Catalog / generators
 
