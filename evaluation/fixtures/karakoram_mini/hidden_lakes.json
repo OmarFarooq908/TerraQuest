@@ -1,0 +1,47 @@
+[
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/turquoise_lake",
+    "catalog_id": "seed_turquoise_lake",
+    "geometry": { "type": "Point", "coordinates": [75.18, 35.72] },
+    "known": true,
+    "interesting": true,
+    "human_rating": 9.2,
+    "google_maps_popularity": 2.0,
+    "tags": ["lake", "alpine", "solitude"],
+    "ontology_ids": ["water.lake", "experience.discovery"],
+    "notes": "Synthetic CI label aligned to fixture catalog — not a field rating.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  },
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/silent_valley",
+    "catalog_id": "seed_silent_valley",
+    "geometry": { "type": "Point", "coordinates": [74.72, 35.82] },
+    "known": false,
+    "interesting": true,
+    "human_rating": 9.0,
+    "google_maps_popularity": 1.5,
+    "tags": ["valley", "hidden"],
+    "ontology_ids": ["terrain.valley", "experience.solitude"],
+    "notes": "Synthetic CI label.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  },
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/pine_river",
+    "catalog_id": "seed_pine_river",
+    "geometry": { "type": "Point", "coordinates": [74.55, 35.88] },
+    "known": true,
+    "interesting": true,
+    "human_rating": 8.4,
+    "google_maps_popularity": 3.0,
+    "tags": ["river", "forest"],
+    "ontology_ids": ["water.river", "vegetation.forest"],
+    "notes": "Synthetic CI label.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  }
+]

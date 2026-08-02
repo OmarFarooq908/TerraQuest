@@ -1,0 +1,32 @@
+[
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/near_town_hill",
+    "catalog_id": "seed_near_town_hill",
+    "geometry": { "type": "Point", "coordinates": [74.85, 35.35] },
+    "known": true,
+    "interesting": false,
+    "human_rating": 4.0,
+    "google_maps_popularity": 8.5,
+    "tags": ["viewpoint", "control"],
+    "ontology_ids": ["experience.photography"],
+    "notes": "Synthetic control: popular / near-town; should not dominate fearless discovery.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  },
+  {
+    "schema_version": "0.1.0",
+    "id": "fixtures/karakoram_mini/sunrise_ridge",
+    "catalog_id": "seed_sunrise_ridge",
+    "geometry": { "type": "Point", "coordinates": [75.12, 35.68] },
+    "known": true,
+    "interesting": true,
+    "human_rating": 7.8,
+    "google_maps_popularity": 4.0,
+    "tags": ["viewpoint", "ridge"],
+    "ontology_ids": ["terrain.ridge", "experience.photography"],
+    "notes": "Synthetic CI label.",
+    "license": "Apache-2.0",
+    "synthetic": true
+  }
+]
