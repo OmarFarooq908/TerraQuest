@@ -19,3 +19,4 @@ Breaking changes to `MissionIntent` or catalog schema **require** an RFC while t
 | [0006](0006-sentinel2-indices.md) | Sentinel-2 indices in Region Packs | Draft |
 | [0007](0007-vlm-pack-features.md) | VLM feature extraction at pack build (not ranking) | Draft |
 | [0008](0008-formal-ontology.md) | Formal adventure ontology (shared language) | Draft |
+| [0009](0009-ranking-explanations.md) | Deterministic ranking explanations | Draft |

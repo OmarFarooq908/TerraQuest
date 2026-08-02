@@ -19,6 +19,7 @@ from adventure_core.intent import (
 from adventure_core.schemas import Candidate, RankedMission
 
 from adventure_scoring.confidence import build_confidence
+from adventure_scoring.explanations import build_ranking_explanations
 
 
 def candidate_dimensions(candidate: Candidate) -> dict[str, float]:
@@ -316,6 +317,16 @@ def rank_missions(
         conf = build_confidence(cand, pack_synthetic=pack_synthetic)
         if conf.value < min_confidence:
             continue
+        evidence = {
+            **cand.evidence,
+            "dimensions": candidate_dimensions(cand),
+        }
+        explanations = build_ranking_explanations(
+            feature_breakdown=breakdown,
+            preference_adjustments=adj,
+            evidence=evidence,
+            tags=cand.tags,
+        )
         ranked.append(
             RankedMission(
                 candidate_id=cand.id,
@@ -327,11 +338,9 @@ def rank_missions(
                 confidence=conf,
                 feature_breakdown=breakdown,
                 preference_adjustments=adj,
+                explanations=explanations,
                 tags=cand.tags,
-                evidence={
-                    **cand.evidence,
-                    "dimensions": candidate_dimensions(cand),
-                },
+                evidence=evidence,
             )
         )
     ranked.sort(key=lambda m: (m.score, m.confidence.value), reverse=True)

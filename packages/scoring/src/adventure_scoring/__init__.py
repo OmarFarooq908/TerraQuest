@@ -5,6 +5,7 @@ from adventure_scoring.confidence import (
     apply_calibration_hook,
     build_confidence,
 )
+from adventure_scoring.explanations import build_ranking_explanations
 from adventure_scoring.scorer import (
     build_intent_coverage,
     candidate_dimensions,
@@ -20,6 +21,7 @@ __all__ = [
     "rank_missions",
     "build_confidence",
     "build_intent_coverage",
+    "build_ranking_explanations",
     "candidate_dimensions",
     "preference_alignment",
 ]

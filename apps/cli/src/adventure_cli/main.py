@@ -309,8 +309,17 @@ def mission_run(
 
     if result.missions:
         console.print()
+        console.print("[bold]Why these ranked[/bold] (deterministic; not LLM):")
+        for m in result.missions:
+            console.print(f"  [cyan]{m.name}[/cyan] ({m.candidate_id})")
+            if m.explanations:
+                for r in m.explanations:
+                    console.print(f"    • {r.code}: {r.detail}")
+            else:
+                console.print("    • (no strong score drivers)")
+        console.print()
         top = result.missions[0]
-        console.print(f"[bold]Top evidence[/bold] ({top.candidate_id}):")
+        console.print(f"[bold]Top confidence[/bold] ({top.candidate_id}):")
         for r in top.confidence.reasons:
             console.print(f"  • {r.code}: {r.detail}")
         if top.evidence:
