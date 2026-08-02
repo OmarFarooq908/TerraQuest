@@ -1,7 +1,7 @@
 # Discovery ranking comparison
 
 - pack: `karakoram_mini`
-- pack_content_hash: `23405f3b9dafc17b`
+- pack_content_hash: `f7f6a397fd5fef00`
 - labels: `/Users/dev/Documents/Personal/open-source/AdventureAI/evaluation/fixtures/karakoram_mini`
 - interpreter: `rules`
 - mode: `fearless_far`

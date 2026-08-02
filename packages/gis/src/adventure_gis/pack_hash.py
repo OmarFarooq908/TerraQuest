@@ -1,4 +1,4 @@
-"""Content hash for Region Pack layer directories."""
+"""Content hash for Region Pack layer directories (RFC-0003 / issue #62)."""
 
 from __future__ import annotations
 
@@ -6,6 +6,20 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+
+# Domain-separated pack fingerprint. Bump when the hashed inputs change.
+PACK_CONTENT_HASH_VERSION = 2
+_PACK_CONTENT_DOMAIN = f"terraquest-pack-content-v{PACK_CONTENT_HASH_VERSION}\0"
+
+# Discovery fields folded into the pack fingerprint when present.
+_DISCOVERY_HASH_KEYS = (
+    "selected_by_generator",
+    "quotas",
+    "min_spacing_km",
+    "grid_res_deg",
+    "catalog_schema_version",
+    "generators_run",
+)
 
 
 def discovery_stats_for_hash(stats_or_blob: dict[str, Any] | None) -> dict[str, Any]:
@@ -26,6 +40,7 @@ def discovery_stats_for_hash(stats_or_blob: dict[str, Any] | None) -> dict[str, 
         "osm" in stats_or_blob or "dem_tiles" in stats_or_blob or "content_hash" in stats_or_blob
     )
     if looks_like_build_stats:
+        assert isinstance(discovery, dict)
         return discovery
     if "selected_by_generator" in stats_or_blob:
         return stats_or_blob
@@ -34,16 +49,45 @@ def discovery_stats_for_hash(stats_or_blob: dict[str, Any] | None) -> dict[str, 
     return {}
 
 
+def discovery_payload_for_hash(discovery: dict[str, Any]) -> dict[str, Any]:
+    """Stable subset of discovery stats included in the pack fingerprint."""
+    out: dict[str, Any] = {}
+    for key in _DISCOVERY_HASH_KEYS:
+        if key not in discovery:
+            continue
+        val = discovery[key]
+        if key == "generators_run" and isinstance(val, list):
+            out[key] = sorted(str(x) for x in val)
+        else:
+            out[key] = val
+    return out
+
+
+def layer_file_digests(layers_dir: Path) -> dict[str, str]:
+    """Return ``{filename: full sha256 hex}`` for every ``*.geojson`` under layers."""
+    digests: dict[str, str] = {}
+    for path in sorted(layers_dir.glob("*.geojson")):
+        digests[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return digests
+
+
 def pack_content_hash(layers_dir: Path, stats: dict[str, Any] | None = None) -> str:
-    """Hash all layer GeoJSON bytes + selected generator counts.
+    """Hash all layer GeoJSON bytes + discovery knobs (pack-content v2).
 
     ``stats`` may be discovery stats or a full ``build_stats.json`` blob
     (see ``discovery_stats_for_hash`` / RFC-0003).
+
+    Returns a 16-hex digest (SHA-256 truncated) for ``pack.yaml`` / DuckDB /
+    eval pin compatibility.
     """
     discovery = discovery_stats_for_hash(stats)
+    payload = discovery_payload_for_hash(discovery)
     h = hashlib.sha256()
+    h.update(_PACK_CONTENT_DOMAIN.encode())
     for path in sorted(layers_dir.glob("*.geojson")):
         h.update(path.name.encode())
+        h.update(b"\0")
         h.update(path.read_bytes())
-    h.update(json.dumps(discovery.get("selected_by_generator", {}), sort_keys=True).encode())
+        h.update(b"\0")
+    h.update(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
     return h.hexdigest()[:16]

@@ -1,7 +1,7 @@
 # Eval delta note — pack-time VLM features (RFC-0007 / issue #22)
 
 Date: 2026-08-02  
-Pack: `fixtures/karakoram_mini` (synthetic) · `pack_content_hash: 8e68daaa09771542`  
+Pack: `fixtures/karakoram_mini` (synthetic) · `pack_content_hash: f7f6a397fd5fef00` (pack-content v2)  
 Prompt: standard Fearless & Far / Swift / hate-crowds  
 Interpreter: `rules` · mode: `fearless_far` · k=5
 

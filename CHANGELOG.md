@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ## [Unreleased]
 
+### Changed
+
+- Pack content hash v2 (#62 / #17): domain-separated fingerprint; discovery knobs (`quotas`, spacing, grid, schema version, `generators_run`) included alongside layers + `selected_by_generator`; per-layer SHA-256 digests in `build_stats.json`; fixture/baseline pins retargeted
+
 ### Added
 
 - Geofabrik dated extract pins (#60): `allow_latest: false` requires checksum; optional `geofabrik_md5` / `geofabrik_sha256` verify (including cache reuse); `skardu_v1` pinned to `pakistan-260801`

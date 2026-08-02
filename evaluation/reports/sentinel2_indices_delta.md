@@ -1,7 +1,7 @@
 # Eval delta note — Sentinel-2 indices (RFC-0006 / issue #21)
 
 Date: 2026-08-02  
-Pack: `fixtures/karakoram_mini` (synthetic) · `pack_content_hash: 1aad7575ad0e7000`  
+Pack: `fixtures/karakoram_mini` (synthetic) · `pack_content_hash: f7f6a397fd5fef00` (pack-content v2)  
 Prompt: standard Fearless & Far / Swift / hate-crowds  
 Interpreter: `rules` · mode: `fearless_far` · k=5
 

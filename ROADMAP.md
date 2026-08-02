@@ -31,7 +31,7 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 ## Next — Reproducible packs (0.3)
 
 - [x] Pinned Geofabrik dated extracts where practical (#60 — `skardu_v1` → `pakistan-260801`)
-- Stronger content hashes across all layers
+- [x] Stronger content hashes across all layers (#62)
 - Intent / schema regression suites (P0)
 - Evidence ledger completeness
 - [x] Region Pack architecture RFC

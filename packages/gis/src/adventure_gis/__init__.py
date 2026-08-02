@@ -7,7 +7,13 @@ from adventure_gis.pack_contract import (
     default_layers_map,
 )
 from adventure_gis.pack_data import PackData, load_pack_data
-from adventure_gis.pack_hash import discovery_stats_for_hash, pack_content_hash
+from adventure_gis.pack_hash import (
+    PACK_CONTENT_HASH_VERSION,
+    discovery_payload_for_hash,
+    discovery_stats_for_hash,
+    layer_file_digests,
+    pack_content_hash,
+)
 from adventure_gis.pack_query import (
     PackQueryError,
     catalog_label_join_counts,
@@ -27,10 +33,13 @@ __all__ = [
     "REQUIRED_PACK_LAYER_KEYS",
     "catalog_label_join_counts",
     "connect_pack_db",
+    "PACK_CONTENT_HASH_VERSION",
     "default_layers_map",
+    "discovery_payload_for_hash",
     "discovery_stats_for_hash",
     "execute_pack_sql",
     "generate_candidates",
+    "layer_file_digests",
     "load_pack_data",
     "lookup_sentinel_indices",
     "lookup_vlm_features",
