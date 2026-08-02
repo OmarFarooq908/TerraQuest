@@ -105,8 +105,9 @@ Build behavior:
 ### 6. Mission-time featurize
 
 `load_pack_data` loads optional `sentinel_indices`.
-`generate_candidates` joins by `catalog_id` (exact); if missing, nearest index
-point within **0.25 km** (else null).
+`generate_candidates` joins by `catalog_id` (exact). Distance fallback only uses
+index features **without** a `catalog_id`, within **0.25 km** — never a neighbor's
+labeled sample. Unmatched → null.
 
 | Field | Behavior |
 |-------|----------|

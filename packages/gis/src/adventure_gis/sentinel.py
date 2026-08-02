@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from adventure_core.geo import Point, haversine_km
 
 from adventure_gis.pack_data import NamedPoint
@@ -18,7 +20,7 @@ def _optional_index(props: dict, key: str) -> float | None:
         val = float(raw)
     except (TypeError, ValueError):
         return None
-    if val != val:  # NaN
+    if not math.isfinite(val):
         return None
     return max(-1.0, min(1.0, val))
 
@@ -32,22 +34,30 @@ def lookup_sentinel_indices(
 ) -> tuple[float | None, float | None, dict]:
     """Return ``(ndvi, ndwi, meta)`` for a catalog point.
 
-    Prefer exact ``properties.catalog_id``; else nearest point within
-    ``match_radius_km``. Empty ``indices`` → all null / empty meta.
+    Prefer exact ``properties.catalog_id``. Distance fallback only considers
+    index features **without** a ``catalog_id`` so a nearby labeled neighbor
+    cannot leak indices onto an unmatched catalog seed (dense packs).
+
+    Empty ``indices`` → all null / empty meta.
     """
     if not indices:
         return None, None, {}
 
-    by_catalog = {
-        str(pt.properties.get("catalog_id")): pt
-        for pt in indices
-        if pt.properties.get("catalog_id")
-    }
+    by_catalog: dict[str, NamedPoint] = {}
+    for pt in indices:
+        cid = pt.properties.get("catalog_id")
+        if cid is None or cid == "":
+            continue
+        by_catalog[str(cid)] = pt
+
     hit = by_catalog.get(catalog_id)
     via = "catalog_id"
     if hit is None:
         best: tuple[float, NamedPoint] | None = None
         for pt in indices:
+            # Do not steal a neighbor's catalog_id-tagged sample.
+            if pt.properties.get("catalog_id") not in (None, ""):
+                continue
             d = haversine_km(origin, pt.point)
             if d <= match_radius_km and (best is None or d < best[0]):
                 best = (d, pt)

@@ -104,10 +104,15 @@ def pack_build(
     are for offline tests — do not pass them to pack build.
     """
     from adventure_packbuilder import build_pack, load_build_config
+    from adventure_packbuilder.sentinel2 import Sentinel2BuildError
 
     cfg = load_build_config(config)
     console.print(f"Building pack [bold]{cfg.pack_id}[/bold] bbox={cfg.bbox} …")
-    out = build_pack(cfg, skip_dem=skip_dem)
+    try:
+        out = build_pack(cfg, skip_dem=skip_dem)
+    except Sentinel2BuildError as exc:
+        console.print(f"[red]Sentinel-2 build error[/red]: {exc}")
+        raise typer.Exit(code=2) from exc
     console.print(f"[green]Built[/green] {out}")
     console.print("Run a mission with:")
     console.print(f'  adventurectl mission run --pack {cfg.pack_id} --interpreter rules -p "..."')

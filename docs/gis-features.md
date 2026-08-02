@@ -47,7 +47,8 @@ See issue [#23](https://github.com/OmarFarooq908/TerraQuest/issues/23) and
 ## Sentinel-2 indices (RFC-0006 / #21)
 
 - **Definition:** Point-sampled NDVI / NDWI in **[-1, 1]** joined by `catalog_id`
-  (else nearest within 0.25 km).
+  (else nearest unlabeled index point within 0.25 km — never a neighbor's
+  `catalog_id` sample).
 - **Data:** optional `layers/sentinel_indices.geojson` (not required for v1 packs).
 - **Scoring impact:** **None yet** — features + evidence only; preference weights
   unchanged until Skardu eval justifies a blend.

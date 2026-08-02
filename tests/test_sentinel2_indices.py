@@ -68,6 +68,117 @@ def test_lookup_distance_fallback():
     assert meta["match_via"] == "distance"
 
 
+def test_lookup_does_not_steal_neighbor_catalog_id():
+    """Dense catalogs: unlabeled seed must not inherit a nearby labeled sample."""
+    indices = [
+        _pt("b_idx", 75.001, 35.5, catalog_id="seed_b", ndvi=0.9, ndwi=0.1),
+    ]
+    ndvi_a, _, meta_a = lookup_sentinel_indices(
+        "seed_a", Point(lon=75.0, lat=35.5), indices
+    )
+    ndvi_b, _, meta_b = lookup_sentinel_indices(
+        "seed_b", Point(lon=75.001, lat=35.5), indices
+    )
+    assert ndvi_a is None and meta_a == {}
+    assert ndvi_b == pytest.approx(0.9)
+    assert meta_b["match_via"] == "catalog_id"
+
+
+def test_optional_index_rejects_non_finite():
+    indices = [_pt("x", 75.0, 35.5, catalog_id="c1", ndvi=float("nan"), ndwi=float("inf"))]
+    ndvi, ndwi, meta = lookup_sentinel_indices("c1", Point(lon=75.0, lat=35.5), indices)
+    assert ndvi is None and ndwi is None
+    assert meta["match_via"] == "catalog_id"
+
+
+def test_maybe_attach_disabled_clears_leftover_layer(tmp_path: Path):
+    leftover = tmp_path / "sentinel_indices.geojson"
+    leftover.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    cfg = PackManifest(
+        pack_id="t",
+        name="t",
+        bbox=[0, 0, 1, 1],
+        sentinel2={"enabled": False},
+    )
+    src, wrote = maybe_attach_sentinel_indices(cfg, tmp_path)
+    assert src is None and wrote is False
+    assert not leftover.exists()
+
+
+def test_maybe_attach_rejects_empty_and_duplicate(tmp_path: Path):
+    empty = tmp_path / "empty.json"
+    empty.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    layers = tmp_path / "layers"
+    layers.mkdir()
+    cfg = PackManifest(
+        pack_id="t",
+        name="t",
+        bbox=[0, 0, 1, 1],
+        sentinel2={"enabled": True, "indices_geojson": str(empty)},
+    )
+    with pytest.raises(Sentinel2BuildError, match="empty"):
+        maybe_attach_sentinel_indices(cfg, layers)
+
+    dup = tmp_path / "dup.json"
+    dup.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "Point", "coordinates": [75.0, 35.0]},
+                        "properties": {"catalog_id": "c1", "ndvi": 0.1},
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "Point", "coordinates": [75.1, 35.1]},
+                        "properties": {"catalog_id": "c1", "ndvi": 0.2},
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    cfg2 = PackManifest(
+        pack_id="t",
+        name="t",
+        bbox=[0, 0, 1, 1],
+        sentinel2={"enabled": True, "indices_geojson": str(dup)},
+    )
+    with pytest.raises(Sentinel2BuildError, match="duplicate"):
+        maybe_attach_sentinel_indices(cfg2, layers)
+
+
+def test_maybe_attach_rejects_bad_coordinates(tmp_path: Path):
+    bad = tmp_path / "bad.json"
+    bad.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "Point", "coordinates": [999.0, 35.0]},
+                        "properties": {"catalog_id": "c1", "ndvi": 0.1},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    layers = tmp_path / "layers"
+    layers.mkdir()
+    cfg = PackManifest(
+        pack_id="t",
+        name="t",
+        bbox=[0, 0, 1, 1],
+        sentinel2={"enabled": True, "indices_geojson": str(bad)},
+    )
+    with pytest.raises(Sentinel2BuildError, match="WGS84"):
+        maybe_attach_sentinel_indices(cfg, layers)
+
+
 def test_maybe_attach_disabled_is_noop(tmp_path: Path):
     cfg = PackManifest(
         pack_id="t",

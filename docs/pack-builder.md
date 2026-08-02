@@ -62,7 +62,9 @@ sentinel2:
    even if lift is zero or negative. Ranking weights stay unchanged until then.
 
 Live STAC download inside `pack build` is intentionally not wired yet — attach a
-precomputed GeoJSON so CI stays offline.
+precomputed GeoJSON so CI stays offline. Rebuilds with `enabled: false` **remove**
+any leftover `sentinel_indices.geojson` so hash/validate stay clean. Attach rejects
+empty collections, duplicate `catalog_id`s, and out-of-range coordinates.
 
 Synthetic fixture smoke: `fixtures/karakoram_mini/layers/sentinel_indices.geojson`
 (not real EO).
