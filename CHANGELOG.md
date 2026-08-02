@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 ### Changed
 
 - Pack content hash v2 (#62 / #17): domain-separated fingerprint; discovery knobs (`quotas`, global + per-generator spacing, grid, schema version, `generators_run`) included alongside layers + `selected_by_generator`; per-layer SHA-256 digests in `build_stats.json`; fixture/baseline pins retargeted
-- Evidence ledger v2 (#64 / #17): non-synthetic OSM-element generators require `provenance.osm_id` (positive int); grid/DEM generators and synthetic fixtures unchanged; `EVIDENCE_LEDGER_VERSION` → `"2"`
+- Evidence ledger v2 (#64 / #17): non-synthetic OSM-element generators require `provenance.osm_id` (positive int / integral float); packbuilder skips element candidates lacking `osm_id`; grid/DEM generators and synthetic fixtures unchanged; `EVIDENCE_LEDGER_VERSION` → `"2"`
 
 ### Added
 

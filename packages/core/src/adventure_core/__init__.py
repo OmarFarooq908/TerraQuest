@@ -32,6 +32,7 @@ from adventure_core.evaluation import (
 from adventure_core.evidence_ledger import (
     EVIDENCE_LEDGER_VERSION,
     OSM_ELEMENT_GENERATORS,
+    coerce_positive_osm_id,
     validate_evidence_ledger,
 )
 from adventure_core.geo import Point, haversine_km
@@ -92,6 +93,7 @@ __all__ = [
     "validate_catalog_geojson",
     "EVIDENCE_LEDGER_VERSION",
     "OSM_ELEMENT_GENERATORS",
+    "coerce_positive_osm_id",
     "validate_evidence_ledger",
     "PackManifest",
     "PackSource",

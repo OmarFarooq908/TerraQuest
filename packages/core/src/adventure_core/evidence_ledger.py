@@ -80,8 +80,23 @@ def _missing_keys(evidence: dict[str, Any], required: frozenset[str]) -> list[st
 
 
 def _valid_osm_id(value: Any) -> bool:
-    """Positive int osm_id (bool is rejected; bool subclasses int in Python)."""
-    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+    return coerce_positive_osm_id(value) is not None
+
+
+def coerce_positive_osm_id(value: Any) -> int | None:
+    """Return a positive OSM id, or None if missing/invalid.
+
+    Accepts ints and integral floats (common in GeoJSON). Rejects bools,
+    non-integral floats, strings, zero, and negatives.
+    """
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return value if value > 0 else None
+    if isinstance(value, float) and value.is_integer():
+        as_int = int(value)
+        return as_int if as_int > 0 else None
+    return None
 
 
 def validate_evidence_ledger(
@@ -124,12 +139,15 @@ def validate_evidence_ledger(
     if gen in DEM_SOURCE_GENERATORS and not synthetic and "dem" not in sources_list:
         errors.append(f"{feature_id}: provenance.sources must include 'dem' for {gen}")
 
-    if gen in DEM_SOURCE_GENERATORS and not synthetic and not provenance.get("dem_tile"):
-        errors.append(f"{feature_id}: provenance.dem_tile required for {gen}")
+    if gen in DEM_SOURCE_GENERATORS and not synthetic:
+        dem_tile = provenance.get("dem_tile")
+        if not (isinstance(dem_tile, str) and dem_tile.strip()):
+            errors.append(f"{feature_id}: provenance.dem_tile required for {gen}")
 
-    if not synthetic and gen != "synthetic_fixture" and not provenance.get("layer"):
+    if not synthetic and gen != "synthetic_fixture":
+        layer = provenance.get("layer")
         # DEM generators may omit layer when dem_tile is set
-        if gen not in DEM_SOURCE_GENERATORS:
+        if gen not in DEM_SOURCE_GENERATORS and not (isinstance(layer, str) and layer.strip()):
             errors.append(f"{feature_id}: provenance.layer required for {gen}")
 
     if (

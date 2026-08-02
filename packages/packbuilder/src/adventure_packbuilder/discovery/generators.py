@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from adventure_core.catalog import CatalogCandidate, Provenance
+from adventure_core.evidence_ledger import coerce_positive_osm_id
 from adventure_core.geo import Point
 from adventure_core.ontology import water_kind_to_ontology_id
 
@@ -17,6 +18,11 @@ def _is_named(props: dict) -> bool:
 
 def _base_score_isolation(dist_s: float) -> float:
     return min(1.0, dist_s / 25.0)
+
+
+def _require_osm_id(props: dict) -> int | None:
+    """Ledger v2: OSM-element candidates need a positive osm_id."""
+    return coerce_positive_osm_id(props.get("osm_id"))
 
 
 # ---------------------------------------------------------------------------
@@ -35,12 +41,15 @@ def gen_track_terminus(ctx: DiscoveryContext) -> list[CatalogCandidate]:
             dist_s = ctx.dist_settlement(pt)
             if dist_s < 3.0:
                 continue
+            osm_id = _require_osm_id(props)
+            if osm_id is None:
+                continue
             building, crowd = ctx.human_proxies(pt)
             cid = f"gen:track_terminus:{sid}:centroid"
             out.append(
                 CatalogCandidate(
                     id=cid,
-                    name=str(props.get("name") or f"track_terminus_{props.get('osm_id')}"),
+                    name=str(props.get("name") or f"track_terminus_{osm_id}"),
                     lon=pt.lon,
                     lat=pt.lat,
                     kind="abandoned_track",
@@ -49,7 +58,7 @@ def gen_track_terminus(ctx: DiscoveryContext) -> list[CatalogCandidate]:
                     provenance=Provenance(
                         sources=["osm"],
                         method="track_centroid_fallback",
-                        osm_id=props.get("osm_id"),
+                        osm_id=osm_id,
                         osm_type=props.get("osm_type"),
                         layer="road_nodes",
                     ),
@@ -72,8 +81,10 @@ def gen_track_terminus(ctx: DiscoveryContext) -> list[CatalogCandidate]:
             dist_s = ctx.dist_settlement(pt)
             if dist_s < 2.5:
                 continue
+            osm_id = _require_osm_id(ln.props)
+            if osm_id is None:
+                continue
             building, crowd = ctx.human_proxies(pt)
-            osm_id = ln.props.get("osm_id")
             cid = f"gen:track_terminus:{ln.id}:{endpoint_name}"
             out.append(
                 CatalogCandidate(
@@ -123,9 +134,11 @@ def gen_road_spur(ctx: DiscoveryContext) -> list[CatalogCandidate]:
             far, near_dist_road, far_label = a, db_road, "a"
         else:
             continue
+        osm_id = _require_osm_id(ln.props)
+        if osm_id is None:
+            continue
         building, crowd = ctx.human_proxies(far)
         dist_s = ctx.dist_settlement(far)
-        osm_id = ln.props.get("osm_id")
         cid = f"gen:road_spur:{ln.id}:{far_label}"
         out.append(
             CatalogCandidate(
@@ -172,6 +185,9 @@ def _water_candidates(ctx: DiscoveryContext, *, named: bool) -> list[CatalogCand
         is_named = _is_named(props)
         if named != is_named:
             continue
+        osm_id = _require_osm_id(props)
+        if osm_id is None:
+            continue
         kind_raw = props.get("kind") or "lake"
         seed_kind = "alpine_lake" if kind_raw == "lake" else "river_crossing"
         dist_s = ctx.dist_settlement(pt)
@@ -184,7 +200,7 @@ def _water_candidates(ctx: DiscoveryContext, *, named: bool) -> list[CatalogCand
         out.append(
             CatalogCandidate(
                 id=cid,
-                name=str(props.get("name") or f"{gen}_{props.get('osm_id')}"),
+                name=str(props.get("name") or f"{gen}_{osm_id}"),
                 lon=pt.lon,
                 lat=pt.lat,
                 kind=seed_kind,
@@ -193,7 +209,7 @@ def _water_candidates(ctx: DiscoveryContext, *, named: bool) -> list[CatalogCand
                 provenance=Provenance(
                     sources=["osm"],
                     method="water_centroid",
-                    osm_id=props.get("osm_id"),
+                    osm_id=osm_id,
                     osm_type=props.get("osm_type"),
                     layer="water",
                 ),
@@ -230,6 +246,9 @@ def gen_unnamed_waterbody(ctx: DiscoveryContext) -> list[CatalogCandidate]:
 def gen_osm_peak(ctx: DiscoveryContext) -> list[CatalogCandidate]:
     out: list[CatalogCandidate] = []
     for sid, pt, props in ctx.peaks:
+        osm_id = _require_osm_id(props)
+        if osm_id is None:
+            continue
         dist_s = ctx.dist_settlement(pt)
         building, crowd = ctx.human_proxies(pt)
         elev = props.get("elevation_m") or props.get("ele")
@@ -242,7 +261,7 @@ def gen_osm_peak(ctx: DiscoveryContext) -> list[CatalogCandidate]:
         out.append(
             CatalogCandidate(
                 id=cid,
-                name=str(props.get("name") or f"peak_{props.get('osm_id')}"),
+                name=str(props.get("name") or f"peak_{osm_id}"),
                 lon=pt.lon,
                 lat=pt.lat,
                 kind="viewpoint",
@@ -251,7 +270,7 @@ def gen_osm_peak(ctx: DiscoveryContext) -> list[CatalogCandidate]:
                 provenance=Provenance(
                     sources=["osm"],
                     method="osm_peak_node",
-                    osm_id=props.get("osm_id"),
+                    osm_id=osm_id,
                     osm_type=props.get("osm_type"),
                     layer="peaks",
                 ),
@@ -273,13 +292,16 @@ def gen_osm_peak(ctx: DiscoveryContext) -> list[CatalogCandidate]:
 def gen_osm_viewpoint(ctx: DiscoveryContext) -> list[CatalogCandidate]:
     out: list[CatalogCandidate] = []
     for sid, pt, props in ctx.viewpoints:
+        osm_id = _require_osm_id(props)
+        if osm_id is None:
+            continue
         dist_s = ctx.dist_settlement(pt)
         building, crowd = ctx.human_proxies(pt)
         cid = f"gen:osm_viewpoint:{sid}"
         out.append(
             CatalogCandidate(
                 id=cid,
-                name=str(props.get("name") or f"viewpoint_{props.get('osm_id')}"),
+                name=str(props.get("name") or f"viewpoint_{osm_id}"),
                 lon=pt.lon,
                 lat=pt.lat,
                 kind="viewpoint",
@@ -288,7 +310,7 @@ def gen_osm_viewpoint(ctx: DiscoveryContext) -> list[CatalogCandidate]:
                 provenance=Provenance(
                     sources=["osm"],
                     method="osm_viewpoint_node",
-                    osm_id=props.get("osm_id"),
+                    osm_id=osm_id,
                     osm_type=props.get("osm_type"),
                     layer="viewpoints",
                 ),

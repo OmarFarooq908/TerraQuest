@@ -101,7 +101,7 @@ def test_osm_element_requires_positive_osm_id() -> None:
     )
     assert any("osm_id" in e and "v2" in e for e in missing)
 
-    for bad in (0, -1, True, "12", 12.0, None):
+    for bad in (0, -1, True, "12", 12.5, None):
         errs = validate_evidence_ledger(
             generator="osm_peak",
             provenance={**prov, "osm_id": bad},
@@ -110,13 +110,51 @@ def test_osm_element_requires_positive_osm_id() -> None:
         )
         assert any("osm_id" in e for e in errs), bad
 
-    ok = validate_evidence_ledger(
+    for good in (123, 123.0):
+        ok = validate_evidence_ledger(
+            generator="osm_peak",
+            provenance={**prov, "osm_id": good},
+            evidence=base_ev,
+            feature_id="p_ok",
+        )
+        assert ok == [], good
+
+
+def test_coerce_positive_osm_id() -> None:
+    from adventure_core.evidence_ledger import coerce_positive_osm_id
+
+    assert coerce_positive_osm_id(7) == 7
+    assert coerce_positive_osm_id(7.0) == 7
+    assert coerce_positive_osm_id(0) is None
+    assert coerce_positive_osm_id(True) is None
+    assert coerce_positive_osm_id("9") is None
+    assert coerce_positive_osm_id(1.5) is None
+
+
+def test_whitespace_layer_and_dem_tile_rejected() -> None:
+    peak = validate_evidence_ledger(
         generator="osm_peak",
-        provenance={**prov, "osm_id": 123},
-        evidence=base_ev,
-        feature_id="p_ok",
+        provenance={
+            "sources": ["osm"],
+            "method": "osm_peak_node",
+            "layer": "  ",
+            "osm_id": 1,
+        },
+        evidence={"discovery_score": 0.5, "dist_settlement_km": 1.0},
+        feature_id="p_ws",
     )
-    assert ok == []
+    assert any("layer" in e for e in peak)
+    dem = validate_evidence_ledger(
+        generator="dem_local_max",
+        provenance={"sources": ["dem"], "method": "x", "dem_tile": " \t"},
+        evidence={
+            "discovery_score": 0.5,
+            "dist_settlement_km": 1.0,
+            "elevation_m": 100.0,
+        },
+        feature_id="d_ws",
+    )
+    assert any("dem_tile" in e for e in dem)
 
 
 def test_isolation_maximum_does_not_require_osm_id() -> None:

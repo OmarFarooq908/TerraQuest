@@ -47,9 +47,11 @@ includes `synthetic`. Real OSM/DEM packs must declare matching source kinds
 
 **v2 provenance:** non-synthetic **OSM-element** generators
 (`track_terminus`, `road_spur`, named/unnamed water, `osm_peak`,
-`osm_viewpoint`) require `provenance.osm_id` as a positive int. Grid
-`isolation_maximum` and DEM generators do **not** require `osm_id` (they are
-not OSM elements). DEM window polygons remain deferred.
+`osm_viewpoint`) require `provenance.osm_id` as a positive int (integral
+floats like `123.0` accepted for GeoJSON interop). Packbuilder skips
+emitting those candidates when the source layer lacks a usable `osm_id`.
+Grid `isolation_maximum` and DEM generators do **not** require `osm_id`.
+DEM window polygons remain deferred.
 
 Empty / whitespace ``generator`` values and blank string evidence fields
 (e.g. ``water_kind: ""``) fail validation.
