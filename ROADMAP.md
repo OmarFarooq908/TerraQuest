@@ -1,6 +1,21 @@
 # Roadmap
 
-Adventure AI is in **`0.x`**: APIs and schemas may change with RFCs. Maintainability and reproducible packs land before large product features.
+Adventure AI / TerraQuest is in **`0.x`**: APIs and schemas may change with RFCs.
+
+## North Star (current focus)
+
+> Can we consistently discover places that an experienced explorer would genuinely add to their travel list?
+
+Working balance: ~**80%** better data + evaluation, ~**20%** new features. Architecture for `MissionIntent` → deterministic GIS scoring stays frozen unless an RFC proves a North Star need.
+
+Milestone: **North Star — discovery quality** (see issues). Start here:
+
+1. [#11 Evaluation dataset](https://github.com/OmarFarooq908/TerraQuest/issues/11)
+2. [#12 Formal ontology](https://github.com/OmarFarooq908/TerraQuest/issues/12)
+3. [#31 Measuring “adventure”](https://github.com/OmarFarooq908/TerraQuest/issues/31)
+4. P0 correctness issues (intent, inversion, schema, confidence)
+
+Project model (three tracks + P0–P4): [#10](https://github.com/OmarFarooq908/TerraQuest/issues/10).
 
 ## Near term — OSS foundation (0.2)
 
@@ -14,33 +29,29 @@ Adventure AI is in **`0.x`**: APIs and schemas may change with RFCs. Maintainabi
 ## Next — Reproducible packs (0.3)
 
 - Pinned Geofabrik dated extracts where practical
-- Stronger content hashes across all layers (in progress via layer byte hash)
-- Eval suite for rules interpreter
-- Benchmark smoke for discovery
+- Stronger content hashes across all layers
+- Intent / schema regression suites (P0)
+- Evidence ledger completeness
+- Region Pack architecture RFC
 
 ## Then — Public beta (0.4)
 
 - Intent validation / repair for LLM interpreters
 - Calibrated confidence (real vs synthetic packs)
 - Documented known limits (haversine travel, party_size)
+- Thin product UX (export/GPX) only where it helps field eval
 
-## Later (post-invite)
+## Later (after North Star evidence)
 
-- Real routing / access graphs
-- Sentinel-2 indices in packs
+- Real routing / access graphs (P2 — capability, not a bug)
+- Sentinel-2 indices + VLM features (P1 — judged by eval lift)
 - Mission-time local densification (Phase C) without changing `MissionIntent`
+- Intelligence layer (explanations first; memory/KG later)
 - PyPI publish of selected packages
-
-## Good first issues (after v0.2.0)
-
-- Docs typos / examples polish
-- Unit tests for individual discovery generators
-- Fixture catalog expansion (still synthetic, clearly marked)
-- CLI help text / error message clarity
-- Enable Discussions categories (see `.github/SETTINGS.md`)
 
 ## Out of scope for drive-by PRs
 
 - Replacing the preference-vector scorer with an LLM ranker
 - Calling external closed model APIs (OpenAI/Anthropic/Google) as defaults
 - Committing built `data/packs/` or raw PBF/DEM tiles
+- Filing missing future capabilities (routing, weather, map UI) as `bug`
