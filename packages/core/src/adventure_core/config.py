@@ -97,8 +97,11 @@ def load_pack_manifest(pack_id_or_path: str) -> tuple[PackManifest, Path]:
             built_data = load_yaml(built / "pack.yaml")
             return PackManifest.model_validate(built_data), built.resolve()
         raise FileNotFoundError(
-            f"Pack '{pack_id}' is configured but not built. "
-            f"Run: adventurectl pack build --config {pack_id}"
+            f"Pack '{pack_id}' is configured but not built yet. "
+            f"Build it with: adventurectl pack build --config {pack_id} "
+            f"(requires osmium-tool on PATH). "
+            f"For offline/CI, pass a fixture instead: "
+            f"--pack fixtures/karakoram_mini"
         )
 
     fixtures = root / "fixtures" / pack_id

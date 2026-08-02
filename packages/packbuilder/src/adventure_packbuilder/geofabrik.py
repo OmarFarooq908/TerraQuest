@@ -21,7 +21,13 @@ USER_AGENT = (
 def require_osmium() -> str:
     path = shutil.which("osmium")
     if not path:
-        raise RuntimeError("osmium-tool not found on PATH. Install with: brew install osmium-tool")
+        raise RuntimeError(
+            "osmium-tool not found on PATH (needed for production pack builds). "
+            "Install it, then retry: brew install osmium-tool  # macOS; "
+            "see https://osmcode.org/osmium-tool/ for Linux packages. "
+            "For offline CI, use a fixture pack: "
+            "adventurectl mission run --pack fixtures/karakoram_mini ..."
+        )
     return path
 
 

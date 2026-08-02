@@ -23,9 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Opt-in Ollama intent goldens (`ADVENTURE_OLLAMA_GOLDENS=1` / CI workflow_dispatch `intent-ollama`)
 - Segmented coverage gates (`configs/coverage_gates.yaml` + `scripts/check_coverage_gates.py`); global floor **70%**
 - Offline unit tests for individual discovery generators (`tests/test_generators.py`)
+- CLI help/error regression tests for fixture-vs-pack messaging (`tests/test_cli_help_errors.py`)
 
 ### Changed
 
+- CLI help/errors clarify fixture vs production packs and point to osmium install + `fixtures/karakoram_mini` when builds fail
 - Canonical candidate file is `catalog.geojson`; pack builder no longer writes deprecated `seeds.geojson`
 - `check_pack` / `validate_pack` fail on dual-path catalog+seeds (waive with `--allow-legacy-seeds`) and on `content_hash` mismatch when declared
 - Pack load no longer silently fills missing catalog fields (`strict=True` by default)
