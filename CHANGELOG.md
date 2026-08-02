@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Opt-in Ollama intent goldens (`ADVENTURE_OLLAMA_GOLDENS=1` / CI workflow_dispatch `intent-ollama`)
 - Segmented coverage gates (`configs/coverage_gates.yaml` + `scripts/check_coverage_gates.py`); global floor **70%**
 - Offline unit tests for individual discovery generators (`tests/test_generators.py`)
+- CLI help/error regression tests for fixture-vs-pack messaging (`tests/test_cli_help_errors.py`)
 
 ### Changed
 
