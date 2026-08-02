@@ -155,7 +155,9 @@ def pack_verify(
     """
     from adventure_gis import verify_pack
 
-    _print_pack_banner(pack)
+    # Keep --json stdout parseable (no honesty banner prefix).
+    if not json_out:
+        _print_pack_banner(pack)
     report = verify_pack(pack, allow_legacy_seeds=allow_legacy_seeds)
     if json_out:
         console.print_json(data=report)
@@ -167,6 +169,8 @@ def pack_verify(
         console.print(f"[bold red]FAIL[/bold red] {report['pack_id']} ({report['dir']})")
         for err in report["errors"]:
             console.print(f"  - {err}")
+        for warn in report.get("warnings") or []:
+            console.print(f"  [yellow]! {warn}[/yellow]")
         raise typer.Exit(code=1)
 
     console.print(f"[green]OK[/green] pack_id={report['pack_id']} synthetic={report['synthetic']}")
@@ -176,15 +180,18 @@ def pack_verify(
     )
     if report.get("content_hash"):
         match = report.get("hash_match")
-        status = "match" if match else "mismatch"
+        if match is True:
+            status = "match"
+        elif match is False:
+            status = "mismatch"
+        else:
+            status = "unverified"
         console.print(f"[dim]content_hash={report['content_hash']} ({status})[/dim]")
+    for warn in report.get("warnings") or []:
+        console.print(f"[yellow]! {warn}[/yellow]")
     qdb = report.get("query_db")
-    if isinstance(qdb, dict) and "stale" in qdb:
-        stale = qdb["stale"]
-        console.print(
-            f"[dim]query.duckdb={'stale — run pack materialize' if stale else 'in sync'} "
-            f"({qdb.get('path')})[/dim]"
-        )
+    if isinstance(qdb, dict) and qdb.get("stale") is False:
+        console.print(f"[dim]query.duckdb=in sync ({qdb.get('path')})[/dim]")
 
 
 @pack_app.command("materialize")

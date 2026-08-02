@@ -37,7 +37,11 @@ uv run adventurectl pack verify --pack data/packs/skardu_v1 --json
 Same honesty bar as `scripts/check_pack.py` (catalog contract, dual-path seeds,
 NOTICE/layers for real packs, declared `content_hash` when present). Also prints
 the computed layer fingerprint for pinning. If `query.duckdb` exists, reports
-whether it is stale vs that fingerprint.
+whether it is stale vs that fingerprint (warning only — does not fail verify).
+
+`--json` prints only the report object (no honesty banner), including `errors`,
+`warnings`, `fingerprint`, and `hash_match` (`null` when a declared hash cannot
+be checked because `build_stats.json` is missing/unreadable).
 
 ## Mission options
 

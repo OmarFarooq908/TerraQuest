@@ -76,12 +76,16 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
                 "content_hash set on manifest but build_stats.json is missing (cannot verify)"
             )
         else:
-            blob = json.loads(stats_path.read_text(encoding="utf-8"))
-            actual = pack_content_hash(layers, blob)
-            if actual != manifest.content_hash:
-                errors.append(
-                    f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
-                )
+            try:
+                blob = json.loads(stats_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                errors.append(f"build_stats.json is not valid JSON: {exc}")
+            else:
+                actual = pack_content_hash(layers, blob)
+                if actual != manifest.content_hash:
+                    errors.append(
+                        f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
+                    )
 
     return errors
 
@@ -92,14 +96,29 @@ def verify_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> dict[str,
     ``ok`` is True iff ``errors`` is empty. Always includes a computed
     ``fingerprint`` when ``layers/`` exists (fixtures without manifest
     ``content_hash`` still get a layer fingerprint for pinning).
+
+    ``hash_match`` is True/False only when a declared ``content_hash`` can be
+    checked against a readable ``build_stats.json`` (same bar as
+    ``validate_pack``). Missing or unreadable stats → ``hash_match`` is None
+    (never a false "match").
     """
-    errors = validate_pack(pack_ref, allow_legacy_seeds=allow_legacy_seeds)
+    errors = list(validate_pack(pack_ref, allow_legacy_seeds=allow_legacy_seeds))
+    warnings: list[str] = []
     manifest, pack_dir = load_pack_manifest(pack_ref)
     layers = pack_dir / "layers"
     stats_path = pack_dir / "build_stats.json"
     stats: dict[str, Any] | None = None
+    stats_readable = False
     if stats_path.is_file():
-        stats = json.loads(stats_path.read_text(encoding="utf-8"))
+        try:
+            stats = json.loads(stats_path.read_text(encoding="utf-8"))
+            stats_readable = True
+        except json.JSONDecodeError as exc:
+            msg = f"build_stats.json is not valid JSON: {exc}"
+            if msg not in errors:
+                # validate_pack only flags this when content_hash is declared.
+                warnings.append(msg)
+            stats = None
 
     fingerprint: str | None = None
     if layers.is_dir():
@@ -113,8 +132,11 @@ def verify_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> dict[str,
         catalog_count = 0
 
     declared = manifest.content_hash
+    # Only claim match/mismatch when we hashed with the same stats input
+    # validate_pack uses (readable build_stats). Layers-only fingerprint must
+    # not imply the declared content_hash was verified.
     hash_match: bool | None = None
-    if declared and fingerprint:
+    if declared and fingerprint is not None and stats_readable:
         hash_match = declared == fingerprint
 
     query_db: dict[str, Any] | None = None
@@ -125,17 +147,24 @@ def verify_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> dict[str,
 
             meta = read_pack_db_meta(db_path)
             db_hash = meta.get("content_hash")
+            stale = db_hash != fingerprint
             query_db = {
                 "path": str(db_path),
                 "content_hash": db_hash,
-                "stale": db_hash != fingerprint,
+                "stale": stale,
             }
+            if stale:
+                warnings.append(
+                    "query.duckdb content_hash is stale; run adventurectl pack materialize"
+                )
         except Exception as exc:  # noqa: BLE001 — report, don't fail verify
             query_db = {"path": str(db_path), "error": str(exc)}
+            warnings.append(f"query.duckdb unreadable: {exc}")
 
     return {
         "ok": not errors,
         "errors": errors,
+        "warnings": warnings,
         "pack_id": manifest.pack_id,
         "synthetic": bool(manifest.synthetic),
         "dir": str(pack_dir),
