@@ -6,7 +6,7 @@ Documented so contributors do not “fix” them with architecture-breaking PRs.
 |-------|--------|
 | Travel time | Haversine / 45 km/h heuristic — not a road router |
 | `party_size` | Parsed; camping capacity not scored |
-| Confidence | Heuristic noisy-OR; not empirically calibrated |
+| Confidence | Heuristic noisy-OR with **pack-kind priors** (synthetic ceiling lower than real); not empirically calibrated — see [confidence](confidence.md) |
 | Overpass ingest | Degraded (no road_lines); opt-in only |
 | LLM intent | Validation + polarity repair in `interpret_mission`; `--interpreter rules` for CI |
 | Sentinel-2 | Not in v1 packs |

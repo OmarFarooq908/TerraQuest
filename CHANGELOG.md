@@ -24,10 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Segmented coverage gates (`configs/coverage_gates.yaml` + `scripts/check_coverage_gates.py`); global floor **70%**
 - Offline unit tests for individual discovery generators (`tests/test_generators.py`)
 - CLI help/error regression tests for fixture-vs-pack messaging (`tests/test_cli_help_errors.py`)
+- Pack-kind confidence priors/ceiling (`heuristic-v1`) + `docs/confidence.md`; synthetic packs cannot match real-pack confidence
 
 ### Changed
 
 - CLI help/errors clarify fixture vs production packs and point to osmium install + `fixtures/karakoram_mini` when builds fail
+- `build_confidence` / `rank_missions` take `pack_synthetic`; MissionResult notes expose `pack_kind` and `confidence_calibration`
 - Canonical candidate file is `catalog.geojson`; pack builder no longer writes deprecated `seeds.geojson`
 - `check_pack` / `validate_pack` fail on dual-path catalog+seeds (waive with `--allow-legacy-seeds`) and on `content_hash` mismatch when declared
 - Pack load no longer silently fills missing catalog fields (`strict=True` by default)

@@ -142,3 +142,8 @@ def test_fixture_pack_features_in_unit_interval():
         assert f.dist_settlement_km != 999.0
         conf = build_confidence(cand)
         assert 0.05 <= conf.value <= 0.92
+        # Fixture catalog evidence is synthetic → stricter ceiling when kind inferred
+        from adventure_scoring.confidence import SYNTHETIC_CONFIDENCE_CEILING
+
+        assert conf.value <= SYNTHETIC_CONFIDENCE_CEILING
+        assert "synthetic_pack_confidence_ceiling" in conf.uncertainties
