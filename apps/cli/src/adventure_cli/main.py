@@ -258,6 +258,14 @@ def mission_run(
         "--gpx-no-track",
         help="With --export-gpx, emit waypoints only (no connecting track)",
     ),
+    export_md: str | None = typer.Option(
+        None,
+        "--export-md",
+        help=(
+            "Write a Markdown mission report (prompt, ranks, claims, explanations) "
+            "for field notes / eval logs."
+        ),
+    ),
 ) -> None:
     """Run a mission: interpret → GIS → preference-vector score.
 
@@ -295,6 +303,16 @@ def mission_run(
             console.print(f"[bold red]GPX export error[/bold red]: {exc}")
             raise typer.Exit(code=2) from exc
         console.print(f"[green]Wrote GPX[/green]: {gpx_path}")
+
+    if export_md:
+        from adventure_core.markdown_export import write_mission_markdown
+
+        try:
+            md_path = write_mission_markdown(export_md, result)
+        except (ValueError, OSError) as exc:
+            console.print(f"[bold red]Markdown export error[/bold red]: {exc}")
+            raise typer.Exit(code=2) from exc
+        console.print(f"[green]Wrote Markdown[/green]: {md_path}")
 
     if json_out:
         console.print_json(result.model_dump_json(indent=2))
