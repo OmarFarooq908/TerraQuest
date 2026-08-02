@@ -65,9 +65,7 @@ def load_north_star_config() -> NorthStarConfig:
     raw = load_yaml(path)
     return NorthStarConfig(
         primary_metric=_pin_str(raw, "primary_metric", NORTH_STAR_PRIMARY_METRIC),
-        primary_label_filter=_pin_str(
-            raw, "primary_label_filter", NORTH_STAR_PRIMARY_LABEL_FILTER
-        ),
+        primary_label_filter=_pin_str(raw, "primary_label_filter", NORTH_STAR_PRIMARY_LABEL_FILTER),
         k=_pin_int(raw, "k", NORTH_STAR_K),
         guardrail_metric=_pin_str(raw, "guardrail_metric", NORTH_STAR_GUARDRAIL_METRIC),
         popularity_threshold=_pin_float(
