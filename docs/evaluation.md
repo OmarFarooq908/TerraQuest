@@ -21,6 +21,10 @@ need regional labels.
 - Near-neutral prompts stay near zero (`near_neutral: true`)
 - All `inv_*` polarity cases remain covered
 
+Schema contract pins (MissionIntent + catalog Feature properties) live under
+`schemas/` and are checked by `tests/test_schema_regression.py` — complementary
+to prompt goldens.
+
 Default CI uses `--interpreter rules` only. Opt-in Ollama goldens (local or
 manual workflow):
 

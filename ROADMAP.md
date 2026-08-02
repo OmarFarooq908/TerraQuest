@@ -33,14 +33,14 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 - [x] Pinned Geofabrik dated extracts where practical (#60 — `skardu_v1` → `pakistan-260801`)
 - [x] Stronger content hashes across all layers (#62)
 - [x] Evidence ledger completeness (#19 v1, #64 v2 `osm_id`)
-- Intent / schema regression suites (P0)
+- [x] Intent / schema regression suites (P0) (#12 goldens, #66 schema pins)
 - [x] Region Pack architecture RFC
 
 ## Then — Public beta (0.4)
 
-- Intent validation / repair for LLM interpreters
-- Calibrated confidence (real vs synthetic packs)
-- Documented known limits (haversine travel, party_size)
+- [x] Intent validation / repair for LLM interpreters
+- [x] Calibrated confidence (real vs synthetic packs)
+- [x] Documented known limits (haversine travel, party_size)
 - Thin product UX (export/GPX) only where it helps field eval
   - [x] GPX waypoint export from `adventurectl mission run --export-gpx` (#58)
 
