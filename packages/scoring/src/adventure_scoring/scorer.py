@@ -309,6 +309,9 @@ def rank_missions(
     min_confidence: float = 0.35,
     pack_synthetic: bool | None = None,
 ) -> list[RankedMission]:
+    if max_results <= 0:
+        return []
+
     ranked: list[RankedMission] = []
     for cand in candidates:
         if not _passes_gates(cand, mode):

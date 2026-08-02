@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- GPX waypoint export (#58 / #28): `adventurectl mission run --export-gpx` writes GPX 1.1 waypoints (+ optional haversine rank-order track) for field eval; XML text sanitized; `max_results<=0` returns no missions
 - Skardu evaluation seed + corpus CI (#56 / #9): provisional curator labels under `evaluation/skardu/`; `validate_place_label_corpus` gate (schema, ontology ids, unique catalog ids, opposite-interesting separation); RFC-0002 Accepted (infra; regional fill ongoing)
 - Measuring “adventure” (RFC-0005 / #29): operational North Star pin — primary `recall_at_k` (k=5) + `popularity_trap_at_k` guardrail; `configs/north_star.yaml` wired into eval harness defaults; threats-to-validity note
 - Pack-time VLM features (RFC-0007 / #22): optional `vlm_features` layer + evidence join; packbuilder attach from precomputed GeoJSON; never used as a ranker; `pack_vlm` pin in `configs/models.yaml`

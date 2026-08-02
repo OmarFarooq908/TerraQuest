@@ -37,6 +37,23 @@ GeoJSON remains the source of truth; `query.duckdb` is gitignored.
 | `--strict-llm` | With `auto`, do not fall back to rules |
 | `--max-results` | How many ranked missions to print (default 5) |
 | `--json` | Machine-readable `MissionResult` |
+| `--export-gpx PATH` | Write GPX 1.1 waypoints (+ optional rank-order track) for phone GPS / field label checks |
+| `--gpx-no-track` | With `--export-gpx`, waypoints only |
+
+### GPX field export
+
+```bash
+uv run adventurectl mission run \
+  --pack fixtures/karakoram_mini \
+  --interpreter rules \
+  -p "Three days, rivers and forests, hate crowds." \
+  --export-gpx /tmp/mission.gpx
+```
+
+Use this to drop ranked stops into OsmAnd / Gaia / a handheld for verifying
+evaluation labels in the field ([evaluation](evaluation.md)). The optional track
+is **rank order** (origin first when parsed) — haversine display only, not a
+road router ([known limits](known-limits.md)).
 
 Local LLM setup, cache layout, and missing-model errors: [offline inference](offline-inference.md).
 

@@ -76,6 +76,10 @@ not re-run packbuilder discovery.
 Checked-in fixture baseline:
 [`evaluation/reports/karakoram_mini_baseline.md`](https://github.com/OmarFarooq908/TerraQuest/blob/main/evaluation/reports/karakoram_mini_baseline.md).
 
+Field-check ranked stops on a phone GPS with
+[`adventurectl mission run --export-gpx`](cli.md) (GPX waypoints; track is rank
+order, not routed).
+
 - Schema: `evaluation/schema/place_label.schema.json` and `adventure_core.evaluation.PlaceLabel`
 - CI uses **synthetic** labels under `evaluation/fixtures/karakoram_mini/`
 - Real regional seed: `evaluation/skardu/` (provisional v0, issue #56) — grow with
