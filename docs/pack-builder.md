@@ -30,7 +30,42 @@ and `seeds.geojson` fail `scripts/check_pack.py` unless `--allow-legacy-seeds`.
 Production builds list every shipped GeoJSON:
 
 `settlements`, `water`, `road_nodes`, `road_lines`, `peaks`, `viewpoints`,
-`catalog`, `elevation`.
+`catalog`, `elevation`. Optional: `sentinel_indices` (RFC-0006) when the layer is
+written.
+
+## Sentinel-2 indices (RFC-0006 / issue #21)
+
+Opt-in EO indices (NDVI / NDWI) sampled at catalog points. **Default off** —
+packs stay OSM + DEM only.
+
+```yaml
+# configs/packs/skardu_v1.yaml
+sentinel2:
+  enabled: false
+  max_cloud_cover: 20
+  indices: [ndvi, ndwi]
+  indices_geojson: data/cache/sentinel2/skardu_v1_indices.geojson  # when enabling
+```
+
+### Skardu pilot steps
+
+1. Build the OSM+DEM pack: `uv run adventurectl pack build --config skardu_v1`.
+2. Query [Earth Search](https://earth-search.aws.element84.com/v1) `sentinel-2-l2a`
+   for the pack bbox, `eo:cloud_cover ≤ 20`, prefer a recent low-cloud item; record
+   `stac_item_id`.
+3. Sample B03/B04/B08 at each catalog lon/lat; write a Point FeatureCollection with
+   `catalog_id`, `ndvi`, `ndwi`, `cloud_cover`, `acquired_at`, `stac_item_id`,
+   `index_version: s2-indices-v1` under `data/cache/sentinel2/` (gitignored).
+4. Set `sentinel2.enabled: true` and `indices_geojson` to that path; rebuild.
+5. Confirm `NOTICE` cites Copernicus Sentinel; `layers:` lists `sentinel_indices`.
+6. Run discovery eval vs the GIS-only baseline; publish the delta (RFC-0005 metrics)
+   even if lift is zero or negative. Ranking weights stay unchanged until then.
+
+Live STAC download inside `pack build` is intentionally not wired yet — attach a
+precomputed GeoJSON so CI stays offline.
+
+Synthetic fixture smoke: `fixtures/karakoram_mini/layers/sentinel_indices.geojson`
+(not real EO).
 
 ## Hashes (RFC-0003)
 

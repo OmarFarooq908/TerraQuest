@@ -38,5 +38,7 @@ class PackManifest(BaseModel):
     osm: dict[str, Any] = Field(default_factory=dict)
     dem: dict[str, Any] = Field(default_factory=dict)
     discovery: dict[str, Any] = Field(default_factory=dict)
+    # Optional Sentinel-2 index attach (RFC-0006 / issue #21). Opt-in at build.
+    sentinel2: dict[str, Any] = Field(default_factory=dict)
     # Deprecated: use discovery.generators quotas
     candidate_limits: dict[str, int] = Field(default_factory=dict)

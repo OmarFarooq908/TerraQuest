@@ -47,6 +47,9 @@ class CandidateFeatures(BaseModel):
     settlements_within_10km: int | None = Field(default=None, ge=0)
     nearest_highway: str | None = None
 
+    # Sentinel-2 indices (RFC-0006) — None when layer absent / unmatched
+    ndvi: float | None = Field(default=None, ge=-1.0, le=1.0)
+    ndwi: float | None = Field(default=None, ge=-1.0, le=1.0)
 
 class Candidate(BaseModel):
     id: str

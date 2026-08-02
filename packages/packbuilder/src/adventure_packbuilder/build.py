@@ -18,6 +18,7 @@ from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
 from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojson
 from adventure_packbuilder.geofabrik import fetch_geofabrik_layers
 from adventure_packbuilder.osm import fetch_overpass, overpass_to_layers
+from adventure_packbuilder.sentinel2 import maybe_attach_sentinel_indices
 
 
 def load_build_config(pack_id_or_path: str) -> PackManifest:
@@ -160,6 +161,10 @@ def build_pack(
     if legacy_seeds.exists():
         legacy_seeds.unlink()
 
+    sentinel_source, sentinel_wrote = maybe_attach_sentinel_indices(config, layers_dir)
+    if sentinel_source is not None:
+        sources.append(sentinel_source)
+
     # Production OSM path must retain road geometries for access generators
     road_lines = layers.get("road_lines") or {"features": []}
     osm_method = str((config.osm or {}).get("method", "geofabrik")).lower()
@@ -193,11 +198,22 @@ def build_pack(
             + f" generators={stats['selected_by_generator']}",
         }
     )
+    layers_map = default_layers_map()
+    if sentinel_wrote:
+        layers_map["sentinel_indices"] = "layers/sentinel_indices.geojson"
     pack_yaml = {
         **manifest.model_dump(
-            exclude={"osm", "dem", "discovery", "candidate_limits", "output_dir", "fixtures_dir"}
+            exclude={
+                "osm",
+                "dem",
+                "discovery",
+                "sentinel2",
+                "candidate_limits",
+                "output_dir",
+                "fixtures_dir",
+            }
         ),
-        "layers": default_layers_map(),
+        "layers": layers_map,
     }
     (out / "pack.yaml").write_text(yaml.safe_dump(pack_yaml, sort_keys=False), encoding="utf-8")
 
@@ -211,7 +227,13 @@ https://www.openstreetmap.org/copyright
 
 Copernicus DEM © DLR / Airbus — provided under COPERNICUS by the European Union and ESA
 https://spacedata.copernicus.eu/
-
+"""
+    if sentinel_wrote:
+        notice += """
+Contains modified Copernicus Sentinel-2 data (indices sampled at catalog points).
+https://sentinel.esa.int/documents/247904/690755/Sentinel_Data_Legal_Notice
+"""
+    notice += """
 Candidates are produced by named deterministic generators (track_terminus,
 road_spur, isolation_maximum, dem_local_max, …). Redistribute OSM-derived
 products under ODbL share-alike obligations.
@@ -224,6 +246,15 @@ products under ODbL share-alike obligations.
                 "discovery": stats,
                 "dem_tiles": [p.name for p in dem_paths],
                 "content_hash": content_hash,
+                "sentinel2": {
+                    "enabled": bool((config.sentinel2 or {}).get("enabled")),
+                    "wrote_layer": sentinel_wrote,
+                    "feature_count": (
+                        len(json.loads((layers_dir / "sentinel_indices.geojson").read_text())["features"])
+                        if sentinel_wrote
+                        else 0
+                    ),
+                },
             },
             indent=2,
         ),

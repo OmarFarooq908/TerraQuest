@@ -44,7 +44,7 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 ## Later (after North Star evidence)
 
 - Real routing / access graphs (P2 — capability, not a bug)
-- Sentinel-2 indices + VLM features (P1 — judged by eval lift)
+- [ ] Sentinel-2 indices + VLM features (P1 — RFC-0006 shipped opt-in layer; judged by eval lift)
 - Mission-time local densification (Phase C) without changing `MissionIntent`
 - Intelligence layer (explanations first; memory/KG later)
 - PyPI publish of selected packages

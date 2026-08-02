@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [75.18, 35.72] },
+      "properties": {
+        "id": "s2_turquoise_lake",
+        "catalog_id": "seed_turquoise_lake",
+        "ndvi": 0.12,
+        "ndwi": 0.55,
+        "cloud_cover": 5.0,
+        "acquired_at": "2024-06-01",
+        "stac_item_id": "synthetic-fixture",
+        "index_version": "s2-indices-v1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.55, 35.88] },
+      "properties": {
+        "id": "s2_pine_river",
+        "catalog_id": "seed_pine_river",
+        "ndvi": 0.72,
+        "ndwi": 0.35,
+        "cloud_cover": 8.0,
+        "acquired_at": "2024-06-01",
+        "stac_item_id": "synthetic-fixture",
+        "index_version": "s2-indices-v1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [74.85, 35.35] },
+      "properties": {
+        "id": "s2_near_town_hill",
+        "catalog_id": "seed_near_town_hill",
+        "ndvi": 0.22,
+        "ndwi": -0.05,
+        "cloud_cover": 12.0,
+        "acquired_at": "2024-06-01",
+        "stac_item_id": "synthetic-fixture",
+        "index_version": "s2-indices-v1"
+      }
+    }
+  ]
+}
