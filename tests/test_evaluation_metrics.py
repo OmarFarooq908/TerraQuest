@@ -1,7 +1,8 @@
-"""Unit tests for evaluation place labels + discovery metrics (RFC-0002)."""
+"""Unit tests for evaluation place labels + discovery metrics (RFC-0002 / RFC-0005)."""
 
 from __future__ import annotations
 
+import inspect
 import subprocess
 import sys
 from pathlib import Path
@@ -9,17 +10,129 @@ from pathlib import Path
 import pytest
 from adventure_core.config import repo_root
 from adventure_core.evaluation import (
+    NORTH_STAR_DEFAULT_MODE,
+    NORTH_STAR_K,
+    NORTH_STAR_MATCH_RADIUS_KM,
+    NORTH_STAR_POPULARITY_THRESHOLD,
+    NORTH_STAR_PRIMARY_METRIC,
     PLACE_LABEL_SCHEMA_VERSION,
     PlaceLabel,
     RankedRef,
     compute_discovery_metrics,
+    load_north_star_config,
     load_place_labels,
     match_ranked_to_labels,
     ndcg_at_k,
+    north_star_constants_match_config,
 )
 from pydantic import ValidationError
 
 FIXTURE_LABELS = repo_root() / "evaluation" / "fixtures" / "karakoram_mini"
+
+
+def test_north_star_pin_matches_yaml():
+    """RFC-0005: module constants stay in sync with configs/north_star.yaml."""
+    cfg = load_north_star_config()
+    assert north_star_constants_match_config(cfg)
+    assert cfg.primary_metric == NORTH_STAR_PRIMARY_METRIC == "recall_at_k"
+    assert cfg.k == NORTH_STAR_K == 5
+    assert cfg.guardrail_metric == "popularity_trap_at_k"
+    assert cfg.primary_label_filter == "interesting"
+    assert cfg.default_mode == NORTH_STAR_DEFAULT_MODE == "fearless_far"
+    assert cfg.match_radius_km == NORTH_STAR_MATCH_RADIUS_KM
+    assert cfg.popularity_threshold == NORTH_STAR_POPULARITY_THRESHOLD
+
+
+def test_metric_defaults_use_north_star_constants():
+    """Avoid silent drift: discovery metric kwargs default to the North Star pin."""
+    sig = inspect.signature(compute_discovery_metrics)
+    assert sig.parameters["k"].default == NORTH_STAR_K
+    assert sig.parameters["match_radius_km"].default == NORTH_STAR_MATCH_RADIUS_KM
+    assert sig.parameters["popularity_threshold"].default == NORTH_STAR_POPULARITY_THRESHOLD
+    ndcg_sig = inspect.signature(ndcg_at_k)
+    assert ndcg_sig.parameters["k"].default == NORTH_STAR_K
+    match_sig = inspect.signature(match_ranked_to_labels)
+    assert match_sig.parameters["match_radius_km"].default == NORTH_STAR_MATCH_RADIUS_KM
+
+
+def test_eval_discovery_cli_defaults_follow_north_star():
+    """Harness argparse defaults come from load_north_star_config()."""
+    import importlib.util
+
+    path = repo_root() / "scripts" / "eval_discovery.py"
+    spec = importlib.util.spec_from_file_location("eval_discovery_under_test", path)
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    pin = load_north_star_config()
+    assert "fearless" in mod.DEFAULT_PROMPT.lower()
+    args = mod.build_arg_parser(pin).parse_args([])
+    assert args.k == pin.k == NORTH_STAR_K
+    assert args.mode == pin.default_mode == NORTH_STAR_DEFAULT_MODE
+    assert args.match_radius_km == pin.match_radius_km == NORTH_STAR_MATCH_RADIUS_KM
+    assert args.popularity_threshold == pin.popularity_threshold == NORTH_STAR_POPULARITY_THRESHOLD
+    assert args.prompt == mod.DEFAULT_PROMPT
+
+
+def test_popularity_trap_none_when_no_popularity():
+    """Missing popularity must not become trap=0 (RFC-0005 threat mitigation)."""
+    labels = [
+        PlaceLabel(
+            id="a",
+            catalog_id="c1",
+            geometry={"type": "Point", "coordinates": [75.0, 35.0]},
+            known=True,
+            interesting=True,
+            human_rating=8.0,
+            google_maps_popularity=None,
+            license="Apache-2.0",
+            synthetic=True,
+        )
+    ]
+    ranked = [RankedRef(candidate_id="c1", score=1.0, lon=75.0, lat=35.0)]
+    m = compute_discovery_metrics(ranked, labels, k=1)
+    assert m.popularity_trap_at_k is None
+    assert m.recall_at_k == 1.0
+
+
+def test_popularity_threshold_zero_is_respected():
+    """YAML/config value 0.0 must not fall back to the default 7.0."""
+    labels = [
+        PlaceLabel(
+            id="a",
+            catalog_id="c1",
+            geometry={"type": "Point", "coordinates": [75.0, 35.0]},
+            known=True,
+            interesting=True,
+            google_maps_popularity=0.0,
+            license="Apache-2.0",
+            synthetic=True,
+        )
+    ]
+    ranked = [RankedRef(candidate_id="c1", score=1.0, lon=75.0, lat=35.0)]
+    m = compute_discovery_metrics(ranked, labels, k=1, popularity_threshold=0.0)
+    assert m.popularity_trap_at_k == 1.0
+
+
+def test_recall_none_when_no_interesting_labels():
+    labels = [
+        PlaceLabel(
+            id="ctrl",
+            catalog_id="c1",
+            geometry={"type": "Point", "coordinates": [75.0, 35.0]},
+            known=True,
+            interesting=False,
+            google_maps_popularity=8.0,
+            license="Apache-2.0",
+            synthetic=True,
+        )
+    ]
+    ranked = [RankedRef(candidate_id="c1", score=1.0, lon=75.0, lat=35.0)]
+    m = compute_discovery_metrics(ranked, labels, k=1)
+    assert m.recall_at_k is None
+    assert m.precision_at_k == 0.0
+    assert m.popularity_trap_at_k == 1.0
 
 
 def test_load_fixture_labels():

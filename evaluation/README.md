@@ -23,8 +23,11 @@ uv run python scripts/eval_discovery.py \
   --k 5
 ```
 
-Primary North Star metric: `recall_at_k` on `interesting=true` (see RFC-0002).
-Also reported: `ndcg_at_k` (human_rating), `popularity_trap_at_k`, `rating_spearman`.
+Primary North Star metric (RFC-0005 / issue #29): `recall_at_k` on `interesting=true`
+(default k=5). Guardrail: `popularity_trap_at_k`. Pin: `configs/north_star.yaml`.
+Also reported: `ndcg_at_k` (human_rating), `precision_at_k`, `rating_spearman`.
+
+Threats to validity and offline metric map: `RFC/0005-measure-adventure.md`.
 
 ### Generator ablations
 

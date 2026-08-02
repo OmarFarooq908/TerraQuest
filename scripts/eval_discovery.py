@@ -19,8 +19,10 @@ from typing import Any
 from adventure_cli.pipeline import run_mission
 from adventure_core.config import load_pack_manifest, repo_root
 from adventure_core.evaluation import (
+    NorthStarConfig,
     RankedRef,
     compute_discovery_metrics,
+    load_north_star_config,
     load_place_labels,
     metrics_as_dict,
 )
@@ -228,7 +230,7 @@ def write_markdown_report(runs: list[dict[str, Any]], path: Path) -> None:
             "",
             "## Notes",
             "",
-            "- North Star: maximize `recall_at_k` on `interesting=true` without inflating `popularity_trap_at_k`.",
+            "- North Star (RFC-0005): maximize `recall_at_k` on `interesting=true` without inflating `popularity_trap_at_k`.",
             "- `nDCG@k` uses label `human_rating` with exponential gain `(2^rel - 1) / log2(rank+1)`.",
             "- Precision@k denominator is matched labels only; unlabeled tops do not dilute it.",
             "- Re-run: `uv run python scripts/eval_discovery.py --ablations --write-report "
@@ -240,7 +242,11 @@ def write_markdown_report(runs: list[dict[str, Any]], path: Path) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_arg_parser(
+    pin: NorthStarConfig | None = None,
+) -> argparse.ArgumentParser:
+    """CLI parser with North Star–pinned defaults (RFC-0005)."""
+    cfg = pin if pin is not None else load_north_star_config()
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--pack", default="fixtures/karakoram_mini")
     p.add_argument(
@@ -249,12 +255,17 @@ def main(argv: list[str] | None = None) -> int:
         default=repo_root() / "evaluation" / "fixtures" / "karakoram_mini",
         help="Place-label JSON file or directory",
     )
-    p.add_argument("-p", "--prompt", default=DEFAULT_PROMPT)
-    p.add_argument("--mode", default="fearless_far")
+    p.add_argument(
+        "-p",
+        "--prompt",
+        default=DEFAULT_PROMPT,
+        help="Mission prompt (North Star default: Fearless & Far family; see RFC-0005)",
+    )
+    p.add_argument("--mode", default=cfg.default_mode)
     p.add_argument("--interpreter", default="rules", choices=["rules", "ollama", "auto"])
-    p.add_argument("--k", type=int, default=5)
-    p.add_argument("--match-radius-km", type=float, default=2.0)
-    p.add_argument("--popularity-threshold", type=float, default=7.0)
+    p.add_argument("--k", type=int, default=cfg.k)
+    p.add_argument("--match-radius-km", type=float, default=cfg.match_radius_km)
+    p.add_argument("--popularity-threshold", type=float, default=cfg.popularity_threshold)
     p.add_argument("--max-results", type=int, default=10)
     p.add_argument(
         "--include-generators",
@@ -283,7 +294,13 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Also report catalog↔label join counts via derived query.duckdb (RFC-0004)",
     )
-    args = p.parse_args(argv)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    # Runtime pin (YAML) wins over module constants when they ever diverge.
+    pin = load_north_star_config()
+    args = build_arg_parser(pin).parse_args(argv)
 
     common = dict(
         pack=args.pack,

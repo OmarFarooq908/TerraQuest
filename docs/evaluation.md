@@ -7,7 +7,10 @@
 | Intent / ranking regression | `eval/golden_prompts.yaml`, `tests/test_intent_regression.py` | Is interpretation + scoring deterministic and sign-correct? |
 | **Discovery quality** | `evaluation/` + RFC-0002 | Did we surface places an explorer would actually care about? |
 
-North Star metric (for now): **`recall_at_k`** on labels with `interesting=true` (default k=5), with **`popularity_trap_at_k`** as a guardrail.
+North Star (RFC-0005 / issue #29): primary **`recall_at_k`** on `interesting=true`
+(default **k=5**), guardrail **`popularity_trap_at_k`**. Pin: `configs/north_star.yaml`
+and `adventure_core.evaluation.NORTH_STAR_*`. Fixture recall is smoke only; real claims
+need regional labels.
 
 ## Offline golden missions
 
@@ -77,7 +80,17 @@ Checked-in fixture baseline:
 - CI uses **synthetic** labels under `evaluation/fixtures/karakoram_mini/`
 - Real regional labels live under `evaluation/skardu/` (etc.); start empty and grow with curator licenses
 
-See `evaluation/README.md` and `RFC/0002-evaluation-dataset.md`.
+See `evaluation/README.md`, `RFC/0002-evaluation-dataset.md`, and
+`RFC/0005-measure-adventure.md` (metric map + threats to validity).
+
+## Threats to validity (summary)
+
+- Synthetic fixture labels ≠ real explorers — do not ship product claims from fixture recall alone.
+- Match radius / post-hoc `catalog_id` can inflate hits — prefer exact ids; report radius.
+- Prompt cherry-picking — use the documented default Fearless & Far prompt family.
+- Rising recall with rising popularity trap is not a win — quote both metrics.
+
+Full table: [RFC-0005](https://github.com/OmarFarooq908/TerraQuest/blob/main/RFC/0005-measure-adventure.md).
 
 ## Pack validation
 
@@ -96,4 +109,4 @@ See `eval/golden_prompts.yaml` for rules-interpreter property checks, including
 ## What “pass” means
 
 - **CI / golden:** Deterministic ranking given the same `MissionIntent` + catalog. LLM intent quality is evaluated separately and is not required for CI green.
-- **North Star:** Improving `recall_at_k` (and not inflating popularity trap) on labeled regions — starting with the synthetic fixture slice, then real Skardu labels.
+- **North Star (RFC-0005):** Improving `recall_at_k` (k=5) without inflating `popularity_trap_at_k` on labeled regions — fixture first for smoke, then real Skardu (etc.) labels.
