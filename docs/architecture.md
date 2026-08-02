@@ -51,7 +51,8 @@ bytes + `selected_by_generator`, truncated to 16 hex.
 Versioning: refresh data → same `pack_id`, new hash; breaking catalog fields →
 bump `feature_schema_version`; intentional identity break → new `pack_id`.
 
-Details: [pack builder](pack-builder.md), [RFC-0003](https://github.com/OmarFarooq908/TerraQuest/blob/main/RFC/0003-region-pack-architecture.md).
+Details: [pack builder](pack-builder.md), [RFC-0003](https://github.com/OmarFarooq908/TerraQuest/blob/main/RFC/0003-region-pack-architecture.md),
+[RFC-0004](https://github.com/OmarFarooq908/TerraQuest/blob/main/RFC/0004-duckdb-pack-query.md) (optional derived DuckDB).
 
 ## Catalog contract
 

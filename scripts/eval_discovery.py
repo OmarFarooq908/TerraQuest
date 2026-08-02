@@ -104,6 +104,7 @@ def run_eval(
     include_generators: list[str] | None = None,
     exclude_generators: list[str] | None = None,
     ablation_name: str | None = None,
+    duckdb_join: bool = False,
 ) -> dict[str, Any]:
     labels = load_place_labels(labels_path)
     pool_ids = catalog_ids_for_generators(
@@ -158,6 +159,12 @@ def run_eval(
         "metrics": metrics_as_dict(metrics),
         "notes": result.notes,
     }
+    if duckdb_join:
+        from adventure_gis.pack_query import catalog_label_join_counts
+
+        payload["duckdb_join"] = catalog_label_join_counts(
+            pack, [lab.model_dump() for lab in labels]
+        )
     return payload
 
 
@@ -271,6 +278,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Write markdown comparison table (implies --ablations unless filters set)",
     )
     p.add_argument("--json", action="store_true", help="Print metrics JSON only")
+    p.add_argument(
+        "--duckdb-join",
+        action="store_true",
+        help="Also report catalog↔label join counts via derived query.duckdb (RFC-0004)",
+    )
     args = p.parse_args(argv)
 
     common = dict(
@@ -283,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         match_radius_km=args.match_radius_km,
         popularity_threshold=args.popularity_threshold,
         max_results=args.max_results,
+        duckdb_join=args.duckdb_join,
     )
 
     custom_filters = bool(args.include_generators or args.exclude_generators)
@@ -331,6 +344,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  ndcg_at_k={m['ndcg_at_k']}")
             print(f"  popularity_trap_at_k={m['popularity_trap_at_k']}")
             print(f"  rating_spearman={m['rating_spearman']}")
+            if payload.get("duckdb_join"):
+                print(f"  duckdb_join={payload['duckdb_join']}")
             print("  top:", ", ".join(payload["ranked_candidate_ids"]))
             if len(runs) > 1:
                 print()

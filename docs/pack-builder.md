@@ -82,7 +82,18 @@ catalog+seeds, missing `NOTICE` / incomplete `layers:` map on real packs,
 | `geofabrik` / `osmium` / `pbf` | **Production** | LineStrings for track_terminus / road_spur |
 | `overpass` | **Degraded** | Requires `osm.allow_degraded_overpass: true`; no road_lines |
 
-## Discovery config
+## Derived query DB (RFC-0004)
 
-See `configs/packs/skardu_v1.yaml` → `discovery.generators` for per-generator
-quotas and spacing. There is no global `max_total` cap.
+Optional DuckDB materialization for offline SQL / eval joins. GeoJSON stays the
+source of truth; `query.duckdb` is gitignored and rebuilt from layers.
+
+```bash
+uv run adventurectl pack materialize --pack fixtures/karakoram_mini
+uv run adventurectl pack query --pack fixtures/karakoram_mini \
+  --sql "SELECT generator, count(*) AS n FROM catalog GROUP BY 1 ORDER BY n DESC"
+
+# Eval harness opt-in join stats
+uv run python scripts/eval_discovery.py --duckdb-join
+```
+
+Stale DBs (content hash mismatch) are regenerated automatically on `pack query`.

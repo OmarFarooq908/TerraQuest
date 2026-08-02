@@ -4,8 +4,20 @@
 uv run adventurectl --help
 uv run adventurectl pack build --config skardu_v1
 uv run adventurectl pack info skardu_v1
+uv run adventurectl pack materialize --pack fixtures/karakoram_mini
+uv run adventurectl pack query --pack fixtures/karakoram_mini \
+  --sql "SELECT generator, count(*) AS n FROM catalog GROUP BY 1"
 uv run adventurectl mission run --pack fixtures/karakoram_mini --interpreter rules -p "..."
 ```
+
+## Pack query (RFC-0004)
+
+| Command | Meaning |
+|---------|---------|
+| `pack materialize` | Build derived `query.duckdb` from GeoJSON layers |
+| `pack query --sql …` | Read-only SQL (auto-materializes if stale) |
+
+GeoJSON remains the source of truth; `query.duckdb` is gitignored. See [pack builder](pack-builder.md).
 
 ## Mission options
 
