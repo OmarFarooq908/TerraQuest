@@ -42,7 +42,10 @@ jobs:
           --cov=adventure_gis
           --cov=adventure_scoring
           --cov-report=term-missing
-          --cov-fail-under=50
+          --cov-report=json:coverage.json
+          --cov-fail-under=70
+      - name: Coverage gates (intent/scoring/catalog)
+        run: uv run python scripts/check_coverage_gates.py --coverage-json coverage.json
       - name: Validate fixture pack
         run: uv run python scripts/check_pack.py fixtures/karakoram_mini
       - name: Fixture catalog hash

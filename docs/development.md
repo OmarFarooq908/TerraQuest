@@ -24,10 +24,15 @@ uv run pytest
 uv run ruff check packages apps tests scripts
 uv run ruff format packages apps tests scripts
 uv run mypy packages/core/src/adventure_core
-uv run pytest --cov=adventure_core --cov-fail-under=50
+uv run pytest -q \
+  --cov=adventure_core --cov=adventure_gis --cov=adventure_scoring \
+  --cov-report=json:coverage.json --cov-fail-under=70
+uv run python scripts/check_coverage_gates.py
 uv run python scripts/check_pack.py fixtures/karakoram_mini
 uv run mkdocs build --strict
 ```
+
+Per-module floors live in `configs/coverage_gates.yaml` (see `CONTRIBUTING.md`).
 
 ## Tests
 

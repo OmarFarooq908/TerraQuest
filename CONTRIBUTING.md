@@ -60,6 +60,24 @@ uv run pytest
 4. If you touch OSM/DEM handling, update attribution notes / pack `NOTICE` template as needed (ODbL / Copernicus).
 5. New discovery generators need unit tests and docs under `docs/generators.md`.
 
+## Coverage gates (P0)
+
+CI enforces:
+
+| Gate | Floor | Notes |
+|------|------:|-------|
+| Global (`adventure_core` + `gis` + `scoring`) | **70%** | `--cov-fail-under=70` |
+| Per-module floors | see `configs/coverage_gates.yaml` | intent, polarity, catalog validate, scorers, pack load |
+
+```bash
+uv run pytest -q \
+  --cov=adventure_core --cov=adventure_gis --cov=adventure_scoring \
+  --cov-report=json:coverage.json --cov-fail-under=70
+uv run python scripts/check_coverage_gates.py
+```
+
+Packbuilder / inference / CLI network paths are **out of** offline coverage requirements. Raise a floor in `configs/coverage_gates.yaml` when adding P0 correctness code — do not lower floors without an issue comment.
+
 ## Licensing
 
 - Code: Apache-2.0 ([LICENSE](LICENSE))

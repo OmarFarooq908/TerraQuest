@@ -88,18 +88,22 @@ explicit_package_bases = true
 ignore_missing_imports = true
 
 [tool.coverage.run]
+# Offline CI gates cover core + gis + scoring only (issue #16).
+# Packbuilder network ingest is excluded from fail_under / module floors.
 source = [
   "packages/core/src",
   "packages/gis/src",
   "packages/scoring/src",
-  "packages/inference/src",
-  "packages/packbuilder/src",
-  "apps/cli/src",
 ]
 branch = true
-omit = ["*/tests/*"]
+omit = [
+  "*/tests/*",
+  "*/adventure_packbuilder/*",
+  "*/adventure_inference/*",
+  "*/adventure_cli/*",
+]
 
 [tool.coverage.report]
-fail_under = 50
+fail_under = 70
 show_missing = true
 skip_covered = true
