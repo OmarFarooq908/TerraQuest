@@ -201,6 +201,8 @@ def build_pack(
             "water": "layers/water.geojson",
             "road_nodes": "layers/road_nodes.geojson",
             "road_lines": "layers/road_lines.geojson",
+            "peaks": "layers/peaks.geojson",
+            "viewpoints": "layers/viewpoints.geojson",
             "catalog": "layers/catalog.geojson",
             "elevation": "layers/elevation.geojson",
         },
