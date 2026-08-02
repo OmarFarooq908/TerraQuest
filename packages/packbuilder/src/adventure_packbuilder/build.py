@@ -19,7 +19,7 @@ from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojso
 from adventure_packbuilder.geofabrik import fetch_geofabrik_layers
 from adventure_packbuilder.osm import fetch_overpass, overpass_to_layers
 from adventure_packbuilder.sentinel2 import maybe_attach_sentinel_indices
-from adventure_packbuilder.vlm import maybe_attach_vlm_features
+from adventure_packbuilder.vlm import _as_enabled, maybe_attach_vlm_features
 
 
 def load_build_config(pack_id_or_path: str) -> PackManifest:
@@ -272,7 +272,7 @@ products under ODbL share-alike obligations.
                     ),
                 },
                 "vlm": {
-                    "enabled": bool((config.vlm or {}).get("enabled")),
+                    "enabled": _as_enabled((config.vlm or {}).get("enabled")),
                     "wrote_layer": vlm_wrote,
                     "feature_count": (
                         len(

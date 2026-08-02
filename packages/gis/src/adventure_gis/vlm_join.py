@@ -17,15 +17,17 @@ def lookup_vlm_features(
     """Exact ``catalog_id`` join only — never invent or distance-steal labels."""
     if not features:
         return None
+    want = str(catalog_id).strip()
+    if not want:
+        return None
     for pt in features:
         cid = pt.properties.get("catalog_id")
-        if cid is None or str(cid) != catalog_id:
+        if cid is None or str(cid).strip() != want:
             continue
         try:
-            rec: VlmFeatureRecord = record_from_properties(
-                {**pt.properties, "catalog_id": catalog_id}
-            )
-        except ValidationError:
+            rec: VlmFeatureRecord = record_from_properties({**pt.properties, "catalog_id": want})
+        except (ValidationError, ValueError):
+            # Corrupt record for this id — treat as unlabeled (fail soft at mission time).
             return None
         return rec.model_dump(mode="json")
     return None

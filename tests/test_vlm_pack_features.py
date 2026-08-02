@@ -72,6 +72,94 @@ def test_lookup_exact_catalog_id_only():
     assert hit is not None and hit["concept_ids"] == ["forest"]
 
 
+def test_lookup_coerces_catalog_id_types():
+    feats = [
+        _pt(
+            "x",
+            75.0,
+            35.0,
+            catalog_id=42,  # JSON number
+            model="synthetic-fixture",
+            concept_ids=["lake"],
+            attributes={},
+            prompt_id="pack_vlm_v1",
+        )
+    ]
+    hit = lookup_vlm_features("42", feats)
+    assert hit is not None and hit["catalog_id"] == "42"
+
+
+def test_rejects_ranking_keys():
+    with pytest.raises(ValueError, match="ranking keys"):
+        record_from_properties(
+            {
+                "catalog_id": "c1",
+                "model": "x",
+                "concept_ids": ["forest"],
+                "attributes": {},
+                "score": 0.99,
+            }
+        )
+    with pytest.raises(ValueError, match="ranking keys"):
+        record_from_properties(
+            {
+                "catalog_id": "c1",
+                "model": "x",
+                "concept_ids": ["forest"],
+                "attributes": {"rank": 1},
+            }
+        )
+
+
+def test_rejects_unknown_vlm_version():
+    with pytest.raises(Exception, match="vlm_version"):
+        record_from_properties(
+            {
+                "catalog_id": "c1",
+                "model": "x",
+                "vlm_version": "vlm-features-v999",
+                "concept_ids": [],
+                "attributes": {},
+            }
+        )
+
+
+def test_enabled_string_false_does_not_attach(tmp_path: Path):
+    leftover = tmp_path / "vlm_features.geojson"
+    leftover.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    cfg = PackManifest(
+        pack_id="t",
+        name="t",
+        bbox=[0, 0, 1, 1],
+        vlm={"enabled": "false", "features_geojson": "missing.json"},
+    )
+    src, wrote = maybe_attach_vlm_features(cfg, tmp_path)
+    assert src is None and wrote is False
+    assert not leftover.exists()
+
+
+def test_candidate_dimensions_unaffected_by_vlm_layer():
+    """Hard rule: VLM evidence must not change preference-space projections."""
+    from adventure_scoring.scorer import candidate_dimensions
+
+    data = load_pack_data(FIXTURE)
+    with_vlm = {c.id: candidate_dimensions(c) for c in generate_candidates(data)}
+    stripped = PackData(
+        pack_dir=data.pack_dir,
+        settlements=data.settlements,
+        roads=data.roads,
+        water=data.water,
+        catalog=data.catalog,
+        elevation_samples=data.elevation_samples,
+        vlm_features=[],
+    )
+    without = {c.id: candidate_dimensions(c) for c in generate_candidates(stripped)}
+    assert with_vlm == without
+    assert any(
+        c.evidence.get("vlm") for c in generate_candidates(data) if c.id == "seed_pine_river"
+    )
+
+
 def test_unknown_concepts_flagged_not_dropped():
     rec = record_from_properties(
         {

@@ -34,6 +34,7 @@ Forbidden:
 - Inventing lon/lat or new catalog ids
 - Cloud VLM as the default OSS/CI path
 - Treating natural-language captions as scores
+- Smuggling ranking fields (`score`, `rank`, `mission_score`, …) into the layer
 
 ## Detailed design
 

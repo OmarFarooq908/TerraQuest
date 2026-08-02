@@ -14,6 +14,20 @@ from adventure_core.ontology import CONCEPT_TO_DIMENSIONS
 VLM_FEATURES_VERSION = "vlm-features-v1"
 DEFAULT_VLM_PROMPT_ID = "pack_vlm_v1"
 
+# Top-level property keys that would violate the hard rule (VLM must not rank).
+FORBIDDEN_RANKING_KEYS = frozenset(
+    {
+        "score",
+        "rank",
+        "ranking",
+        "mission_score",
+        "ranking_score",
+        "best_mission",
+        "winner",
+        "preference_score",
+    }
+)
+
 
 class VlmFeatureRecord(BaseModel):
     """One catalog-point VLM label set (mission evidence; not a score)."""
@@ -35,6 +49,13 @@ class VlmFeatureRecord(BaseModel):
             raise ValueError("must be a non-empty string")
         return text
 
+    @field_validator("vlm_version")
+    @classmethod
+    def _known_version(cls, v: str) -> str:
+        if v != VLM_FEATURES_VERSION:
+            raise ValueError(f"unsupported vlm_version {v!r}; expected {VLM_FEATURES_VERSION!r}")
+        return v
+
     @field_validator("concept_ids")
     @classmethod
     def _concepts(cls, v: list[str]) -> list[str]:
@@ -44,6 +65,20 @@ class VlmFeatureRecord(BaseModel):
             if cid and cid not in out:
                 out.append(cid)
         return out
+
+
+def assert_no_ranking_keys(props: dict[str, Any], *, where: str = "properties") -> None:
+    """Fail closed if a record smuggles ranking fields (RFC-0007 hard rule)."""
+    bad = sorted(k for k in props if str(k).lower() in FORBIDDEN_RANKING_KEYS)
+    if bad:
+        raise ValueError(f"{where} must not include ranking keys {bad} (VLM is not a ranker)")
+    attrs = props.get("attributes")
+    if isinstance(attrs, dict):
+        bad_attrs = sorted(k for k in attrs if str(k).lower() in FORBIDDEN_RANKING_KEYS)
+        if bad_attrs:
+            raise ValueError(
+                f"attributes must not include ranking keys {bad_attrs} (VLM is not a ranker)"
+            )
 
 
 def annotate_unknown_concepts(record: VlmFeatureRecord) -> VlmFeatureRecord:
@@ -60,6 +95,7 @@ def annotate_unknown_concepts(record: VlmFeatureRecord) -> VlmFeatureRecord:
 def record_from_properties(props: dict[str, Any]) -> VlmFeatureRecord:
     """Validate a GeoJSON properties object into a VlmFeatureRecord."""
     raw = dict(props)
+    assert_no_ranking_keys(raw)
     if "vlm_version" not in raw and "version" in raw:
         raw["vlm_version"] = raw.pop("version")
     rec = VlmFeatureRecord.model_validate(raw)

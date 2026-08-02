@@ -24,6 +24,20 @@ class VlmBuildError(RuntimeError):
     """Misconfigured or incomplete VLM pack build options."""
 
 
+def _as_enabled(val: Any) -> bool:
+    """YAML-safe truthiness: ``\"false\"`` must not enable the hook."""
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return False
+    if isinstance(val, (int, float)):
+        return val != 0
+    text = str(val).strip().lower()
+    if text in {"", "0", "false", "no", "off", "disabled"}:
+        return False
+    return text in {"1", "true", "yes", "on", "enabled"}
+
+
 def _validate_lon_lat(coords: Any, *, index: int) -> tuple[float, float]:
     if not isinstance(coords, (list, tuple)) or len(coords) < 2:
         raise VlmBuildError(f"vlm features[{index}] coordinates must be [lon, lat]")
@@ -66,7 +80,7 @@ def _normalize_vlm_fc(
         props.setdefault("vlm_version", VLM_FEATURES_VERSION)
         try:
             rec = record_from_properties(props)
-        except ValidationError as exc:
+        except (ValidationError, ValueError) as exc:
             raise VlmBuildError(f"vlm features[{i}] invalid: {exc}") from exc
         if rec.catalog_id in seen:
             raise VlmBuildError(
@@ -102,7 +116,7 @@ def maybe_attach_vlm_features(
     When disabled, leftover ``vlm_features.geojson`` is removed.
     """
     cfg = dict(config.vlm or {})
-    if not cfg.get("enabled"):
+    if not _as_enabled(cfg.get("enabled")):
         clear_vlm_layer(layers_dir)
         return None, False
 
