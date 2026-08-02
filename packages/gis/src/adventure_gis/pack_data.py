@@ -27,6 +27,8 @@ class PackData:
     water: list[NamedPoint]
     catalog: list[NamedPoint]
     elevation_samples: list[NamedPoint]
+    # Optional Sentinel-2 indices (RFC-0006); empty when layer absent.
+    sentinel_indices: list[NamedPoint] = field(default_factory=list)
 
     @property
     def seeds(self) -> list[NamedPoint]:
@@ -119,4 +121,5 @@ def load_pack_data(
         water=_load_points(layers / "water.geojson", "water"),
         catalog=catalog_pts,
         elevation_samples=_load_points(layers / "elevation.geojson", "elev"),
+        sentinel_indices=_load_points(layers / "sentinel_indices.geojson", "sentinel"),
     )

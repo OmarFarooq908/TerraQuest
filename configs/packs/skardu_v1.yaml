@@ -32,3 +32,12 @@ discovery:
     terrain_relief_hotspot: { quota: 15, min_spacing_km: 1.0 }
     osm_peak: { quota: 15 }
     osm_viewpoint: { quota: 10 }
+sentinel2:
+  enabled: false
+  max_cloud_cover: 20
+  indices: [ndvi, ndwi]
+  # Pilot: precompute Point FC then set enabled: true + indices_geojson path
+  # (see RFC-0006 / docs/pack-builder.md). Example:
+  # indices_geojson: data/cache/sentinel2/skardu_v1_indices.geojson
+  provider: Copernicus Sentinel-2 L2A via Earth Search (Element84)
+

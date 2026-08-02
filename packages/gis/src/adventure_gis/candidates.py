@@ -9,6 +9,7 @@ from adventure_core.geo import Point, haversine_km
 from adventure_core.schemas import Candidate, CandidateFeatures
 
 from adventure_gis.pack_data import NamedPoint, PackData
+from adventure_gis.sentinel import lookup_sentinel_indices
 
 # Remoteness when settlement layer is absent — neutral unknown, not "maximally remote".
 _UNKNOWN_REMOTENESS = 0.5
@@ -296,7 +297,9 @@ def generate_candidates(
             "settlements_layer_empty": dist_settlement is None,
             "roads_layer_empty": dist_road is None,
             "water_layer_empty": dist_water is None,
+            "sentinel_indices_layer_empty": not pack.sentinel_indices,
         }
+        ndvi, ndwi, sentinel_meta = lookup_sentinel_indices(seed.id, origin, pack.sentinel_indices)
         if dist_settlement is None:
             remoteness = _UNKNOWN_REMOTENESS
         else:
@@ -374,6 +377,8 @@ def generate_candidates(
             settlement_density=settlement_density,
             settlements_within_10km=settlements_within,
             nearest_highway=access_highway,
+            ndvi=ndvi,
+            ndwi=ndwi,
         )
 
         provenance = seed.properties.get("provenance") or {}
@@ -412,6 +417,9 @@ def generate_candidates(
                     "settlements_within_10km": settlements_within,
                     "nearest_highway": access_highway,
                     "nearest_highway_geom": nearest_highway_geom,
+                    "ndvi": ndvi,
+                    "ndwi": ndwi,
+                    "sentinel": sentinel_meta or None,
                     "osm_id": (provenance.get("osm_id") if isinstance(provenance, dict) else None)
                     or seed.properties.get("osm_id"),
                     "provenance": provenance,
