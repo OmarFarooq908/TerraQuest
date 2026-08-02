@@ -55,4 +55,4 @@ Suggested renames in **Settings → General → Discussions** (API cannot edit c
 | Add **RFCs** | Design discussion before / alongside `RFC/` PRs |
 | Polls | Optional; hide if unused |
 
-Welcome post: [Discussions #9](https://github.com/OmarFarooq908/TerraQuest/discussions/9).
+Welcome post: [Discussions #8](https://github.com/OmarFarooq908/TerraQuest/discussions/8).
