@@ -141,13 +141,17 @@ def pack_materialize(
     GeoJSON remains the source of truth. query.duckdb is gitignored and rebuilt
     when pack layer hashes change.
     """
-    from adventure_gis import materialize_pack_db, query_db_path
+    from adventure_gis import PackQueryError, materialize_pack_db, query_db_path
     from adventure_gis.pack_query import pack_fingerprint_for_db, read_pack_db_meta
 
     _print_pack_banner(pack)
-    path = materialize_pack_db(pack, force=force)
-    _, pack_dir = load_pack_manifest(pack)
-    meta = read_pack_db_meta(path)
+    try:
+        path = materialize_pack_db(pack, force=force)
+        _, pack_dir = load_pack_manifest(pack)
+        meta = read_pack_db_meta(path)
+    except PackQueryError as exc:
+        console.print(f"[bold red]Materialize error[/bold red]: {exc}")
+        raise typer.Exit(code=2) from exc
     console.print(f"[green]Materialized[/green] {path}")
     console.print(
         f"[dim]pack_id={meta.get('pack_id')} content_hash={meta.get('content_hash')} "

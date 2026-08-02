@@ -68,10 +68,13 @@ uv run adventurectl pack query --pack fixtures/karakoram_mini \
 
 ### Eval harness
 
-`adventure_gis.pack_query.connect_pack_db` / `catalog_label_join_sql` helpers let
+`adventure_gis.pack_query.connect_pack_db` / `catalog_label_join_counts` helpers let
 `scripts/eval_discovery.py` (and tests) join `catalog.id` to label `catalog_id`
 without scanning GeoJSON in nested Python loops when desired. Default eval path
 may stay Python-native; DuckDB is opt-in via `--duckdb-join` or library use.
+
+Hard guarantees: `pack query` opens the DB **read-only** and rejects multi-statement
+batches / obvious write leads. Soft keyword checks are defense-in-depth only.
 
 ### Hash coupling (RFC-0003)
 

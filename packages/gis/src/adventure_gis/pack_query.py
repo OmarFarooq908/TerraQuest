@@ -7,6 +7,7 @@ regenerated from those files and pinned to ``pack_content_hash``.
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,31 @@ from adventure_gis.pack_hash import pack_content_hash
 DUCKDB_SCHEMA_VERSION = "1"
 QUERY_DB_NAME = "query.duckdb"
 _META_TABLE = "_pack_meta"
+
+# Soft deny-list for statement leads (read-only connection is the hard guarantee).
+_BLOCKED_SQL_LEADS = frozenset(
+    {
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "DROP",
+        "ALTER",
+        "CREATE",
+        "COPY",
+        "ATTACH",
+        "DETACH",
+        "TRUNCATE",
+        "REPLACE",
+        "MERGE",
+        "VACUUM",
+        "EXPORT",
+        "IMPORT",
+        "LOAD",
+        "INSTALL",
+        "FORCE",
+        "CHECKPOINT",
+    }
+)
 
 
 class PackQueryError(RuntimeError):
@@ -37,6 +63,46 @@ def pack_fingerprint_for_db(pack_dir: Path) -> str:
     if stats_path.is_file():
         stats = json.loads(stats_path.read_text(encoding="utf-8"))
     return pack_content_hash(layers, stats)
+
+
+def _strip_leading_sql_comments(sql: str) -> str:
+    s = sql.strip()
+    while s:
+        if s.startswith("--"):
+            s = s.split("\n", 1)[1].strip() if "\n" in s else ""
+            continue
+        if s.startswith("/*"):
+            end = s.find("*/")
+            if end < 0:
+                return ""
+            s = s[end + 2 :].strip()
+            continue
+        break
+    return s
+
+
+def _assert_readonly_sql(sql: str) -> str:
+    """Normalize SQL and reject obvious writes / multi-statements."""
+    stripped = sql.strip().rstrip(";").strip()
+    if not stripped:
+        raise PackQueryError("empty SQL")
+    # Disallow multi-statement batches (second statement could be a write).
+    if ";" in stripped:
+        raise PackQueryError("multi-statement SQL is not allowed via pack query")
+    body = _strip_leading_sql_comments(stripped)
+    if not body:
+        raise PackQueryError("empty SQL")
+    lead = body.split(None, 1)[0].upper()
+    # WITH … INSERT/DELETE/etc.
+    if lead == "WITH" and re.search(
+        r"\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|MERGE|COPY)\b",
+        body,
+        flags=re.IGNORECASE,
+    ):
+        raise PackQueryError("write/DDL statements are not allowed via pack query (WITH … write)")
+    if lead in _BLOCKED_SQL_LEADS:
+        raise PackQueryError(f"write/DDL statements are not allowed via pack query ({lead})")
+    return stripped
 
 
 def _load_feature_rows(path: Path) -> list[dict[str, Any]]:
@@ -115,10 +181,11 @@ def materialize_pack_db(
     if not layers_dir.is_dir():
         raise PackQueryError(f"missing layers directory: {layers_dir}")
 
-    if db_path.exists():
-        db_path.unlink()
+    tmp_path = db_path.with_suffix(".duckdb.tmp")
+    if tmp_path.exists():
+        tmp_path.unlink()
 
-    con = duckdb.connect(str(db_path))
+    con = duckdb.connect(str(tmp_path))
     try:
         for geojson in sorted(layers_dir.glob("*.geojson")):
             table = geojson.stem
@@ -126,10 +193,10 @@ def materialize_pack_db(
             if not table.isidentifier() or table.startswith("_"):
                 continue
             rows = _load_feature_rows(geojson)
-            con.execute(f"DROP TABLE IF EXISTS {table}")
+            con.execute(f'DROP TABLE IF EXISTS "{table}"')
             con.execute(
                 f"""
-                CREATE TABLE {table} (
+                CREATE TABLE "{table}" (
                   id VARCHAR,
                   name VARCHAR,
                   lon DOUBLE,
@@ -142,7 +209,7 @@ def materialize_pack_db(
             )
             if rows:
                 con.executemany(
-                    f"INSERT INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    f'INSERT INTO "{table}" VALUES (?, ?, ?, ?, ?, ?, ?)',
                     [
                         (
                             r["id"],
@@ -157,10 +224,10 @@ def materialize_pack_db(
                     ],
                 )
 
-        con.execute(f"DROP TABLE IF EXISTS {_META_TABLE}")
+        con.execute(f'DROP TABLE IF EXISTS "{_META_TABLE}"')
         con.execute(
             f"""
-            CREATE TABLE {_META_TABLE} (
+            CREATE TABLE "{_META_TABLE}" (
               pack_id VARCHAR,
               content_hash VARCHAR,
               feature_schema_version VARCHAR,
@@ -170,7 +237,7 @@ def materialize_pack_db(
             """
         )
         con.execute(
-            f"INSERT INTO {_META_TABLE} VALUES (?, ?, ?, ?, ?)",
+            f'INSERT INTO "{_META_TABLE}" VALUES (?, ?, ?, ?, ?)',
             [
                 manifest.pack_id,
                 fingerprint,
@@ -179,8 +246,14 @@ def materialize_pack_db(
                 DUCKDB_SCHEMA_VERSION,
             ],
         )
-    finally:
+    except Exception:
         con.close()
+        if tmp_path.exists():
+            tmp_path.unlink()
+        raise
+    else:
+        con.close()
+        tmp_path.replace(db_path)
     return db_path
 
 
@@ -190,7 +263,7 @@ def read_pack_db_meta(db_path: Path) -> dict[str, Any]:
     con = duckdb.connect(str(db_path), read_only=True)
     try:
         try:
-            row = con.execute(f"SELECT * FROM {_META_TABLE} LIMIT 1").fetchone()
+            row = con.execute(f'SELECT * FROM "{_META_TABLE}" LIMIT 1').fetchone()
             cols = [c[0] for c in con.description]
         except duckdb.Error as exc:
             raise PackQueryError(f"query db missing {_META_TABLE}: {exc}") from exc
@@ -220,13 +293,7 @@ def execute_pack_sql(
     force_materialize: bool = False,
 ) -> tuple[list[str], list[tuple[Any, ...]]]:
     """Run read-only SQL against the pack DB. Returns (column_names, rows)."""
-    stripped = sql.strip().rstrip(";")
-    if not stripped:
-        raise PackQueryError("empty SQL")
-    # Soft guard: block obvious writes (materialize owns DDL).
-    lead = stripped.split(None, 1)[0].upper()
-    if lead in {"INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "COPY", "ATTACH"}:
-        raise PackQueryError(f"write/DDL statements are not allowed via pack query ({lead})")
+    stripped = _assert_readonly_sql(sql)
     con = connect_pack_db(pack_ref, force_materialize=force_materialize)
     try:
         result = con.execute(stripped)
@@ -234,7 +301,13 @@ def execute_pack_sql(
         rows = result.fetchall()
         return cols, rows
     except duckdb.Error as exc:
-        raise PackQueryError(str(exc)) from exc
+        msg = str(exc)
+        if "read-only" in msg.lower():
+            raise PackQueryError(
+                "pack query connections are read-only; rebuild with "
+                "`adventurectl pack materialize` if the DB is stale"
+            ) from exc
+        raise PackQueryError(msg) from exc
     finally:
         con.close()
 
