@@ -137,13 +137,13 @@ def missions_to_markdown(result: MissionResult) -> str:
         "",
         "## Intent",
         "",
-        f"- **Origin:** {_md_escape(c.origin) if (c.origin or '').strip() else '—'}"
+        f"- **Origin:** {_md_escape((c.origin or '').strip()) or '—'}"
         + (
             f" (`{c.origin_lat:.5f}, {c.origin_lon:.5f}`)"
             if c.origin_lat is not None and c.origin_lon is not None
             else ""
         ),
-        f"- **Vehicle:** {_md_escape(c.vehicle) if (c.vehicle or '').strip() else '—'}"
+        f"- **Vehicle:** {_md_escape((c.vehicle or '').strip()) or '—'}"
         + (f" (`{_md_escape_code(c.vehicle_class)}`)" if c.vehicle_class else ""),
         f"- **Days:** {_fmt_optional_number(c.days)}",
         f"- **Party size:** {_fmt_optional_number(c.party_size)}",
