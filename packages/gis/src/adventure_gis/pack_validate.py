@@ -65,8 +65,7 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
         stats_path = pack_dir / "build_stats.json"
         if not stats_path.exists():
             errors.append(
-                "content_hash set on manifest but build_stats.json is missing "
-                "(cannot verify)"
+                "content_hash set on manifest but build_stats.json is missing (cannot verify)"
             )
         else:
             blob = json.loads(stats_path.read_text(encoding="utf-8"))
@@ -74,8 +73,7 @@ def validate_pack(pack_ref: str, *, allow_legacy_seeds: bool = False) -> list[st
             actual = pack_content_hash(layers, stats)
             if actual != manifest.content_hash:
                 errors.append(
-                    f"content_hash mismatch: manifest={manifest.content_hash} "
-                    f"actual={actual}"
+                    f"content_hash mismatch: manifest={manifest.content_hash} actual={actual}"
                 )
 
     return errors
