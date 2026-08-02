@@ -39,6 +39,7 @@ GeoJSON remains the source of truth; `query.duckdb` is gitignored.
 | `--json` | Machine-readable `MissionResult` |
 | `--export-gpx PATH` | Write GPX 1.1 waypoints (+ optional rank-order track) for phone GPS / field label checks |
 | `--gpx-no-track` | With `--export-gpx`, waypoints only |
+| `--export-md PATH` | Write a Markdown mission report (prompt, ranks, claims, explanations) for notes / eval logs |
 
 ### GPX field export
 
@@ -54,6 +55,20 @@ Use this to drop ranked stops into OsmAnd / Gaia / a handheld for verifying
 evaluation labels in the field ([evaluation](evaluation.md)). The optional track
 is **rank order** (origin first when parsed) — haversine display only, not a
 road router ([known limits](known-limits.md)).
+
+### Markdown field notes
+
+```bash
+uv run adventurectl mission run \
+  --pack fixtures/karakoram_mini \
+  --interpreter rules \
+  -p "Three days, rivers and forests, hate crowds." \
+  --export-md /tmp/mission.md \
+  --export-gpx /tmp/mission.gpx
+```
+
+`--export-md` writes a readable card (intent, ranked stops, claims, ranking
+“why”) for eval notebooks or PR comments. Composable with GPX / `--json`.
 
 Local LLM setup, cache layout, and missing-model errors: [offline inference](offline-inference.md).
 

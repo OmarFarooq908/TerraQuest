@@ -43,6 +43,7 @@ Project model (three tracks + P0–P4): [#8](https://github.com/OmarFarooq908/Te
 - [x] Documented known limits (haversine travel, party_size)
 - Thin product UX (export/GPX) only where it helps field eval
   - [x] GPX waypoint export from `adventurectl mission run --export-gpx` (#58)
+  - [x] Markdown mission report via `--export-md` (#68)
 
 ## Later (after North Star evidence)
 
