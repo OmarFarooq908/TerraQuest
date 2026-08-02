@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 - Evaluation place-label schema + discovery metrics harness (RFC-0002)
 - Preference polarity detection/repair against prompt cues (anti-inversion)
 - GIS feature audit: no `-1`/`999` distance sentinels; missing layers → `null` + evidence flags
+- MissionIntent semantic validation + repair (`intent_repairs`) for LLM/rules paths
 
 ### Changed
 

@@ -15,6 +15,7 @@ from adventure_core.intent import (
     MissionIntent,
     PreferenceVector,
 )
+from adventure_core.intent_validate import IntentValidationError, sanitize_intent_dict
 
 DEFAULT_MODEL = "llama3.2"
 FALLBACK_MODELS = ("llama3.2", "llama3.1:8b", "qwen3:8b", "llama3.2:3b")
@@ -138,6 +139,7 @@ def interpret_ollama(
     chosen = _pick_model(model, base_url)
     raw = _post_chat(chosen, prompt, base_url, timeout)
     data = _extract_json(raw)
+    data, sanitize_repairs = sanitize_intent_dict(data)
 
     constraints_raw = data.get("constraints") or {}
     prefs_raw = data.get("preferences") or {}
@@ -154,19 +156,22 @@ def interpret_ollama(
         if key in CITY_COORDS:
             origin_lon, origin_lat = CITY_COORDS[key]
 
-    constraints = HardConstraints(
-        days=constraints_raw.get("days"),
-        vehicle=constraints_raw.get("vehicle"),
-        vehicle_class=constraints_raw.get("vehicle_class"),
-        party_size=constraints_raw.get("party_size"),
-        budget_per_person=constraints_raw.get("budget_per_person"),
-        currency=constraints_raw.get("currency"),
-        origin=origin,
-        origin_lon=origin_lon,
-        origin_lat=origin_lat,
-        departure=constraints_raw.get("departure"),
-        return_by=constraints_raw.get("return_by"),
-    )
+    try:
+        constraints = HardConstraints(
+            days=constraints_raw.get("days"),
+            vehicle=constraints_raw.get("vehicle"),
+            vehicle_class=constraints_raw.get("vehicle_class"),
+            party_size=constraints_raw.get("party_size"),
+            budget_per_person=constraints_raw.get("budget_per_person"),
+            currency=constraints_raw.get("currency"),
+            origin=origin,
+            origin_lon=origin_lon,
+            origin_lat=origin_lat,
+            departure=constraints_raw.get("departure"),
+            return_by=constraints_raw.get("return_by"),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise IntentValidationError(f"invalid constraints: {exc}") from exc
 
     pref_kwargs = {d: float(prefs_raw.get(d, 0.0) or 0.0) for d in PREFERENCE_DIMENSIONS}
     preferences = PreferenceVector(**pref_kwargs)
@@ -178,5 +183,6 @@ def interpret_ollama(
         goals=goals,
         source="llm",
         interpreter_notes=[f"ollama_model={chosen}"],
+        intent_repairs=sanitize_repairs,
         raw_prompt=prompt,
     )

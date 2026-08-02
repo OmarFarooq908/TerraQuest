@@ -106,6 +106,7 @@ class MissionIntent(BaseModel):
     goals: list[str] = Field(default_factory=list)
     source: Literal["rules", "llm", "hybrid"] = "rules"
     interpreter_notes: list[str] = Field(default_factory=list)
+    intent_repairs: list[str] = Field(default_factory=list)
     raw_prompt: str | None = None
 
     def merge_mode_prior(self, mode_id: str) -> MissionIntent:

@@ -31,6 +31,11 @@ from adventure_core.intent import (
     MissionIntent,
     PreferenceVector,
 )
+from adventure_core.intent_validate import (
+    IntentValidationError,
+    sanitize_intent_dict,
+    validate_and_repair_intent,
+)
 from adventure_core.interpreters import interpret_rules
 from adventure_core.pack_manifest import PackManifest, PackSource
 from adventure_core.polarity import (
@@ -87,4 +92,7 @@ __all__ = [
     "PolarityFinding",
     "detect_preference_inversions",
     "repair_preference_inversions",
+    "IntentValidationError",
+    "sanitize_intent_dict",
+    "validate_and_repair_intent",
 ]
