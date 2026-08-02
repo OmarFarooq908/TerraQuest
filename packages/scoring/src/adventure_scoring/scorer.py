@@ -326,6 +326,8 @@ def rank_missions(
             preference_adjustments=adj,
             evidence=evidence,
             tags=cand.tags,
+            preference_weights=intent.preferences.active(),
+            dimensions=evidence["dimensions"],
         )
         ranked.append(
             RankedMission(

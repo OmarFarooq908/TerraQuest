@@ -18,6 +18,9 @@ issue #27).
 They are **not** confidence reasons (`confidence.reasons` = how sure).
 They never change the score and never invent places.
 
+Avoid-preferences (`human_activity=-0.9`) are explained with feature context
+(“honors avoid-…”), not naïvely from the sign of `weight × feature`.
+
 ## CLI
 
 ```bash

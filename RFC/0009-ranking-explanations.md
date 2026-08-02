@@ -48,8 +48,11 @@ Rules:
 
 1. No LLM / no free-text generation beyond fixed templates.
 2. Skip near-zero contributions (`|x| < 0.02` for prefs; tiny mode terms).
-3. Prefer signed language: “matches water preference” vs “penalized by travel time”.
-4. Evidence lines are informational when present (`generator`, `ontology_ids`).
+3. Preference copy must respect **sign of the preference weight**:
+   avoid-dims (`weight < 0`) with low feature → “honors avoid-*”; never treat
+   `contrib = weight × feature < 0` alone as “conflicts”.
+4. Evidence lines are informational when present (`generator`, `ontology_ids`);
+   reserve up to two evidence slots so ontology is not dropped behind mode lines.
 
 ### 3. CLI
 
