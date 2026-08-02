@@ -27,6 +27,7 @@ from adventure_core.evaluation import (
     RankedRef,
     compute_discovery_metrics,
     load_place_labels,
+    ndcg_at_k,
 )
 from adventure_core.evidence_ledger import (
     EVIDENCE_LEDGER_VERSION,
@@ -103,6 +104,7 @@ __all__ = [
     "DiscoveryMetrics",
     "load_place_labels",
     "compute_discovery_metrics",
+    "ndcg_at_k",
     "PolarityFinding",
     "detect_preference_inversions",
     "repair_preference_inversions",
