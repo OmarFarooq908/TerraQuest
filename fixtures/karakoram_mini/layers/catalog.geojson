@@ -697,6 +697,59 @@
           "grid_res_deg": 0.02
         }
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.05,
+          35.55
+        ]
+      },
+      "properties": {
+        "id": "seed_eo_texture_ridge",
+        "name": "EO Texture Ridge (synthetic)",
+        "kind": "texture_anomaly",
+        "elevation_m": 3100,
+        "building_density": 0.02,
+        "crowd": 0.08,
+        "forest": 0.1,
+        "slope": 0.35,
+        "hazard": 0.3,
+        "protected": 0.0,
+        "tags": [
+          "eo",
+          "texture_anomaly",
+          "synthetic"
+        ],
+        "generator": "eo_texture_anomaly",
+        "generator_version": "1",
+        "catalog_schema_version": "0.3.0",
+        "provenance": {
+          "sources": [
+            "synthetic"
+          ],
+          "method": "fixture_seed",
+          "layer": "eo_scout"
+        },
+        "evidence": {
+          "discovery_score": 0.55,
+          "fixture": true,
+          "synthetic": true,
+          "dist_settlement_km": 9.0,
+          "pixel_size": 12,
+          "edge_intensity": 0.42,
+          "index_name": "ndmi",
+          "evidence_ledger": "2"
+        },
+        "densify": {
+          "cell_id": "c_35.55_75.05",
+          "parent_id": null,
+          "densify_allowed": true,
+          "grid_res_deg": 0.02
+        }
+      }
     }
   ]
 }

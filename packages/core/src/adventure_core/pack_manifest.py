@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class PackSource(BaseModel):
-    kind: Literal["osm", "dem", "sentinel2", "vlm", "synthetic"]
+    kind: Literal["osm", "dem", "sentinel2", "vlm", "eo", "synthetic"]
     provider: str
     retrieved_at: str | None = None
     license: str
@@ -42,5 +42,7 @@ class PackManifest(BaseModel):
     sentinel2: dict[str, Any] = Field(default_factory=dict)
     # Optional pack-time VLM labels (RFC-0007 / issue #22). Opt-in; never ranking.
     vlm: dict[str, Any] = Field(default_factory=dict)
+    # Optional EO texture-anomaly scout import (RFC-0010). Opt-in; verified-only.
+    eo_scout: dict[str, Any] = Field(default_factory=dict)
     # Deprecated: use discovery.generators quotas
     candidate_limits: dict[str, int] = Field(default_factory=dict)

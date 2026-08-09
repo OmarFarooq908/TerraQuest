@@ -20,6 +20,7 @@ NEW_SEED_IDS = {
     "seed_dem_summit",
     "seed_needle_peak",
     "seed_granite_lookout",
+    "seed_eo_texture_ridge",
 }
 
 
@@ -30,7 +31,7 @@ def test_fixture_catalog_covers_all_shipping_generators() -> None:
     assert gens >= SHIPPING_GENERATORS
     ids = {f["properties"]["id"] for f in raw["features"]}
     assert ids >= NEW_SEED_IDS
-    assert len(raw["features"]) == 13
+    assert len(raw["features"]) == 14
 
 
 def test_fixture_catalog_features_marked_synthetic() -> None:
@@ -81,7 +82,7 @@ def test_fixture_pack_manifest_and_hash_check() -> None:
     assert m.synthetic is True
     assert pack_dir == FIXTURE.resolve()
     data = load_pack_data(pack_dir)
-    assert len(data.catalog) == 13
+    assert len(data.catalog) == 14
 
     script = repo_root() / "scripts" / "hash_fixture_catalog.py"
     proc = subprocess.run(

@@ -30,7 +30,9 @@ and `seeds.geojson` fail `scripts/check_pack.py` unless `--allow-legacy-seeds`.
 Production builds list every shipped GeoJSON:
 
 `settlements`, `water`, `road_nodes`, `road_lines`, `peaks`, `viewpoints`,
-`catalog`, `elevation`. Optional: `sentinel_indices` (RFC-0006) and/or `vlm_features` (RFC-0007) when those layers are written.
+`catalog`, `elevation`. Optional: `sentinel_indices` (RFC-0006),
+`vlm_features` (RFC-0007), and/or verified EO scout import via
+`eo_texture_anomaly` (RFC-0010; not a separate pack layer file).
 
 ## Sentinel-2 indices (RFC-0006 / issue #21)
 
@@ -93,6 +95,44 @@ vlm:
 
 Rebuilds with `enabled: false` remove leftover `vlm_features.geojson`.
 Synthetic fixture smoke: `fixtures/karakoram_mini/layers/vlm_features.geojson`.
+
+## EO texture anomaly scout (RFC-0010)
+
+Opt-in **pack feeder** for human-verified Earth-observation texture/edge
+anomalies. Mission runtime never invents coordinates from imagery.
+
+```yaml
+# configs/packs/skardu_v1.yaml
+eo_scout:
+  enabled: false
+  # candidates_geojson: data/cache/eo/skardu_v1_scout_verified.geojson
+discovery:
+  generators:
+    eo_texture_anomaly: { quota: 0 }   # raise only when verified GeoJSON is ready
+```
+
+### Workflow
+
+1. Obtain a local GeoTIFF (cache under `data/cache/eo/`; do not commit rasters).
+2. Run the offline scout:
+
+```bash
+uv run python scripts/eo_anomaly_scout.py \
+  --raster data/cache/eo/aoi_snippet.tif \
+  --out-geojson data/cache/eo/scout_raw.geojson \
+  --out-gpx data/cache/eo/scout_raw.gpx \
+  --nir-band 1 --swir-band 2
+```
+
+3. Triage waypoints in Google Earth / field notes. Copy keepers to a verified
+   GeoJSON and set `properties.verified: true` on each feature.
+4. Point `eo_scout.candidates_geojson` at that file, set `eo_scout.enabled: true`,
+   raise `discovery.generators.eo_texture_anomaly.quota`, rebuild the pack.
+5. Only `verified: true` points inside the pack bbox become
+   `eo_texture_anomaly` catalog candidates.
+
+Edges and NDMI contrast are **not** archaeological claims — false positives from
+ridges, shadows, and snow are expected until triage.
 
 ## OSM backends
 

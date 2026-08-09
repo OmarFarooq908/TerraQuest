@@ -55,7 +55,7 @@ def test_check_pack_fixture_passes():
 
 def test_load_pack_data_fixture():
     data = load_pack_data(FIXTURE)
-    assert len(data.catalog) == 13
+    assert len(data.catalog) == 14
     generators = {c.properties.get("generator") for c in data.catalog}
     assert generators >= {
         "named_waterbody",

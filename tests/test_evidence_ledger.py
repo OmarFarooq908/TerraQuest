@@ -13,12 +13,41 @@ from adventure_core.evidence_ledger import (
 
 
 def test_ledger_version_and_covers_shipping_generators() -> None:
+    from adventure_core.evidence_ledger import EO_SOURCE_GENERATORS
+
     assert EVIDENCE_LEDGER_VERSION == "2"
     assert "named_waterbody" in REQUIRED_EVIDENCE_KEYS
     assert "dem_local_max" in REQUIRED_EVIDENCE_KEYS
+    assert "eo_texture_anomaly" in REQUIRED_EVIDENCE_KEYS
     assert "synthetic_fixture" in REQUIRED_EVIDENCE_KEYS
     assert "isolation_maximum" not in OSM_ELEMENT_GENERATORS
     assert "osm_peak" in OSM_ELEMENT_GENERATORS
+    assert "eo_texture_anomaly" in EO_SOURCE_GENERATORS
+    assert "eo_texture_anomaly" not in OSM_ELEMENT_GENERATORS
+
+
+def test_eo_texture_anomaly_requires_eo_or_sentinel2_source() -> None:
+    base_ev = {
+        "discovery_score": 0.5,
+        "dist_settlement_km": 8.0,
+        "pixel_size": 12,
+        "edge_intensity": 0.4,
+        "index_name": "ndmi",
+    }
+    errs = validate_evidence_ledger(
+        generator="eo_texture_anomaly",
+        provenance={"sources": ["osm"], "method": "eo_texture_anomaly_v1", "layer": "eo_scout"},
+        evidence=base_ev,
+        feature_id="e1",
+    )
+    assert any("eo" in e or "sentinel2" in e for e in errs)
+    ok = validate_evidence_ledger(
+        generator="eo_texture_anomaly",
+        provenance={"sources": ["eo"], "method": "eo_texture_anomaly_v1", "layer": "eo_scout"},
+        evidence=base_ev,
+        feature_id="e2",
+    )
+    assert ok == []
 
 
 def test_missing_evidence_key_fails() -> None:

@@ -23,12 +23,13 @@ GeneratorName = Literal[
     "terrain_relief_hotspot",
     "osm_peak",
     "osm_viewpoint",
+    "eo_texture_anomaly",
     "synthetic_fixture",
 ]
 
 
 class Provenance(BaseModel):
-    sources: list[str] = Field(default_factory=list)  # osm | dem | synthetic
+    sources: list[str] = Field(default_factory=list)  # osm | dem | eo | sentinel2 | synthetic
     method: str
     osm_id: int | None = None
     osm_type: str | None = None

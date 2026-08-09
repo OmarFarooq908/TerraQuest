@@ -23,6 +23,8 @@ DEFAULT_QUOTAS: dict[str, int] = {
     "terrain_relief_hotspot": 15,
     "osm_peak": 15,
     "osm_viewpoint": 10,
+    # RFC-0010: off unless pack config raises quota + provides verified GeoJSON
+    "eo_texture_anomaly": 0,
 }
 
 
@@ -56,6 +58,7 @@ def run_discovery(
     bbox: list[float],
     dem_paths: list[Path] | None = None,
     discovery: DiscoveryConfig | dict[str, Any] | None = None,
+    eo_scout_features: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Run all generators; return catalog FeatureCollection + stats."""
     if isinstance(discovery, DiscoveryConfig):
@@ -72,7 +75,13 @@ def run_discovery(
 
             cfg.generators[name] = GeneratorQuota(quota=quota)
 
-    ctx = build_context(layers, bbox=bbox, config=cfg, dem_paths=dem_paths)
+    ctx = build_context(
+        layers,
+        bbox=bbox,
+        config=cfg,
+        dem_paths=dem_paths,
+        eo_scout_features=eo_scout_features,
+    )
     per_gen: dict[str, list[CatalogCandidate]] = {}
     raw_counts: dict[str, int] = {}
 

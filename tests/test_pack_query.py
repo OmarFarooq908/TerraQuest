@@ -51,7 +51,7 @@ def test_materialize_and_query_fixture(_clean_fixture_db: None) -> None:
     assert "generator" in cols and "n" in cols
     assert rows
     total = sum(int(r[1]) for r in rows)
-    assert total == 13
+    assert total == 14
 
 
 def test_materialize_skips_when_fresh(_clean_fixture_db: None) -> None:
@@ -108,13 +108,13 @@ def test_stale_db_rebuilds_after_layer_change(tmp_path: Path) -> None:
     meta2 = read_pack_db_meta(db2)
     assert meta2["content_hash"] == pack_fingerprint_for_db(dest)
     _, rows = execute_pack_sql(str(dest), "SELECT count(*) FROM catalog")
-    assert rows[0][0] == 14
+    assert rows[0][0] == 15
 
 
 def test_catalog_label_join_counts(_clean_fixture_db: None) -> None:
     labels = load_place_labels(Path("evaluation/fixtures/karakoram_mini"))
     counts = catalog_label_join_counts(FIXTURE, [lab.model_dump() for lab in labels])
-    assert counts["catalog_rows"] == 13
+    assert counts["catalog_rows"] == 14
     assert counts["label_rows_with_id"] >= 1
     assert counts["matched"] >= 1
     assert counts["interesting_matched"] >= 1
@@ -135,4 +135,4 @@ def test_cli_pack_query(_clean_fixture_db: None) -> None:
     )
     assert result.exit_code == 0, result.stdout
     assert '"n"' in result.stdout
-    assert "13" in result.stdout
+    assert "14" in result.stdout

@@ -20,6 +20,7 @@ from adventure_gis.pack_hash import (
 
 from adventure_packbuilder.dem import dem_source_meta, download_dem_tiles
 from adventure_packbuilder.discovery.pipeline import run_discovery, write_geojson
+from adventure_packbuilder.eo_anomaly import resolve_eo_scout_features
 from adventure_packbuilder.geofabrik import cache_pbf_name_from_url, fetch_geofabrik_layers
 from adventure_packbuilder.osm import fetch_overpass, overpass_to_layers
 from adventure_packbuilder.sentinel2 import maybe_attach_sentinel_indices
@@ -159,6 +160,13 @@ def build_pack(
             )
         )
 
+    # --- EO scout verified candidates (RFC-0010; optional) ---
+    eo_features, eo_meta = resolve_eo_scout_features(
+        config.eo_scout,
+        bbox=config.bbox,
+        repo=root,
+    )
+
     # --- Discovery catalog ---
     discovery_cfg = DiscoveryConfig.model_validate(config.discovery or {})
     discovered = run_discovery(
@@ -166,6 +174,7 @@ def build_pack(
         bbox=config.bbox,
         dem_paths=dem_paths,
         discovery=discovery_cfg,
+        eo_scout_features=eo_features,
     )
     write_geojson(layers_dir / "catalog.geojson", discovered["catalog"])
     write_geojson(layers_dir / "elevation.geojson", discovered["elevation"])
@@ -199,6 +208,24 @@ def build_pack(
         )
 
     built_at = datetime.now(UTC).isoformat()
+    if eo_meta is not None:
+        sources.append(
+            PackSource(
+                kind="eo",
+                provider=str(
+                    (config.eo_scout or {}).get("provider")
+                    or "Local EO GeoTIFF scout (RFC-0010)"
+                ),
+                retrieved_at=built_at,
+                license=str((config.eo_scout or {}).get("license") or "see pack NOTICE"),
+                attribution=str(
+                    (config.eo_scout or {}).get("attribution")
+                    or "EO texture anomaly scout (human-verified)"
+                ),
+                content_hash=None,
+                extra=eo_meta,
+            )
+        )
     stats = discovered["stats"]
     content_hash = pack_content_hash(layers_dir, stats)
     manifest = config.model_copy(
@@ -227,6 +254,7 @@ def build_pack(
                 "discovery",
                 "sentinel2",
                 "vlm",
+                "eo_scout",
                 "candidate_limits",
                 "output_dir",
                 "fixtures_dir",
@@ -257,10 +285,16 @@ https://sentinel.esa.int/documents/247904/690755/Sentinel_Data_Legal_Notice
 Pack-time VLM labels (structured features only — not used as a ranker).
 See RFC-0007. Model weights remain under their upstream licenses (e.g. Ollama).
 """
+    if eo_meta is not None:
+        notice += """
+Contains human-verified EO texture-anomaly scout points (RFC-0010).
+Edges/texture contrasts are not archaeological claims; cite upstream EO
+imagery (e.g. Copernicus Sentinel) when the scout raster is Sentinel-derived.
+"""
     notice += """
 Candidates are produced by named deterministic generators (track_terminus,
-road_spur, isolation_maximum, dem_local_max, …). Redistribute OSM-derived
-products under ODbL share-alike obligations.
+road_spur, isolation_maximum, dem_local_max, eo_texture_anomaly, …).
+Redistribute OSM-derived products under ODbL share-alike obligations.
 """
     (out / "NOTICE").write_text(notice, encoding="utf-8")
     (out / "build_stats.json").write_text(
@@ -296,6 +330,13 @@ products under ODbL share-alike obligations.
                         )
                         if vlm_wrote
                         else 0
+                    ),
+                },
+                "eo_scout": {
+                    "enabled": bool((config.eo_scout or {}).get("enabled")),
+                    "verified_count": len(eo_features),
+                    "selected": int(
+                        (stats.get("selected_by_generator") or {}).get("eo_texture_anomaly", 0)
                     ),
                 },
             },

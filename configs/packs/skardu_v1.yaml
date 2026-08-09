@@ -51,3 +51,10 @@ vlm:
   # Pilot: precompute Point FC then set enabled: true + features_geojson
   # (see RFC-0007 / docs/pack-builder.md). Example:
   # features_geojson: data/cache/inference/vlm/skardu_v1_features.geojson
+
+# RFC-0010: human-verified EO texture anomalies (default off).
+# Workflow: scripts/eo_anomaly_scout.py → Google Earth triage → verified GeoJSON.
+eo_scout:
+  enabled: false
+  # candidates_geojson: data/cache/eo/skardu_v1_scout_verified.geojson
+  # Then set discovery.generators.eo_texture_anomaly quota > 0.
