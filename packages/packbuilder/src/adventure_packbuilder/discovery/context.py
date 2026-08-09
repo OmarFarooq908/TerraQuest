@@ -41,6 +41,8 @@ class DiscoveryContext:
     peaks: list[tuple[str, Point, dict[str, Any]]]
     viewpoints: list[tuple[str, Point, dict[str, Any]]]
     dem_paths: list[Path] = field(default_factory=list)
+    # Verified EO scout Point features (RFC-0010); empty unless pack eo_scout enabled.
+    eo_scout_features: list[dict[str, Any]] = field(default_factory=list)
 
     def dist_settlement(self, pt: Point) -> float:
         if not self.settlements:
@@ -115,6 +117,7 @@ def build_context(
     bbox: list[float],
     config: DiscoveryConfig,
     dem_paths: list[Path] | None = None,
+    eo_scout_features: list[dict[str, Any]] | None = None,
 ) -> DiscoveryContext:
     settlements_pts = layer_points(layers.get("settlements", {"features": []}))
     return DiscoveryContext(
@@ -128,4 +131,5 @@ def build_context(
         peaks=layer_points(layers.get("peaks", {"features": []})),
         viewpoints=layer_points(layers.get("viewpoints", {"features": []})),
         dem_paths=list(dem_paths or []),
+        eo_scout_features=list(eo_scout_features or []),
     )

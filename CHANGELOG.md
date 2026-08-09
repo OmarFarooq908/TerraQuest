@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/) while in 
 
 ### Added
 
+- EO texture anomaly scout feeder (RFC-0010): offline `scripts/eo_anomaly_scout.py` (rasterio/numpy GeoTIFF edge scout → GeoJSON/GPX); pack `eo_scout` verified-only import via generator `eo_texture_anomaly` (default quota 0); evidence ledger + fixture coverage; not archaeological detection
 - Offline pack verify CLI (#70 / #28): `adventurectl pack verify` wraps catalog/layout/`content_hash` checks and prints a layer fingerprint; `--json` (pure report, no banner) / `--allow-legacy-seeds`; `hash_match` only when `build_stats.json` is readable; stale `query.duckdb` is a warning; `scripts/check_pack.py` shares the same report helper
 - Markdown mission export (#68 / #28): `adventurectl mission run --export-md` writes a readable report (intent, ranks, claims, explanations) for field notes / eval logs; composable with GPX
 - Schema regression pins (#66): `schemas/mission_intent.schema.json` + `schemas/catalog_feature.schema.json` kept aligned with Pydantic via `tests/test_schema_regression.py`

@@ -54,6 +54,7 @@ Every research issue must be **time-boxed**, produce an **RFC or experiment note
 
 - Real routing / access graphs (P2 — capability, not a bug)
 - [ ] Sentinel-2 indices + VLM features (P1 — RFC-0006/0007 opt-in layers shipped; judged by eval lift)
+- [x] EO texture anomaly scout feeder (RFC-0010 — verified pack import; not ruins detection)
 - Mission-time local densification (Phase C) without changing `MissionIntent`
 - Intelligence layer (explanations first; memory/KG later)
 - PyPI publish of selected packages

@@ -21,3 +21,4 @@ Breaking changes to `MissionIntent` or catalog schema **require** an RFC while t
 | [0007](0007-vlm-pack-features.md) | VLM feature extraction at pack build (not ranking) | Draft |
 | [0008](0008-formal-ontology.md) | Formal adventure ontology (shared language) | Draft |
 | [0009](0009-ranking-explanations.md) | Deterministic ranking explanations | Draft |
+| [0010](0010-eo-texture-anomaly-scout.md) | EO texture anomaly scout (pack feeder) | Draft |

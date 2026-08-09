@@ -11,6 +11,7 @@ Every catalog candidate must originate from a named generator.
 | `dem_local_max` | DEM elevation local maxima |
 | `terrain_relief_hotspot` | High local relief windows |
 | `osm_peak` / `osm_viewpoint` | OSM landmark nodes |
+| `eo_texture_anomaly` | Human-verified EO texture/edge scout points (RFC-0010; default quota 0) |
 | `synthetic_fixture` | CI fixtures only |
 
 The offline pack `fixtures/karakoram_mini` is hand-seeded and **SYNTHETIC**, but its
@@ -39,6 +40,7 @@ Each feature stores:
 | `isolation_maximum` | `discovery_score`, `dist_settlement_km`, `grid_res_deg` |
 | `dem_local_max` | `discovery_score`, `dist_settlement_km`, `elevation_m` |
 | `terrain_relief_hotspot` | `discovery_score`, `dist_settlement_km`, `relief_m` |
+| `eo_texture_anomaly` | `discovery_score`, `dist_settlement_km`, `pixel_size`, `edge_intensity`, `index_name` |
 | `synthetic_fixture` | `discovery_score`, `fixture` |
 
 Synthetic packs must set `evidence.fixture=true` whenever `provenance.sources`
@@ -51,7 +53,8 @@ includes `synthetic`. Real OSM/DEM packs must declare matching source kinds
 floats like `123.0` accepted for GeoJSON interop). Packbuilder skips
 emitting those candidates when the source layer lacks a usable `osm_id`.
 Grid `isolation_maximum` and DEM generators do **not** require `osm_id`.
-DEM window polygons remain deferred.
+`eo_texture_anomaly` requires `eo` or `sentinel2` in `provenance.sources` (non-synthetic)
+and `provenance.layer` (typically `eo_scout`). DEM window polygons remain deferred.
 
 Empty / whitespace ``generator`` values and blank string evidence fields
 (e.g. ``water_kind: ""``) fail validation.

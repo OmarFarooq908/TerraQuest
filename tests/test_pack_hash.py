@@ -18,7 +18,7 @@ from adventure_gis.pack_validate import validate_pack
 
 FIXTURE = Path("fixtures/karakoram_mini")
 # Pinned in evaluation/reports/karakoram_mini_baseline.md (pack-content v2).
-FIXTURE_PACK_CONTENT_HASH_V2 = "f7f6a397fd5fef00"
+FIXTURE_PACK_CONTENT_HASH_V2 = "a04505c310ad311a"
 
 
 def test_discovery_stats_for_hash_accepts_discovery_or_blob() -> None:

@@ -30,6 +30,7 @@ from adventure_core.evaluation import (
     ndcg_at_k,
 )
 from adventure_core.evidence_ledger import (
+    EO_SOURCE_GENERATORS,
     EVIDENCE_LEDGER_VERSION,
     OSM_ELEMENT_GENERATORS,
     coerce_positive_osm_id,
@@ -92,6 +93,7 @@ __all__ = [
     "validate_catalog_feature",
     "validate_catalog_geojson",
     "EVIDENCE_LEDGER_VERSION",
+    "EO_SOURCE_GENERATORS",
     "OSM_ELEMENT_GENERATORS",
     "coerce_positive_osm_id",
     "validate_evidence_ledger",

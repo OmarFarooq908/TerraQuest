@@ -26,6 +26,15 @@ REQUIRED_EVIDENCE_KEYS: dict[str, frozenset[str]] = {
     "isolation_maximum": frozenset({"discovery_score", "dist_settlement_km", "grid_res_deg"}),
     "dem_local_max": frozenset({"discovery_score", "dist_settlement_km", "elevation_m"}),
     "terrain_relief_hotspot": frozenset({"discovery_score", "dist_settlement_km", "relief_m"}),
+    "eo_texture_anomaly": frozenset(
+        {
+            "discovery_score",
+            "dist_settlement_km",
+            "pixel_size",
+            "edge_intensity",
+            "index_name",
+        }
+    ),
     "synthetic_fixture": frozenset({"discovery_score", "fixture"}),
 }
 
@@ -44,6 +53,9 @@ OSM_SOURCE_GENERATORS = frozenset(
     }
 )
 DEM_SOURCE_GENERATORS = frozenset({"dem_local_max", "terrain_relief_hotspot"})
+
+# EO scout feeder (RFC-0010) — not OSM elements; not DEM-tile generators.
+EO_SOURCE_GENERATORS = frozenset({"eo_texture_anomaly"})
 
 # Catalog points derived from a concrete OSM node/way/relation (ledger v2).
 # Grid isolation uses OSM settlements as input but is not itself an OSM element.
@@ -138,6 +150,11 @@ def validate_evidence_ledger(
         errors.append(f"{feature_id}: provenance.sources must include 'osm' for {gen}")
     if gen in DEM_SOURCE_GENERATORS and not synthetic and "dem" not in sources_list:
         errors.append(f"{feature_id}: provenance.sources must include 'dem' for {gen}")
+    if gen in EO_SOURCE_GENERATORS and not synthetic:
+        if "eo" not in sources_list and "sentinel2" not in sources_list:
+            errors.append(
+                f"{feature_id}: provenance.sources must include 'eo' or 'sentinel2' for {gen}"
+            )
 
     if gen in DEM_SOURCE_GENERATORS and not synthetic:
         dem_tile = provenance.get("dem_tile")

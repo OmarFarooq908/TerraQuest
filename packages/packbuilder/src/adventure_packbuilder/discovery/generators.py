@@ -483,6 +483,75 @@ def gen_terrain_relief_hotspot(ctx: DiscoveryContext) -> list[CatalogCandidate]:
     return out
 
 
+def gen_eo_texture_anomaly(ctx: DiscoveryContext) -> list[CatalogCandidate]:
+    """Import human-verified EO scout points (RFC-0010). Unverified skipped upstream."""
+    out: list[CatalogCandidate] = []
+    for feat in ctx.eo_scout_features:
+        props = feat.get("properties") or {}
+        if props.get("verified") is not True:
+            continue
+        coords = (feat.get("geometry") or {}).get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        lon = float(coords[0])
+        lat = float(coords[1])
+        pt = Point(lon, lat)
+        dist_s = ctx.dist_settlement(pt)
+        building, crowd = ctx.human_proxies(pt)
+        try:
+            pixel_size = int(props.get("pixel_size", 0))
+        except (TypeError, ValueError):
+            pixel_size = 0
+        try:
+            edge_intensity = float(props.get("edge_intensity", 0.0))
+        except (TypeError, ValueError):
+            edge_intensity = 0.0
+        index_name = str(props.get("index_name") or "ndmi").strip() or "ndmi"
+        sid = str(props.get("id") or f"eo_{len(out)}")
+        # Prefer compact high-edge clusters; remoteness is a soft boost only.
+        score = min(1.0, edge_intensity / (edge_intensity + 1.0) + 0.15)
+        score = min(1.0, score + _base_score_isolation(dist_s) * 0.2)
+        sources = ["eo"]
+        if props.get("source_kind") == "sentinel2" or "sentinel" in str(
+            props.get("raster") or ""
+        ).lower():
+            sources = ["eo", "sentinel2"]
+        cid = f"gen:eo_texture_anomaly:{sid}"
+        out.append(
+            CatalogCandidate(
+                id=cid,
+                name=str(props.get("name") or f"eo_anomaly_{sid}"),
+                lon=lon,
+                lat=lat,
+                kind="texture_anomaly",
+                generator="eo_texture_anomaly",
+                tags=["eo", "texture_anomaly", "scout"],
+                provenance=Provenance(
+                    sources=sources,
+                    method="eo_texture_anomaly_v1",
+                    layer="eo_scout",
+                    extra={
+                        "scout_id": sid,
+                        "raster": props.get("raster"),
+                        "scout_version": props.get("scout_version"),
+                    },
+                ),
+                evidence={
+                    "discovery_score": score,
+                    "dist_settlement_km": round(dist_s, 2),
+                    "pixel_size": pixel_size,
+                    "edge_intensity": edge_intensity,
+                    "index_name": index_name,
+                },
+                densify=ctx.densify_hook(lon, lat),
+                building_density=building,
+                crowd=crowd,
+                hazard=0.3,
+            )
+        )
+    return out
+
+
 GENERATORS = {
     "track_terminus": gen_track_terminus,
     "road_spur": gen_road_spur,
@@ -493,4 +562,5 @@ GENERATORS = {
     "terrain_relief_hotspot": gen_terrain_relief_hotspot,
     "osm_peak": gen_osm_peak,
     "osm_viewpoint": gen_osm_viewpoint,
+    "eo_texture_anomaly": gen_eo_texture_anomaly,
 }
